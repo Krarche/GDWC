@@ -8,8 +8,12 @@ public class Grid {
 	public TextAsset source;
     public int sizeX, sizeY;
     public Cell[,] cells;
+    public Dictionary<GameObject, Cell> worldObjects;
+    public GameObject cellBase;
 
     public void initialisation(int x, int y) {
+        cellBase = Resources.Load<GameObject>("Prefabs/CellBase");
+        worldObjects = new Dictionary<GameObject, Cell>();
         this.sizeX = x;
         this.sizeY = y;
         initPosition();
@@ -18,9 +22,15 @@ public class Grid {
 
     private void initPosition() {
         cells = new Cell[sizeX, sizeY];
-        for (int y = 0; y < sizeY; y++)
-            for (int x = 0; x < sizeX; x++)
-                cells[x, y] = new Cell(sizeX, sizeY);
+        for (int y = 0; y < sizeY; y++) {
+            for (int x = 0; x < sizeX; x++) {
+                GameObject o = GameObject.Instantiate(cellBase, new Vector3(x, 0, y), Quaternion.identity);
+                Cell c = new Cell(sizeX, sizeY, o);
+                cells[x, y] = c;
+                c.inWorld = o;
+                worldObjects.Add(o, c);
+            }
+        }
 
         for (int y = 0; y < sizeY; y++) {
             for (int x = 0; x < sizeX; x++) {

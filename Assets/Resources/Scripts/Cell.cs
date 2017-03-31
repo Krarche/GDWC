@@ -13,7 +13,9 @@ public class Cell {
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
 
-    public Cell(int x, int y) {
+    public GameObject inWorld;
+
+    public Cell(int x, int y, GameObject o) {
         distance = new int[x, y];
         for(int i=0; i<x; i++) {
             for(int j=0; j<y; j++) {
@@ -21,5 +23,6 @@ public class Cell {
             }
         }
         type = new CellType(Type.NORMAL);
+        inWorld = o;
     }
 }
