@@ -10,6 +10,8 @@ public class Grid {
     public Cell[,] cells;
     public Dictionary<GameObject, Cell> worldObjects;
     public GameObject cellBase;
+    public ICollection<Cell> selectedCells;
+
 
     public void initialisation(int x, int y) {
         cellBase = Resources.Load<GameObject>("Prefabs/CellBase");
@@ -26,6 +28,8 @@ public class Grid {
             for (int x = 0; x < sizeX; x++) {
                 GameObject o = GameObject.Instantiate(cellBase, new Vector3(x, 0, y), Quaternion.identity);
                 Cell c = new Cell(sizeX, sizeY, o);
+                c.x = x;
+                c.y = y;
                 cells[x, y] = c;
                 c.inWorld = o;
                 worldObjects.Add(o, c);
@@ -35,19 +39,17 @@ public class Grid {
         for (int y = 0; y < sizeY; y++) {
             for (int x = 0; x < sizeX; x++) {
                 Cell c = cells[x, y];
-                c.x = x;
-                c.y = y;
                 c.id = x + sizeX * y;
                 if (c.y + 1 < sizeY) {
                     c.adjacent[(int)Direction.NORTH] = cells[x, y + 1];
                 }
-                if (c.y - 1  > 0) {
+                if (c.y - 1  >= 0) {
                     c.adjacent[(int)Direction.SOUTH] = cells[x, y - 1];
                 }
                 if (c.x + 1 < sizeX) {
                     c.adjacent[(int)Direction.EAST] = cells[x + 1, y];
                 }
-                if (c.x - 1 > 0) {
+                if (c.x - 1 >= 0) {
                     c.adjacent[(int)Direction.WEST] = cells[x-1, y];
                 }
             }
@@ -119,6 +121,7 @@ public class Grid {
                 if (i >= minRange)
                     output.Add(current);
                 current = current.adjacent[dir];
+                i++;
             }
         }
 
@@ -126,14 +129,25 @@ public class Grid {
     }
 
     public void clickCell(GameObject cellObject) {
+        clearSelection();
         Cell cell;
         if (worldObjects.TryGetValue(cellObject, out cell)) {
             if(cell != null) {
-                //foreach (Cell c in getInRange(cell, 2, 4))
-                    cell.inWorld.GetComponent<MeshRenderer>().material.color = Color.red;
+                selectedCells = getInLine(cell, 2, 4);
+                foreach (Cell c in selectedCells)
+                    c.inWorld.GetComponent<MeshRenderer>().material.color = Color.red;
             }
 
         }
 
     }
+
+    public void clearSelection() {
+        if(selectedCells != null) {
+            foreach (Cell c in selectedCells)
+                c.inWorld.GetComponent<MeshRenderer>().material.color = Color.white;
+        }
+        selectedCells = null;
+    }
+
 }

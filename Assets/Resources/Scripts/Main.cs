@@ -11,7 +11,7 @@ public class Main : MonoBehaviour {
     void Start () {
         main = this;
         map = new Grid();
-        map.initialisation(7, 7);
+        map.initialisation(15, 15);
         map.printGrid();
     }
 
