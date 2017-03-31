@@ -13,8 +13,6 @@ public class Cell {
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
 
-    public Mesh model;
-
     public Cell(int x, int y) {
         distance = new int[x, y];
         for(int i=0; i<x; i++) {
@@ -22,6 +20,6 @@ public class Cell {
                 distance[i, j] = -1;
             }
         }
-        model = (Mesh)Resources.Load("Meshes/smoothCube", typeof(Mesh));
+        type = new CellType(Type.NORMAL);
     }
 }

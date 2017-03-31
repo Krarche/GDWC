@@ -70,6 +70,21 @@ public class Grid {
         }
     }
 
+    public void generateGrid() {
+        Mesh tempMesh = new Mesh();
+        Material tempMat = (Material)Resources.Load("Materials/defaultMat", typeof(Material));
+        for (int x = 0; x < this.sizeX; x++) {
+            for (int y = 0; y < this.sizeY; y++) {
+                string tempName = x + "-" + y;
+                GameObject tempObject = new GameObject(tempName);
+                tempObject.AddComponent<MeshFilter>().mesh = tempMesh;
+                
+                tempObject.transform.position.Set(x, y, 0f);
+
+            }
+        }
+    }
+
     public List<Cell> getInRange(Cell origin, int minRange, int maxRange) {
 
         List<Cell> output = new List<Cell>();

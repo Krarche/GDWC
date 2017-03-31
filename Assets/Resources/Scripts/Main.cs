@@ -6,14 +6,11 @@ public class Main : MonoBehaviour {
 
     public Grid map;
     public static Material mat;
-
-
-
-
+    
 	// Use this for initialization
 	void Start () {
         map = new Grid();
-        map.initialisation(6, 4);
+        map.initialisation(7, 7);
         map.printGrid();
         mat = (Material)Resources.Load("Materials/defaultMat", typeof(Material));
         GenerateMesh();
@@ -32,7 +29,7 @@ public class Main : MonoBehaviour {
         for (int x=0; x < map.sizeX; x++) {
             for (int y = 0; y < map.sizeY; y++) {
                 Cell c = map.cells[x, y];
-                Mesh m = c.model;
+                Mesh m = c.type.model;
                 vertexCount += m.vertices.Length;
                 triangleCount += m.triangles.Length;
                 UVCount += m.uv.Length;
@@ -47,7 +44,7 @@ public class Main : MonoBehaviour {
         for (int x = 0; x < map.sizeX; x++) {
             for (int y = 0; y < map.sizeY; y++) {
                 Cell c = map.cells[x, y];
-                Mesh m = c.model;
+                Mesh m = c.type.model;
                 for (int i = 0; i < m.vertices.Length; i++) {
                     vertices[vertexCount + i] = m.vertices[i];
                     vertices[vertexCount + i].x += x;
@@ -84,7 +81,7 @@ public class Main : MonoBehaviour {
             }
         }
     }*/
-
+    /*
     private void OnDrawGizmos() {
         Gizmos.color = Color.green;
         Vector3 pos = new Vector3();
@@ -95,5 +92,5 @@ public class Main : MonoBehaviour {
                 Gizmos.DrawSphere(pos, 0.1f);
             }
         }
-    }
+    }*/
 }
