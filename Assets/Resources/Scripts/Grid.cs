@@ -124,4 +124,16 @@ public class Grid {
 
         return output;
     }
+
+    public void clickCell(GameObject cellObject) {
+        Cell cell;
+        if (worldObjects.TryGetValue(cellObject, out cell)) {
+            if(cell != null) {
+                //foreach (Cell c in getInRange(cell, 2, 4))
+                    cell.inWorld.GetComponent<MeshRenderer>().material.color = Color.red;
+            }
+
+        }
+
+    }
 }

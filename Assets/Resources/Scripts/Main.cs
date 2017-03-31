@@ -5,20 +5,21 @@ using UnityEngine;
 public class Main : MonoBehaviour {
 
     public Grid map;
-    
-	// Use this for initialization
-	void Start () {
+    public static Main main;
+
+    // Use this for initialization
+    void Start () {
         main = this;
         map = new Grid();
         map.initialisation(7, 7);
         map.printGrid();
     }
-	
-	// Update is called once per frame
-	void Update () {
 
-	}
-    
+    // Update is called once per frame
+    void Update() {
+
+    }
+
     private void OnDrawGizmos() {
         Gizmos.color = Color.green;
         Vector3 pos = new Vector3();
