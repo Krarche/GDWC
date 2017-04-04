@@ -12,7 +12,6 @@ public class Main : MonoBehaviour {
         main = this;
         map = new Grid();
         map.initialisation(15, 15);
-        map.printGrid();
     }
 
     // Update is called once per frame
