@@ -21,14 +21,16 @@ public class Main : MonoBehaviour {
     }
 
     private void OnDrawGizmos() {
-        Gizmos.color = Color.green;
-        Vector3 pos = new Vector3();
-        for (int i = 0; i < map.sizeX; i++) {
-            for (int j = 0; j < map.sizeY; j++) {
-                pos.x = i;
-                pos.z = j;
-                Gizmos.DrawSphere(pos, 0.1f);
-            }
-        }
+		if (map != null) {
+			Gizmos.color = Color.green;
+			Vector3 pos = new Vector3 ();
+			for (int i = 0; i < map.sizeX; i++) {
+				for (int j = 0; j < map.sizeY; j++) {
+					pos.x = i;
+					pos.z = j;
+					Gizmos.DrawSphere (pos, 0.1f);
+				}
+			}
+		}
     }
 }
