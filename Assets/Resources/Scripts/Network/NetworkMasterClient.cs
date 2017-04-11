@@ -38,7 +38,8 @@ public class NetworkMasterClient : MonoBehaviour {
 
 		// application msgs
 		client.RegisterHandler (CellChangeColorMessage.ID, OnCellChangeColor);
-		DontDestroyOnLoad (gameObject);
+        client.RegisterHandler (ServerMovementOrderMessage.ID, OnMovementOrder);
+        DontDestroyOnLoad (gameObject);
 	}
 
 	public void ResetClient () {
@@ -100,7 +101,6 @@ public class NetworkMasterClient : MonoBehaviour {
 		Main.main.map.SetCellColor (msg.cellId, msg.GetColor ());
 		Debug.Log ("Client received OnCellChangeColor " + msg.GetColor ().ToString ());
 	}
-
 	public void ChangeCellColor (int[] cellId, Color color) {
 		CellChangeColorMessage msg = new CellChangeColorMessage ();
 		msg.cellId = cellId;
@@ -109,7 +109,22 @@ public class NetworkMasterClient : MonoBehaviour {
 		Debug.Log ("Client sent ChangeCellColor " + color.ToString ());
 	}
 
-	void OnGUI () {
+    void OnMovementOrder(NetworkMessage netMsg)
+    {
+        ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
+        Player.playerList[msg.playerId].orderMoveToCell(msg.cellId);
+        Debug.Log("Client received OnMovementOrder ");
+    }
+    public void MovementOrder(int cellId, int playerId)
+    {
+        ClientMovementOrderMessage msg = new ClientMovementOrderMessage();
+        msg.cellId = cellId;
+        msg.playerId = playerId;
+        client.Send(ClientMovementOrderMessage.ID, msg);
+        Debug.Log("Client sent MovementOrder ");
+    }
+
+    void OnGUI () {
 		if (client != null && client.isConnected) {
 			if (GUI.Button (new Rect (0, 60, 200, 20), "MasterClient Disconnect")) {
 				ResetClient ();

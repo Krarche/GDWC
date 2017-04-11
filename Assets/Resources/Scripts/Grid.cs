@@ -122,12 +122,12 @@ public class Grid {
 				selectedCells = getInLine (cell, 2, 4);
 				//foreach (Cell c in selectedCells)
 					//SetCellColor (c, Color.red);
-				int[] cellId = new int[selectedCells.Count] ;
-				for (int i = 0; i < selectedCells.Count; i++)
-					cellId [i] = selectedCells [i].id;
+				//int[] cellId = new int[selectedCells.Count] ;
+				//for (int i = 0; i < selectedCells.Count; i++)
+				//	cellId [i] = selectedCells [i].id;
 				if(NetworkMasterClient.singleton != null)
-					NetworkMasterClient.singleton.ChangeCellColor(cellId, Color.blue);
-				else SetCellColor(cellId, Color.blue);
+					NetworkMasterClient.singleton.MovementOrder(cell.id, 0);
+				//else SetCellColor(cellId, Color.blue);
 			}
 
 		}

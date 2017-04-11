@@ -43,7 +43,7 @@ public class CellChangeColorMessage : ClientMessage {
 }
 
 // client to server
-
+// ID = 1xxx
 public class ClientSendPathMessage : ClientMessage {
 	public static short ID = 1100;
 	public int[] path; // path cells ids, from current position cell to new position cell
@@ -55,8 +55,16 @@ public class ClientSendSpellMessage : ClientMessage {
 	public int cellId; // id of the cell targeted
 }
 
+public class ClientMovementOrderMessage : ClientMessage
+{
+    public static short ID = 1102;
+    public int cellId;
+    public int playerId;
+}
+
 
 // server to client
+// ID = 2xxx
 
 public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
 	public static short ID = 2100;
@@ -71,8 +79,15 @@ public class ServerSendAllySpellPrevisualisationMessage : ServerMessage {
 	public int cellId; // id of the cell targeted
 }
 
+public class ServerMovementOrderMessage : ServerMessage
+{
+    public static short ID = 2102;
+    public int cellId;
+    public int playerId;
+}
+
 public class ServerSendTurnActionsMessage : ServerMessage {
-	public static short ID = 2102;
+	public static short ID = 2110;
 
 	public int[][] actions; // {action type(move/spell), player id, priority (first, normal, last), datas}
 

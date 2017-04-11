@@ -25,6 +25,7 @@ public class NetworkMasterServer : MonoBehaviour {
 
 		// application msgs
 		NetworkServer.RegisterHandler (CellChangeColorMessage.ID, OnCellChangeColor);
+        NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnClientMovementOrder);
 
 		DontDestroyOnLoad (gameObject);
 	}
@@ -49,14 +50,22 @@ public class NetworkMasterServer : MonoBehaviour {
 
 	// --------------- Application Handlers -----------------
 
-	void OnCellChangeColor (NetworkMessage netMsg) {
-		CellChangeColorMessage msg = netMsg.ReadMessage<CellChangeColorMessage> ();
-		Main.main.map.ClearSelection ();
+	void OnCellChangeColor (NetworkMessage netMsg)
+    {
+        CellChangeColorMessage msg = netMsg.ReadMessage<CellChangeColorMessage> ();
+        Debug.Log("Server received OnCellChangeColor " + msg.GetColor().ToString());
+        Main.main.map.ClearSelection ();
 		ChangeCellColor (msg.cellId, msg.GetColor ());
-		Debug.Log ("Server received OnCellChangeColor " + msg.GetColor ().ToString ());
 	}
+    void OnClientMovementOrder(NetworkMessage netMsg)
+    {
+        ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
+        Debug.Log("Server received OnClientMovementOrder ");
 
-	void OnGUI () {
+        MovementOrder(msg.cellId, msg.playerId);
+    }
+
+    void OnGUI () {
 		if (NetworkServer.active) {
 			GUI.Label (new Rect (0, 0, 200, 20), "Online port:" + MasterServerPort);
 			if (GUI.Button (new Rect (0, 20, 200, 20), "Reset  Master Server")) {
@@ -75,5 +84,14 @@ public class NetworkMasterServer : MonoBehaviour {
 		msg.SetColor (color);
 		NetworkServer.SendToAll (CellChangeColorMessage.ID, msg);
 		Debug.Log ("Server sent ChangeCellColor " + color.ToString ());
-	}
+    }
+
+    public void MovementOrder(int cellId, int playerId)
+    {
+        ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
+        msg.cellId = cellId;
+        msg.playerId = playerId;
+        NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
+        Debug.Log("Server sent MovementOrder ");
+    }
 }
