@@ -30,6 +30,6 @@ public class InputHandler : MonoBehaviour {
     }
 
     public void clickCell(GameObject cellObject) {
-        Main.main.map.clickCell(cellObject);
+        GameLogic.main.map.clickCell(cellObject);
     }
 }

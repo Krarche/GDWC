@@ -44,16 +44,6 @@ public class CellChangeColorMessage : ClientMessage {
 
 // client to server
 // ID = 1xxx
-public class ClientSendPathMessage : ClientMessage {
-	public static short ID = 1100;
-	public int[] path; // path cells ids, from current position cell to new position cell
-}
-
-public class ClientSendSpellMessage : ClientMessage {
-	public static short ID = 1101;
-	public int spellId; // id of spell used
-	public int cellId; // id of the cell targeted
-}
 
 public class ClientMovementOrderMessage : ClientMessage
 {
@@ -62,21 +52,31 @@ public class ClientMovementOrderMessage : ClientMessage
     public int playerId;
 }
 
+public class ClientSendPathMessage : ClientMessage {
+	public static short ID = 1111;
+	public int[] path; // path cells ids, from current position cell to new position cell
+}
+
+public class ClientSendSpellMessage : ClientMessage {
+	public static short ID = 1112;
+	public int spellId; // id of spell used
+	public int cellId; // id of the cell targeted
+}
+
 
 // server to client
 // ID = 2xxx
 
-public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
-	public static short ID = 2100;
-	public int playerId;
-	public int[] path; // path cells ids, from current position cell to new position cell
+public class ServerTellClientPlayerIdMessage : ServerMessage
+{
+    public static short ID = 2100;
+    public int playerId;
 }
 
-public class ServerSendAllySpellPrevisualisationMessage : ServerMessage {
-	public static short ID = 2101;
-	public int playerId;
-	public int spellId; // id of spell used
-	public int cellId; // id of the cell targeted
+public class ServerCreatePlayerMessage : ServerMessage
+{
+    public static short ID = 2101;
+    public int cellId;
 }
 
 public class ServerMovementOrderMessage : ServerMessage
@@ -84,6 +84,19 @@ public class ServerMovementOrderMessage : ServerMessage
     public static short ID = 2102;
     public int cellId;
     public int playerId;
+}
+
+public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
+	public static short ID = 2111;
+	public int playerId;
+	public int[] path; // path cells ids, from current position cell to new position cell
+}
+
+public class ServerSendAllySpellPrevisualisationMessage : ServerMessage {
+	public static short ID = 2112;
+	public int playerId;
+	public int spellId; // id of spell used
+	public int cellId; // id of the cell targeted
 }
 
 public class ServerSendTurnActionsMessage : ServerMessage {

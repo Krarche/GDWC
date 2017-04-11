@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Main : MonoBehaviour {
+public class GameLogic : MonoBehaviour {
 
     public Grid map;
-    public static Main main;
+    public static GameLogic main;
+    public GameObject playerPrefab;
+
 
     // Use this for initialization
     void Start () {
         main = this;
         map = new Grid();
         map.initialisation(15, 15);
+        playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
     }
 
     // Update is called once per frame
@@ -32,4 +35,15 @@ public class Main : MonoBehaviour {
 			}
 		}
     }
+
+
+
+    public void createPlayer(int cellPositionId)
+    {
+        Cell cell = map.GetCell(cellPositionId);
+        GameObject.Instantiate(playerPrefab, new Vector3(cell.x, 0, cell.y), Quaternion.identity);
+    }
+
+
+
 }
