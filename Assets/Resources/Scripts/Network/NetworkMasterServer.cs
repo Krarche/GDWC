@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 
 
 public class NetworkMasterServer : MonoBehaviour {
@@ -9,10 +10,21 @@ public class NetworkMasterServer : MonoBehaviour {
     public int connectionCount = 0;
 
 
-	// map of gameTypeNames to rooms of that type
-	// Dictionary<string, Player> gameTypeRooms = new Dictionary<string, Rooms> ();
+    // map of gameTypeNames to rooms of that type
+    // Dictionary<string, Player> gameTypeRooms = new Dictionary<string, Rooms> ();
 
-	public void InitializeServer () {
+    public void Awake() {
+        if (IsHeadless()) {
+            print("headless mode detected");
+            InitializeServer();
+        }
+    }
+
+    bool IsHeadless() {
+        return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
+    }
+
+    public void InitializeServer () {
 		if (NetworkServer.active) {
 			Debug.LogError ("Already Initialized");
 			return;
