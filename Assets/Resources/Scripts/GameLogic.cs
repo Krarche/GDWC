@@ -2,27 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameLogic : MonoBehaviour {
+public class GameLogic {
+
+    public ulong id { set; get; }
+
+    public List<Player> playerList = new List<Player>();
 
     public Grid map;
-    public static GameLogic main;
     public GameObject playerPrefab;
+    public ClientSendSpellMessage currentSpell;
 
-
-    // Use this for initialization
-    void Start () {
-        main = this;
+    public GameLogic () {
         map = new Grid();
         map.initialisation(15, 15);
         playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
     }
 
-    // Update is called once per frame
-    void Update() {
-
-    }
-
-    private void OnDrawGizmos() {
+    protected void OnDrawGizmos() {
 		if (map != null) {
 			Gizmos.color = Color.green;
 			Vector3 pos = new Vector3 ();
@@ -36,14 +32,35 @@ public class GameLogic : MonoBehaviour {
 		}
     }
 
-
-
-    public void createPlayer(int cellPositionId)
-    {
+    public Entity createEntity(int cellPositionId) {
         Cell cell = map.GetCell(cellPositionId);
-        GameObject.Instantiate(playerPrefab, new Vector3(cell.x, 0, cell.y), Quaternion.identity);
+        GameObject obj = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity);
+        obj.GetComponent<Entity>().setCurrentCell(cell);
+        return obj.GetComponent<Entity>();
     }
 
+    public void removeEntity(Entity e) {
+        GameObject.Destroy(e.gameObject);
+    }
 
+    public void addPlayer(Player p) {
+        playerList.Add(p);
+    }
 
+    public void removePlayer(Player p) {
+        removeEntity(p.entity);
+        playerList.Remove(p);
+    }
+
+    public void registerAction() {
+
+    }
+
+    public void resolveAction() {
+
+    }
+
+    public void resolveTurn() {
+
+    }
 }

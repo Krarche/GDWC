@@ -126,7 +126,7 @@ public class Grid {
 				//for (int i = 0; i < selectedCells.Count; i++)
 				//	cellId [i] = selectedCells [i].id;
 				if(NetworkMasterClient.singleton != null)
-					NetworkMasterClient.singleton.MovementOrder(cell.id, Player.localPlayer);
+					NetworkMasterClient.singleton.MovementOrder(cell.id, GameLogicClient.localPlayer);
 				//else SetCellColor(cellId, Color.blue);
 			}
 
@@ -166,6 +166,4 @@ public class Grid {
 		for(int i = 0; i < cellId.Length; i++)
 			SetCellColor (GetCell (cellId[i]), color);
 	}
-
-
 }

@@ -77,11 +77,16 @@ public class ServerCreatePlayerMessage : ServerMessage
 {
     public static short ID = 2101;
     public int cellId;
+    public int playerId;
+}
+
+public class ServerCreateGameMessage : ServerMessage {
+    public static short ID = 2102;
 }
 
 public class ServerMovementOrderMessage : ServerMessage
 {
-    public static short ID = 2102;
+    public static short ID = 2103;
     public int cellId;
     public int playerId;
 }

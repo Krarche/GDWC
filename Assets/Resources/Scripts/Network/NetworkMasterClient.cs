@@ -39,6 +39,7 @@ public class NetworkMasterClient : MonoBehaviour {
         // application msgs
         client.RegisterHandler(ServerTellClientPlayerIdMessage.ID, OnPlayerIdTold);
         client.RegisterHandler(ServerCreatePlayerMessage.ID, OnCreatePlayer);
+        client.RegisterHandler(ServerCreateGameMessage.ID, OnCreateGame);
         client.RegisterHandler (CellChangeColorMessage.ID, OnCellChangeColor);
         client.RegisterHandler (ServerMovementOrderMessage.ID, OnMovementOrder);
         DontDestroyOnLoad (gameObject);
@@ -100,35 +101,44 @@ public class NetworkMasterClient : MonoBehaviour {
     void OnPlayerIdTold(NetworkMessage netMsg)
     {
         ServerTellClientPlayerIdMessage msg = netMsg.ReadMessage<ServerTellClientPlayerIdMessage>();
-        Player.localPlayer = msg.playerId;
+        GameLogicClient.localPlayer = msg.playerId;
         Debug.Log("Client received OnMovementOrder ");
     }
 
     void OnCreatePlayer(NetworkMessage netMsg)
     {
         ServerCreatePlayerMessage msg = netMsg.ReadMessage<ServerCreatePlayerMessage>();
-        GameLogic.main.createPlayer(msg.cellId);
+        Entity e = GameLogicClient.game.createEntity(msg.cellId);
+        GameLogicClient.game.playerList.Add(new Player(msg.playerId, e));
         Debug.Log("Client received OnMovementOrder ");
+    }
+
+    void OnCreateGame(NetworkMessage netMsg) {
+        ServerCreateGameMessage msg = netMsg.ReadMessage<ServerCreateGameMessage>();
+        GameLogicClient game = new GameLogicClient();
+        game.id = msg.gameId;
+        Debug.Log("Client received OnCreateGame");
     }
 
     void OnCellChangeColor (NetworkMessage netMsg) {
 		CellChangeColorMessage msg = netMsg.ReadMessage<CellChangeColorMessage> ();
-		GameLogic.main.map.ClearSelection ();
-		GameLogic.main.map.SetCellColor (msg.cellId, msg.GetColor ());
+        GameLogicClient.game.map.ClearSelection ();
+        GameLogicClient.game.map.SetCellColor (msg.cellId, msg.GetColor ());
 		Debug.Log ("Client received OnCellChangeColor " + msg.GetColor ().ToString ());
 	}
 	public void ChangeCellColor (int[] cellId, Color color) {
 		CellChangeColorMessage msg = new CellChangeColorMessage ();
 		msg.cellId = cellId;
 		msg.SetColor (color);
-		client.Send (CellChangeColorMessage.ID, msg);
+        msg.gameId = GameLogicClient.game.id;
+        client.Send (CellChangeColorMessage.ID, msg);
 		Debug.Log ("Client sent ChangeCellColor " + color.ToString ());
 	}
 
     void OnMovementOrder(NetworkMessage netMsg)
     {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
-        Player.playerList[msg.playerId].orderMoveToCell(msg.cellId);
+        GameLogicClient.game.playerList[msg.playerId].addOrder(new MovementOrder(msg.cellId));
         Debug.Log("Client received OnMovementOrder ");
     }
     public void MovementOrder(int cellId, int playerId)
@@ -136,6 +146,7 @@ public class NetworkMasterClient : MonoBehaviour {
         ClientMovementOrderMessage msg = new ClientMovementOrderMessage();
         msg.cellId = cellId;
         msg.playerId = playerId;
+        msg.gameId = GameLogicClient.game.id;
         client.Send(ClientMovementOrderMessage.ID, msg);
         Debug.Log("Client sent MovementOrder ");
     }
@@ -145,7 +156,7 @@ public class NetworkMasterClient : MonoBehaviour {
 			if (GUI.Button (new Rect (0, 60, 200, 20), "MasterClient Disconnect")) {
 				ResetClient ();
 				if (NetworkManager.singleton != null) {
-					NetworkManager.singleton.StopServer ();
+					//NetworkManager.singleton.StopServer ();
 					NetworkManager.singleton.StopClient ();
 				}
 			}
