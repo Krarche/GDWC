@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Networking;
-
+using System;
 
 public class NetworkMasterServer : MonoBehaviour {
     public int MasterServerPort;
-    public int connectionCount = 0;
+    public ulong connectionCount = 0;
     public Dictionary<ulong, GameLogicServer> games = new Dictionary<ulong, GameLogicServer>();
     public GameLogicServer defaultGame = null;
     public ulong gameCount = 0;
-    public Dictionary<string, Player> players = new Dictionary<string, Player>();
+
+    public Dictionary<int, Player> playersByConnection = new Dictionary<int, Player>();
+    public Dictionary<string, Player> playersByName = new Dictionary<string, Player>();
 
     // map of gameTypeNames to rooms of that type
     // Dictionary<string, Player> gameTypeRooms = new Dictionary<string, Rooms> ();
@@ -21,7 +23,7 @@ public class NetworkMasterServer : MonoBehaviour {
         }
     }
 
-    private bool isHeadless() {
+    public static bool isHeadless() {
         return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null;
     }
 
@@ -35,11 +37,11 @@ public class NetworkMasterServer : MonoBehaviour {
 
         // system msgs
         NetworkServer.RegisterHandler(MsgType.Connect, OnServerConnect);
+        NetworkServer.RegisterHandler(ClientIdentificationMessage.ID, OnServerIdentification);
         NetworkServer.RegisterHandler(MsgType.Disconnect, OnServerDisconnect);
         NetworkServer.RegisterHandler(MsgType.Error, OnServerError);
 
         // application msgs
-        NetworkServer.RegisterHandler(CellChangeColorMessage.ID, OnCellChangeColor);
         NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnClientMovementOrder);
 
         DontDestroyOnLoad(gameObject);
@@ -65,28 +67,14 @@ public class NetworkMasterServer : MonoBehaviour {
             defaultGame = createGame();
             games.Add(defaultGame.id, defaultGame);
         }
-        CreateGameForNewClient(defaultGame, netMsg.conn);
-
-        if (!players.ContainsKey(netMsg.conn.address)) {
-            Player newPlayer = new Player();
-            TellClientId(netMsg.conn, connectionCount);
-            CreatePlayer(defaultGame, connectionCount, newPlayer);
-            defaultGame.addPlayer(newPlayer);
-            players.Add(netMsg.conn.address, newPlayer);
-            connectionCount++;
-        } else {
-            TellClientId(netMsg.conn, players[netMsg.conn.address].playerId);
-        }
-        
-        for (int i = 0; i < defaultGame.playerList.Count; i++)
-            CreatePlayerForNewClient(defaultGame, netMsg.conn, defaultGame.playerList[i].getCurrentCell());
     }
 
     void OnServerDisconnect(NetworkMessage netMsg) {
         Debug.Log("Master lost client");
-        Debug.Log(netMsg.conn.address);
-        players.Remove(netMsg.conn.address);
-        defaultGame.removePlayer(players[netMsg.conn.address]);
+        Player p = playersByConnection[netMsg.conn.connectionId];
+        if(p.isIdentified) {
+            playersByConnection.Remove(netMsg.conn.connectionId);
+        }
     }
 
     void OnServerError(NetworkMessage netMsg) {
@@ -95,41 +83,54 @@ public class NetworkMasterServer : MonoBehaviour {
 
     // --------------- Player Handlers -----------------
 
-    public void OnPlayerDisconnected(NetworkPlayer player) {
-        Debug.Log("Player "+ player.ipAddress +" disconnected");
-        players.Remove(player.ipAddress);
-        defaultGame.removePlayer(players[player.ipAddress]);
+    void OnServerIdentification(NetworkMessage netMsg) {
+        ClientIdentificationMessage msg = netMsg.ReadMessage<ClientIdentificationMessage>();
+        Debug.Log("Server received Identification from " + msg.playerName);
+
+        Player p = null;
+        if(playersByName.ContainsKey(msg.playerName))
+            p = playersByName[msg.playerName];
+        else
+            p = new Player();
+
+        p.identifie(msg.playerName);
+        playersByName[msg.playerName] = p;
+        playersByConnection[netMsg.conn.connectionId] = p;
+        ServerIdentification(p, true);
+        PlayerJoinGame(p, defaultGame.id, netMsg.conn);
+    }
+
+    void ServerIdentification(Player p, bool state) {
+        ServerIdentificationMessage msg = new ServerIdentificationMessage();
+        msg.state = state;
+        msg.playerId = p.playerId;
+        NetworkServer.SendToAll(ServerIdentificationMessage.ID, msg);
+        Debug.Log("Server sent ServerIdentification " + msg.state); 
+    }
+
+    void PlayerJoinGame(Player player, ulong gameId, NetworkConnection conn) {
+        CreateGameForNewClient(defaultGame, conn);
+
+        foreach (Player p in defaultGame.playerList.Values)
+            CreatePlayerForNewClient(defaultGame, conn, p.getCurrentCell());
+
+        if (!defaultGame.playerList.ContainsKey(player.playerId)) {
+            CreatePlayer(defaultGame, 0, player);
+            defaultGame.addPlayer(player);
+        }
     }
 
     // --------------- Application Handlers -----------------
 
-    void OnCellChangeColor(NetworkMessage netMsg) {
-        CellChangeColorMessage msg = netMsg.ReadMessage<CellChangeColorMessage>();
-        Debug.Log("Server received OnCellChangeColor " + msg.GetColor().ToString());
-
-        GameLogicServer game = games[msg.gameId];
-        game.map.ClearSelection();
-        ChangeCellColor(game, msg.cellId, msg.GetColor());
-    }
 
     void OnClientMovementOrder(NetworkMessage netMsg) {
         ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
         Debug.Log("Server received OnClientMovementOrder ");
-
         GameLogicServer game = games[msg.gameId];
         MovementOrder(game, msg.cellId, msg.playerId);
     }
 
-    public void ChangeCellColor(GameLogicServer game, int[] cellId, Color color) {
-        CellChangeColorMessage msg = new CellChangeColorMessage();
-        msg.cellId = cellId;
-        msg.SetColor(color);
-        msg.gameId = game.id;
-        NetworkServer.SendToAll(CellChangeColorMessage.ID, msg);
-        Debug.Log("Server sent ChangeCellColor " + color.ToString());
-    }
-
-    public void MovementOrder(GameLogicServer game, int cellId, int playerId) {
+    public void MovementOrder(GameLogicServer game, int cellId, ulong playerId) {
         game.playerList[playerId].addOrder(new MovementOrder(cellId));
         ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
         msg.cellId = cellId;
@@ -137,13 +138,6 @@ public class NetworkMasterServer : MonoBehaviour {
         msg.gameId = game.id;
         NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
         Debug.Log("Server sent MovementOrder ");
-    }
-
-    public void TellClientId(NetworkConnection client, int playerId) {
-        ServerTellClientPlayerIdMessage msg = new ServerTellClientPlayerIdMessage();
-        msg.playerId = playerId;
-        client.Send(ServerTellClientPlayerIdMessage.ID, msg);
-        Debug.Log("Server sent TellClientId ");
     }
 
     public void CreatePlayer(GameLogicServer game, int cellId, Player p) {

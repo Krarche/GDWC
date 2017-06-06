@@ -10,8 +10,8 @@ public class Grid {
 	public Cell[,] cells;
 	public Dictionary<GameObject, Cell> worldObjects;
 	public GameObject cellBase;
-	public List<Cell> selectedCells;
-
+    public GameObject gridHolder;
+    public List<Cell> selectedCells;
 
 	public void initialisation (int x, int y) {
 		cellBase = Resources.Load<GameObject> ("Prefabs/CellBase");
@@ -22,18 +22,26 @@ public class Grid {
 		initDistance ();
 	}
 
+    public void clearGrid() {
+        GameObject.Destroy(gridHolder);
+    }
+
 	private void initPosition () {
-		cells = new Cell[sizeX, sizeY];
+        gridHolder = GameObject.Instantiate(Resources.Load<GameObject> ("Prefabs/GridHolder"), new Vector3(0, 0, 0), Quaternion.identity);
+        gridHolder.name = "GridHolder";
+        cells = new Cell[sizeX, sizeY];
 		for (int y = 0; y < sizeY; y++) {
 			for (int x = 0; x < sizeX; x++) {
 				GameObject o = GameObject.Instantiate (cellBase, new Vector3 (x, 0, y), Quaternion.identity);
+                o.transform.parent = gridHolder.transform;
 				Cell c = new Cell (sizeX, sizeY, o);
-				c.x = x;
+                c.x = x;
 				c.y = y;
 				c.id = x + y * sizeX;
 				cells [x, y] = c;
 				c.inWorld = o;
-				worldObjects.Add (o, c);
+                o.name = "Cell #" + c.id;
+                worldObjects.Add (o, c);
 			}
 		}
 
@@ -120,14 +128,8 @@ public class Grid {
 		if (worldObjects.TryGetValue (cellObject, out cell)) {
 			if (cell != null) {
 				selectedCells = getInLine (cell, 2, 4);
-				//foreach (Cell c in selectedCells)
-					//SetCellColor (c, Color.red);
-				//int[] cellId = new int[selectedCells.Count] ;
-				//for (int i = 0; i < selectedCells.Count; i++)
-				//	cellId [i] = selectedCells [i].id;
 				if(NetworkMasterClient.singleton != null)
-					NetworkMasterClient.singleton.MovementOrder(cell.id, GameLogicClient.localPlayer);
-				//else SetCellColor(cellId, Color.blue);
+					NetworkMasterClient.singleton.MovementOrder(cell.id, GameLogicClient.localPlayerId);
 			}
 
 		}

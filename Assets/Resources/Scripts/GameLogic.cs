@@ -6,7 +6,7 @@ public class GameLogic {
 
     public ulong id { set; get; }
 
-    public List<Player> playerList = new List<Player>();
+    public Dictionary<ulong, Player> playerList = new Dictionary<ulong, Player>();
 
     public Grid map;
     public GameObject playerPrefab;
@@ -44,12 +44,15 @@ public class GameLogic {
     }
 
     public void addPlayer(Player p) {
-        playerList.Add(p);
+        if(playerList.ContainsKey(p.playerId)) {
+            removePlayer(p);
+        }
+        playerList[p.playerId] = p;
     }
 
     public void removePlayer(Player p) {
         removeEntity(p.entity);
-        playerList.Remove(p);
+        playerList.Remove(p.playerId);
     }
 
     public void registerAction() {

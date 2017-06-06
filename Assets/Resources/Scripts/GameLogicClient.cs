@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameLogicClient : GameLogic {
 
-    public static int localPlayer = -1;
+    public static ulong localPlayerId = 0;
     public static GameLogicClient game;
 
     public GameLogicClient(): base() {
@@ -39,6 +39,14 @@ public class GameLogicClient : GameLogic {
                 buttonCancel();
                 break;
         }
+    }
+
+    public bool containsPlayerId(ulong playerId) {
+        foreach(ulong key in playerList.Keys) {
+            if (key == playerId)
+                return true;
+        }
+        return false;
     }
 
     private void buttonSpell(short spellIndex) {

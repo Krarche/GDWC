@@ -4,17 +4,20 @@ using UnityEngine;
 
 public class Player
 {
-    public static int playerCount = 0;
-    public int playerId = 0;
+    public static ulong playerCount = 0;
+    public ulong playerId = 0;
     public Entity entity = null;
     public ulong currentGameId = 0;
+
+    public string playerName;
+    public bool isIdentified;
 
     public Player() {
         playerId = playerCount;
         playerCount++;
     }
 
-    public Player (int playerId, Entity e) {
+    public Player (ulong playerId, Entity e) {
         this.playerId = playerId;
         this.entity = e;
     }
@@ -25,5 +28,10 @@ public class Player
 
     public int getCurrentCell() {
         return 0;
+    }
+
+    public void identifie(string playerName) {
+        this.playerName = playerName;
+        this.isIdentified = true;
     }
 }
