@@ -6,29 +6,22 @@ using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using UnityEditor;
 
+[InitializeOnLoad]
 public class SshHandler {
+
+    static SshHandler() {
+        sshclient = new SshClient("217.182.205.172", "root", "4uzPqvqU");
+        sshclient.Connect();
+        stream = sshclient.CreateShellStream("customCommand", 80, 24, 800, 600, 1024);
+        sftpclient = new SftpClient("217.182.205.172", "root", "4uzPqvqU");
+        sftpclient.Connect();
+    }
 
     public static SshClient sshclient;
     public static SftpClient sftpclient;
     public static ShellStream stream;
-
-    public static void initConnection() {
-        sshclient = new SshClient("217.182.205.172", "root", "4uzPqvqU");
-        if (!sshclient.IsConnected) {
-            sshclient.Connect();
-            stream = sshclient.CreateShellStream("customCommand", 80, 24, 800, 600, 1024);
-            sftpclient = new SftpClient("217.182.205.172", "root", "4uzPqvqU");
-            sftpclient.Connect();
-        }
-    }
-
-    public static void disconnect() {
-        sshclient.Disconnect();
-        sshclient.Dispose();
-        sftpclient.Disconnect();
-        sftpclient.Dispose();
-    }
 
     public static string SendCommand(ShellStream stream, string customCMD) {
         StringBuilder strAnswer = new StringBuilder();
