@@ -39,8 +39,6 @@ public class ScriptBatch {
 
         if (File.Exists("./Build/Server/gdwc.zip")) {
             SshHandler.sendFile("./Build/Server/gdwc.zip");
-            SshHandler.SendCommand(SshHandler.stream, "unzip gdwc.zip");
-            SshHandler.SendCommand(SshHandler.stream, "chmod +x gdwc.x86_64");
         }
     }
 
