@@ -58,7 +58,6 @@ public class SshHandler {
 
     public static void sendFile(string path) {
         // reset the progression log filter
-        progression = 0;
         step = 1;
 
         float i = 0f;
@@ -88,13 +87,11 @@ public class SshHandler {
             }
         }
     }
-
-    private static ulong progression = 0;
+    
     private static ulong step = 1;
 
     private static void UpdateProgressBar(ulong uploaded) {
-        progression += uploaded;
-        ulong percentage = (ulong) ((float)progression / (float) fileSize * 100);
+        ulong percentage = (ulong) ((float)uploaded / (float) fileSize * 100);
         if (percentage >= 20 * step) {
             Debug.Log("Uploading build to server... " + percentage + " %");
             step++;
