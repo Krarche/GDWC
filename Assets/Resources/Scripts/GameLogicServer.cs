@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameLogicServer : GameLogic {
 
-    public GameLogicServer(): base() {
+    public GameLogicServer() : base() {
 
     }
 
@@ -14,7 +14,11 @@ public class GameLogicServer : GameLogic {
     }
 
     public override void resolveAction(Order o) {
-        base.resolveAction(o);
+        Entity e = entityList[o.entityId];
+        if (o is MovementOrder) {
+            MovementOrder mo = (MovementOrder)o;
+            e.setCurrentCell(map.GetCell(mo.cellId));
+        }
     }
 
     public override void resolveTurn() {

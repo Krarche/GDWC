@@ -72,7 +72,7 @@ public class NetworkMasterServer : MonoBehaviour {
     void OnServerDisconnect(NetworkMessage netMsg) {
         Debug.Log("Master lost client");
         Player p = playersByConnection[netMsg.conn.connectionId];
-        if(p.isIdentified) {
+        if (p.isIdentified) {
             playersByConnection.Remove(netMsg.conn.connectionId);
         }
     }
@@ -88,7 +88,7 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Server received Identification from " + msg.playerName);
 
         Player p = null;
-        if(playersByName.ContainsKey(msg.playerName))
+        if (playersByName.ContainsKey(msg.playerName))
             p = playersByName[msg.playerName];
         else
             p = new Player();
@@ -96,16 +96,16 @@ public class NetworkMasterServer : MonoBehaviour {
         p.identifie(msg.playerName);
         playersByName[msg.playerName] = p;
         playersByConnection[netMsg.conn.connectionId] = p;
-        ServerIdentification(p, true);
+        ServerIdentification(p, true, netMsg.conn);
         PlayerJoinGame(p, defaultGame.id, netMsg.conn);
     }
 
-    void ServerIdentification(Player p, bool state) {
+    void ServerIdentification(Player p, bool state, NetworkConnection client) {
         ServerIdentificationMessage msg = new ServerIdentificationMessage();
         msg.state = state;
         msg.playerId = p.playerId;
-        NetworkServer.SendToAll(ServerIdentificationMessage.ID, msg);
-        Debug.Log("Server sent ServerIdentification " + msg.state); 
+        client.Send(ServerIdentificationMessage.ID, msg);
+        Debug.Log("Server sent ServerIdentification " + msg.state);
     }
 
     void PlayerJoinGame(Player player, ulong gameId, NetworkConnection conn) {
@@ -137,25 +137,40 @@ public class NetworkMasterServer : MonoBehaviour {
         msg.entityId = entityId;
         msg.gameId = game.id;
         NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
-        game.resolveAction(new MovementOrder(msg.cellId, entityId));
+        game.resolveAction(new MovementOrder(cellId, entityId));
         Debug.Log("Server sent MovementOrder ");
     }
 
     public void CreatePlayer(GameLogicServer game, int cellId, Player p) {
-        p.entity = game.createEntity(cellId);
+        game.lastEntityIdGenerated++;
+        Cell cell = game.map.GetCell(cellId);
+        p.entity = game.createEntity(game.lastEntityIdGenerated);
+        p.entity.setCurrentCell(cell);
+        p.entity.setColor(p.playerColor);
+        p.entity.setDisplayedName(p.playerName);
         ServerCreatePlayerMessage msg = new ServerCreatePlayerMessage();
         msg.cellId = cellId;
         msg.gameId = game.id;
         msg.playerId = p.playerId;
+        msg.entityId = p.entity.entityId;
+        msg.displayedName = p.playerName;
+        msg.r = p.playerColor.r;
+        msg.g = p.playerColor.g;
+        msg.b = p.playerColor.b;
         NetworkServer.SendToAll(ServerCreatePlayerMessage.ID, msg);
         Debug.Log("Server sent CreatePlayer ");
     }
 
     public void CreatePlayerForNewClient(GameLogicServer game, NetworkConnection client, Player p) {
         ServerCreatePlayerMessage msg = new ServerCreatePlayerMessage();
-        msg.cellId = p.getCurrentCell();
+        msg.cellId = p.getCurrentCellId();
         msg.gameId = game.id;
         msg.playerId = p.playerId;
+        msg.entityId = p.entity.entityId;
+        msg.displayedName = p.playerName;
+        msg.r = p.playerColor.r;
+        msg.g = p.playerColor.g;
+        msg.b = p.playerColor.b;
         client.Send(ServerCreatePlayerMessage.ID, msg);
         Debug.Log("Server sent CreatePlayerForNewClient ");
     }

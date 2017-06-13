@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 4e032aa6e33913c45927f184b9590b9b
+timeCreated: 1497388697
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Esphimere
+  fontNames:
+  - Esphimere
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 46adee0295b48f646b7d08a90bec9d06, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

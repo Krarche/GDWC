@@ -44,7 +44,7 @@ public class NetworkMasterClient : MonoBehaviour {
         client.RegisterHandler(ServerCreatePlayerMessage.ID, OnCreatePlayer);
         client.RegisterHandler(ServerCreateGameMessage.ID, OnCreateGame);
         client.RegisterHandler(ServerMovementOrderMessage.ID, OnMovementOrder);
-        
+
         DontDestroyOnLoad(gameObject);
     }
 
@@ -107,7 +107,6 @@ public class NetworkMasterClient : MonoBehaviour {
             Debug.LogError("ClearHostList not connected");
             return;
         }
-
     }
 
     public virtual void OnFailedToConnectToMasterServer() {
@@ -118,7 +117,13 @@ public class NetworkMasterClient : MonoBehaviour {
         ServerCreatePlayerMessage msg = netMsg.ReadMessage<ServerCreatePlayerMessage>();
 
         if (!GameLogicClient.game.containsPlayerId(msg.playerId)) {
-            Entity e = GameLogicClient.game.createEntity(msg.cellId);
+            Debug.Log("COLOR : " + msg.r + " " + msg.g + " " + msg.b);
+            Cell cell = GameLogicClient.game.map.GetCell(msg.cellId);
+            Entity e = GameLogicClient.game.createEntity(msg.entityId);
+            e.setCurrentCell(cell);
+            e.setColor(msg.r, msg.g, msg.b);
+            e.applyColor();
+            e.setDisplayedName(msg.displayedName);
             GameLogicClient.game.addPlayer(new Player(msg.playerId, e));
             Debug.Log("Client received OnCreatePlayer " + msg.playerId);
         } else {
@@ -137,7 +142,7 @@ public class NetworkMasterClient : MonoBehaviour {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
         GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId, msg.entityId));
         GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId, msg.entityId));
-        Debug.Log("Client received OnMovementOrder ");
+        Debug.Log("Client received OnMovementOrder " + msg.entityId);
     }
 
     public void MovementOrder(int cellId, int entityId) {

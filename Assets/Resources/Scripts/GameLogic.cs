@@ -10,7 +10,7 @@ public abstract class GameLogic {
 
     public Dictionary<ulong, Player> playerList = new Dictionary<ulong, Player>();
     public Dictionary<int, Entity> entityList = new Dictionary<int, Entity>();
-
+    public int lastEntityIdGenerated = -1;
     public Grid map;
     public GameObject playerPrefab;
 
@@ -34,11 +34,11 @@ public abstract class GameLogic {
         }
     }
 
-    public Entity createEntity(int cellPositionId) {
-        Cell cell = map.GetCell(cellPositionId);
+    public Entity createEntity(int entityId) {
         Entity temp = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
-        temp.entityId = entityList.Count;
-        temp.setCurrentCell(cell);
+        temp.entityId = entityId;
+        temp.setCurrentCell(map.GetCell(0));
+        entityList[entityId] = temp;
         return temp;
     }
 
@@ -49,7 +49,6 @@ public abstract class GameLogic {
     public void addPlayer(Player p) {
         if (!playerList.ContainsKey(p.playerId)) {
             playerList[p.playerId] = p;
-            entityList[p.entity.entityId] = p.entity;
         }
     }
 
@@ -64,7 +63,7 @@ public abstract class GameLogic {
         Entity e = entityList[o.entityId];
         if(o is MovementOrder) {
             MovementOrder mo = (MovementOrder)o;
-            e.setCurrentCell(map.GetCell(mo.cellId));
+            e.orderMoveToCell(mo.cellId);
         }
     }
 

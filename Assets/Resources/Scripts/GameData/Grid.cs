@@ -138,8 +138,7 @@ public class Grid {
 
 	public void ClearSelection () {
 		if (selectedCells != null) {
-			foreach (Cell c in selectedCells)
-				SetCellColor (c, Color.white);
+
 		}
 		selectedCells = null;
 	}

@@ -38,6 +38,9 @@ public class ServerCreatePlayerMessage : ServerMessage
     public static short ID = 2101;
     public int cellId;
     public ulong playerId;
+    public int entityId;
+    public string displayedName;
+    public float r, g, b;
 }
 
 public class ServerCreateGameMessage : ServerMessage {
