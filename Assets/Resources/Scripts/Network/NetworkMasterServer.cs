@@ -2,142 +2,184 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Networking;
-using UnityEngine.Rendering;
-
+using System;
 
 public class NetworkMasterServer : MonoBehaviour {
-	public int MasterServerPort;
-    public int connectionCount = 0;
+    public int MasterServerPort;
+    public ulong connectionCount = 0;
+    public Dictionary<ulong, GameLogicServer> games = new Dictionary<ulong, GameLogicServer>();
+    public GameLogicServer defaultGame = null;
+    public ulong gameCount = 0;
 
+    public Dictionary<int, Player> playersByConnection = new Dictionary<int, Player>();
+    public Dictionary<string, Player> playersByName = new Dictionary<string, Player>();
 
     // map of gameTypeNames to rooms of that type
     // Dictionary<string, Player> gameTypeRooms = new Dictionary<string, Rooms> ();
 
     public void Awake() {
-        if (IsHeadless()) {
-            print("headless mode detected");
+        if (isHeadless()) {
             InitializeServer();
         }
     }
 
-    bool IsHeadless() {
-        return SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null;
+    public static bool isHeadless() {
+        return SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null;
     }
 
-    public void InitializeServer () {
-		if (NetworkServer.active) {
-			Debug.LogError ("Already Initialized");
-			return;
-		}
 
-		NetworkServer.Listen (MasterServerPort);
+    public void InitializeServer() {
+        if (NetworkServer.active) {
+            Debug.LogError("Already Initialized");
+            return;
+        }
 
-		// system msgs
-		NetworkServer.RegisterHandler (MsgType.Connect, OnServerConnect);
-		NetworkServer.RegisterHandler (MsgType.Disconnect, OnServerDisconnect);
-		NetworkServer.RegisterHandler (MsgType.Error, OnServerError);
+        NetworkServer.Listen(MasterServerPort);
 
-		// application msgs
-		NetworkServer.RegisterHandler (CellChangeColorMessage.ID, OnCellChangeColor);
+        // system msgs
+        NetworkServer.RegisterHandler(MsgType.Connect, OnServerConnect);
+        NetworkServer.RegisterHandler(ClientIdentificationMessage.ID, OnServerIdentification);
+        NetworkServer.RegisterHandler(MsgType.Disconnect, OnServerDisconnect);
+        NetworkServer.RegisterHandler(MsgType.Error, OnServerError);
+
+        // application msgs
         NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnClientMovementOrder);
 
-		DontDestroyOnLoad (gameObject);
-	}
-
-	public void ResetServer () {
-		NetworkServer.Shutdown ();
-	}
-
-	// --------------- System Handlers -----------------
-
-	void OnServerConnect (NetworkMessage netMsg) {
-		Debug.Log ("Master received client");
-
-        TellClientId(netMsg.conn, connectionCount);
-        for (int i = 0; i < Player.playerList.Count; i++)
-            CreatePlayerForNewClient(netMsg.conn, Player.playerList[i].getCurrentCell());
-        CreatePlayer(connectionCount);
-        connectionCount++;
+        DontDestroyOnLoad(gameObject);
     }
 
-	void OnServerDisconnect (NetworkMessage netMsg) {
-		Debug.Log ("Master lost client");
-	}
+    public void ResetServer() {
+        NetworkServer.Shutdown();
+    }
 
-	void OnServerError (NetworkMessage netMsg) {
-		Debug.Log ("ServerError from Master");
-	}
+    public GameLogicServer createGame() {
+        GameLogicServer game = new GameLogicServer();
+        game.id = gameCount++;
+        return game;
+    }
 
-	// --------------- Application Handlers -----------------
+    // --------------- System Handlers -----------------
 
-	void OnCellChangeColor (NetworkMessage netMsg)
-    {
-        CellChangeColorMessage msg = netMsg.ReadMessage<CellChangeColorMessage> ();
-        Debug.Log("Server received OnCellChangeColor " + msg.GetColor().ToString());
-        GameLogic.main.map.ClearSelection ();
-		ChangeCellColor (msg.cellId, msg.GetColor ());
-	}
-    void OnClientMovementOrder(NetworkMessage netMsg)
-    {
+    void OnServerConnect(NetworkMessage netMsg) {
+        Debug.Log("Master received client");
+        Debug.Log(netMsg.conn.address);
+
+        if (defaultGame == null) {
+            defaultGame = createGame();
+            games.Add(defaultGame.id, defaultGame);
+        }
+    }
+
+    void OnServerDisconnect(NetworkMessage netMsg) {
+        Debug.Log("Master lost client");
+        Player p = playersByConnection[netMsg.conn.connectionId];
+        if (p.isIdentified) {
+            playersByConnection.Remove(netMsg.conn.connectionId);
+        }
+    }
+
+    void OnServerError(NetworkMessage netMsg) {
+        Debug.Log("ServerError from Master");
+    }
+
+    // --------------- Player Handlers -----------------
+
+    void OnServerIdentification(NetworkMessage netMsg) {
+        ClientIdentificationMessage msg = netMsg.ReadMessage<ClientIdentificationMessage>();
+        Debug.Log("Server received Identification from " + msg.playerName);
+
+        Player p = null;
+        if (playersByName.ContainsKey(msg.playerName))
+            p = playersByName[msg.playerName];
+        else
+            p = new Player();
+
+        p.identifie(msg.playerName);
+        playersByName[msg.playerName] = p;
+        playersByConnection[netMsg.conn.connectionId] = p;
+        ServerIdentification(p, true, netMsg.conn);
+        PlayerJoinGame(p, defaultGame.id, netMsg.conn);
+    }
+
+    void ServerIdentification(Player p, bool state, NetworkConnection client) {
+        ServerIdentificationMessage msg = new ServerIdentificationMessage();
+        msg.state = state;
+        msg.playerId = p.playerId;
+        client.Send(ServerIdentificationMessage.ID, msg);
+        Debug.Log("Server sent ServerIdentification " + msg.state);
+    }
+
+    void PlayerJoinGame(Player player, ulong gameId, NetworkConnection conn) {
+        CreateGameForNewClient(defaultGame, conn);
+
+        foreach (Player p in defaultGame.playerList.Values)
+            CreatePlayerForNewClient(defaultGame, conn, p);
+
+        if (!defaultGame.playerList.ContainsKey(player.playerId)) {
+            CreatePlayer(defaultGame, 0, player);
+            defaultGame.addPlayer(player);
+        }
+    }
+
+    // --------------- Application Handlers -----------------
+
+
+    void OnClientMovementOrder(NetworkMessage netMsg) {
         ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
         Debug.Log("Server received OnClientMovementOrder ");
-
-        MovementOrder(msg.cellId, msg.playerId);
+        GameLogicServer game = games[msg.gameId];
+        MovementOrder(game, msg.cellId, msg.entityId);
     }
 
-    void OnGUI () {
-		if (NetworkServer.active) {
-			GUI.Label (new Rect (0, 0, 200, 20), "Online port:" + MasterServerPort);
-			if (GUI.Button (new Rect (0, 20, 200, 20), "Reset  Master Server")) {
-				ResetServer ();
-			}
-		} else {
-			if (GUI.Button (new Rect (0, 20, 200, 20), "Init Master Server")) {
-				InitializeServer ();
-			}
-		}
-	}
-
-	public void ChangeCellColor (int[] cellId, Color color) {
-		CellChangeColorMessage msg = new CellChangeColorMessage ();
-		msg.cellId = cellId;
-		msg.SetColor (color);
-		NetworkServer.SendToAll (CellChangeColorMessage.ID, msg);
-		Debug.Log ("Server sent ChangeCellColor " + color.ToString ());
-    }
-
-    public void MovementOrder(int cellId, int playerId)
-    {
-        Player.playerList[playerId].orderMoveToCell(cellId);
+    public void MovementOrder(GameLogicServer game, int cellId, int entityId) {
+        game.entityList[entityId].addOrder(new MovementOrder(cellId, entityId));
         ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
         msg.cellId = cellId;
-        msg.playerId = playerId;
+        msg.entityId = entityId;
+        msg.gameId = game.id;
         NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
+        game.resolveAction(new MovementOrder(cellId, entityId));
         Debug.Log("Server sent MovementOrder ");
     }
 
-    public void TellClientId(NetworkConnection client, int playerId)
-    {
-        ServerTellClientPlayerIdMessage msg = new ServerTellClientPlayerIdMessage();
-        msg.playerId = playerId;
-        client.Send(ServerTellClientPlayerIdMessage.ID, msg);
-        Debug.Log("Server sent TellClientId ");
-    }
-
-    public void CreatePlayer(int cellId)
-    {
-        GameLogic.main.createPlayer(cellId);
+    public void CreatePlayer(GameLogicServer game, int cellId, Player p) {
+        game.lastEntityIdGenerated++;
+        Cell cell = game.map.GetCell(cellId);
+        p.entity = game.createEntity(game.lastEntityIdGenerated);
+        p.entity.setCurrentCell(cell);
+        p.entity.setColor(p.playerColor);
+        p.entity.setDisplayedName(p.playerName);
         ServerCreatePlayerMessage msg = new ServerCreatePlayerMessage();
         msg.cellId = cellId;
+        msg.gameId = game.id;
+        msg.playerId = p.playerId;
+        msg.entityId = p.entity.entityId;
+        msg.displayedName = p.playerName;
+        msg.r = p.playerColor.r;
+        msg.g = p.playerColor.g;
+        msg.b = p.playerColor.b;
         NetworkServer.SendToAll(ServerCreatePlayerMessage.ID, msg);
         Debug.Log("Server sent CreatePlayer ");
     }
 
-    public void CreatePlayerForNewClient(NetworkConnection client, int cellId)
-    {
+    public void CreatePlayerForNewClient(GameLogicServer game, NetworkConnection client, Player p) {
         ServerCreatePlayerMessage msg = new ServerCreatePlayerMessage();
-        msg.cellId = cellId;
+        msg.cellId = p.getCurrentCellId();
+        msg.gameId = game.id;
+        msg.playerId = p.playerId;
+        msg.entityId = p.entity.entityId;
+        msg.displayedName = p.playerName;
+        msg.r = p.playerColor.r;
+        msg.g = p.playerColor.g;
+        msg.b = p.playerColor.b;
         client.Send(ServerCreatePlayerMessage.ID, msg);
         Debug.Log("Server sent CreatePlayerForNewClient ");
+    }
+
+    public void CreateGameForNewClient(GameLogicServer game, NetworkConnection client) {
+        ServerCreateGameMessage msg = new ServerCreateGameMessage();
+        msg.gameId = game.id;
+        client.Send(ServerCreateGameMessage.ID, msg);
+        Debug.Log("Server sent CreateGameForNewClient ");
     }
 }

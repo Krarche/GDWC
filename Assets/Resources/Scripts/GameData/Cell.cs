@@ -12,6 +12,7 @@ public class Cell {
 	public int x, y, id;
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
+    public Vector3 position { get {return new Vector3(x, 0, y);} }
 
     public GameObject inWorld;
 
