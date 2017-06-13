@@ -47,11 +47,10 @@ public abstract class GameLogic {
     }
 
     public void addPlayer(Player p) {
-        if (playerList.ContainsKey(p.playerId)) {
-            removePlayer(p);
+        if (!playerList.ContainsKey(p.playerId)) {
+            playerList[p.playerId] = p;
+            entityList[p.entity.entityId] = p.entity;
         }
-        playerList[p.playerId] = p;
-        entityList[p.entity.entityId] = p.entity;
     }
 
     public void removePlayer(Player p) {

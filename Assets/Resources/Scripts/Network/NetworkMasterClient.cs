@@ -119,7 +119,7 @@ public class NetworkMasterClient : MonoBehaviour {
 
         if (!GameLogicClient.game.containsPlayerId(msg.playerId)) {
             Entity e = GameLogicClient.game.createEntity(msg.cellId);
-            GameLogicClient.game.playerList[msg.playerId] = new Player(msg.playerId, e);
+            GameLogicClient.game.addPlayer(new Player(msg.playerId, e));
             Debug.Log("Client received OnCreatePlayer " + msg.playerId);
         } else {
             Debug.Log("Client received OnCreatePlayer " + msg.playerId + " WARNING - DUPLICATED ID");
@@ -135,8 +135,8 @@ public class NetworkMasterClient : MonoBehaviour {
 
     void OnMovementOrder(NetworkMessage netMsg) {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
-        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId));
-        GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId));
+        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId, msg.entityId));
+        GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId, msg.entityId));
         Debug.Log("Client received OnMovementOrder ");
     }
 

@@ -131,13 +131,13 @@ public class NetworkMasterServer : MonoBehaviour {
     }
 
     public void MovementOrder(GameLogicServer game, int cellId, int entityId) {
-        game.entityList[entityId].addOrder(new MovementOrder(cellId));
+        game.entityList[entityId].addOrder(new MovementOrder(cellId, entityId));
         ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
         msg.cellId = cellId;
         msg.entityId = entityId;
         msg.gameId = game.id;
         NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
-        game.resolveAction(new MovementOrder(msg.cellId));
+        game.resolveAction(new MovementOrder(msg.cellId, entityId));
         Debug.Log("Server sent MovementOrder ");
     }
 

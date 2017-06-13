@@ -12,8 +12,9 @@ public abstract class Order {
 public class MovementOrder : Order{
     public int cellId;
 
-    public MovementOrder(int c) {
-        cellId = c;
+    public MovementOrder(int c, int entityId) {
+        this.cellId = c;
+        this.entityId = entityId;
     }
 
     public override short getPriority() {
