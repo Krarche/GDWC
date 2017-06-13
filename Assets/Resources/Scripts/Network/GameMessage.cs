@@ -10,7 +10,7 @@ public class ClientMovementOrderMessage : ClientMessage
 {
     public static short ID = 1102;
     public int cellId;
-    public ulong playerId;
+    public int entityId;
 }
 
 public class ClientSendPathMessage : ClientMessage {
@@ -48,7 +48,7 @@ public class ServerMovementOrderMessage : ServerMessage
 {
     public static short ID = 2103;
     public int cellId;
-    public ulong playerId;
+    public int entityId;
 }
 
 public class ServerSendTurnActionsMessage : ServerMessage {

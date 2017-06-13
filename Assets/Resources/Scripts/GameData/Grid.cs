@@ -129,7 +129,7 @@ public class Grid {
 			if (cell != null) {
 				selectedCells = getInLine (cell, 2, 4);
 				if(NetworkMasterClient.singleton != null)
-					NetworkMasterClient.singleton.MovementOrder(cell.id, GameLogicClient.localPlayerId);
+					NetworkMasterClient.singleton.MovementOrder(cell.id, GameLogicClient.localPlayer.entity.entityId);
 			}
 
 		}

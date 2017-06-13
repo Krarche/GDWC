@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Order {
+    public int entityId;
+
     public abstract short getPriority();
 }
 
 public class MovementOrder : Order{
-    int cellId;
+    public int cellId;
 
     public MovementOrder(int c) {
         cellId = c;

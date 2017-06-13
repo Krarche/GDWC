@@ -55,13 +55,7 @@ public class NetworkMasterClient : MonoBehaviour {
         client.Disconnect();
         client = null;
 
-        GameLogicClient.game.map.clearGrid();
-
-        foreach (Player p in GameLogicClient.game.playerList.Values) {
-            GameLogicClient.game.removeEntity(p.entity);
-        }
-
-        GameLogicClient.game.playerList.Clear();
+        GameLogicClient.game.clearGame();
     }
 
     public bool isConnected {
@@ -141,14 +135,15 @@ public class NetworkMasterClient : MonoBehaviour {
 
     void OnMovementOrder(NetworkMessage netMsg) {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
-        GameLogicClient.game.playerList[msg.playerId].addOrder(new MovementOrder(msg.cellId));
+        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId));
+        GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId));
         Debug.Log("Client received OnMovementOrder ");
     }
 
-    public void MovementOrder(int cellId, ulong playerId) {
+    public void MovementOrder(int cellId, int entityId) {
         ClientMovementOrderMessage msg = new ClientMovementOrderMessage();
         msg.cellId = cellId;
-        msg.playerId = playerId;
+        msg.entityId = entityId;
         msg.gameId = GameLogicClient.game.id;
         client.Send(ClientMovementOrderMessage.ID, msg);
         Debug.Log("Client sent MovementOrder ");

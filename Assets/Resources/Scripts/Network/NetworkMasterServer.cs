@@ -112,7 +112,7 @@ public class NetworkMasterServer : MonoBehaviour {
         CreateGameForNewClient(defaultGame, conn);
 
         foreach (Player p in defaultGame.playerList.Values)
-            CreatePlayerForNewClient(defaultGame, conn, p.getCurrentCell());
+            CreatePlayerForNewClient(defaultGame, conn, p);
 
         if (!defaultGame.playerList.ContainsKey(player.playerId)) {
             CreatePlayer(defaultGame, 0, player);
@@ -127,16 +127,17 @@ public class NetworkMasterServer : MonoBehaviour {
         ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
         Debug.Log("Server received OnClientMovementOrder ");
         GameLogicServer game = games[msg.gameId];
-        MovementOrder(game, msg.cellId, msg.playerId);
+        MovementOrder(game, msg.cellId, msg.entityId);
     }
 
-    public void MovementOrder(GameLogicServer game, int cellId, ulong playerId) {
-        game.playerList[playerId].addOrder(new MovementOrder(cellId));
+    public void MovementOrder(GameLogicServer game, int cellId, int entityId) {
+        game.entityList[entityId].addOrder(new MovementOrder(cellId));
         ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
         msg.cellId = cellId;
-        msg.playerId = playerId;
+        msg.entityId = entityId;
         msg.gameId = game.id;
         NetworkServer.SendToAll(ServerMovementOrderMessage.ID, msg);
+        game.resolveAction(new MovementOrder(msg.cellId));
         Debug.Log("Server sent MovementOrder ");
     }
 
@@ -150,10 +151,11 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Server sent CreatePlayer ");
     }
 
-    public void CreatePlayerForNewClient(GameLogicServer game, NetworkConnection client, int cellId) {
+    public void CreatePlayerForNewClient(GameLogicServer game, NetworkConnection client, Player p) {
         ServerCreatePlayerMessage msg = new ServerCreatePlayerMessage();
-        msg.cellId = cellId;
+        msg.cellId = p.getCurrentCell();
         msg.gameId = game.id;
+        msg.playerId = p.playerId;
         client.Send(ServerCreatePlayerMessage.ID, msg);
         Debug.Log("Server sent CreatePlayerForNewClient ");
     }

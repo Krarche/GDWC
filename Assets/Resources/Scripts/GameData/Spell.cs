@@ -32,18 +32,6 @@ public class Spell {
 
     }
 
-    public void onAll(Entity target) {
-
-    }
-
-    public void onTarget(Entity target) {
-
-    }
-
-    public void onAera(Cell target) {
-
-    }
-
     public void use(Grid g, Entity user, Cell target) {
 
     }

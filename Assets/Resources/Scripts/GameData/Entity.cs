@@ -7,6 +7,8 @@ public class Entity : MonoBehaviour {
     public int destinationCellId = NO_DESTINATION_CELL_ID;
     public int currentCellId = NO_DESTINATION_CELL_ID;
     public static int NO_DESTINATION_CELL_ID = -1;
+
+    public int entityId;
     public Queue<Order> orders = new Queue<Order>();
 
     // Use this for initialization
