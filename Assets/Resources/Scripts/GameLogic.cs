@@ -11,21 +11,22 @@ public abstract class GameLogic {
     public Dictionary<ulong, Player> playerList = new Dictionary<ulong, Player>();
     public Dictionary<int, Entity> entityList = new Dictionary<int, Entity>();
     public int lastEntityIdGenerated = -1;
-    public Grid map;
+    public Grid grid;
     public GameObject playerPrefab;
 
     public GameLogic() {
-        map = new Grid();
-        map.initialisation(15, 15);
+        grid = new Grid();
+        grid.game = this;
+        grid.initialisation(15, 15);
         playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
     }
 
     protected void OnDrawGizmos() {
-        if (map != null) {
+        if (grid != null) {
             Gizmos.color = Color.green;
             Vector3 pos = new Vector3();
-            for (int i = 0; i < map.sizeX; i++) {
-                for (int j = 0; j < map.sizeY; j++) {
+            for (int i = 0; i < grid.sizeX; i++) {
+                for (int j = 0; j < grid.sizeY; j++) {
                     pos.x = i;
                     pos.z = j;
                     Gizmos.DrawSphere(pos, 0.1f);
@@ -35,11 +36,13 @@ public abstract class GameLogic {
     }
 
     public Entity createEntity(int entityId) {
-        Entity temp = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
-        temp.entityId = entityId;
-        temp.setCurrentCell(map.GetCell(0));
-        entityList[entityId] = temp;
-        return temp;
+        Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
+        entity.entityId = entityId;
+        entity.game = this;
+        entity.grid = grid;
+        entity.setCurrentCell(grid.GetCell(0));
+        entityList[entityId] = entity;
+        return entity;
     }
 
     public void removeEntity(Entity e) {

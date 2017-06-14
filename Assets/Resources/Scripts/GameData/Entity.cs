@@ -5,15 +5,36 @@ using UnityEngine.UI;
 
 public class Entity : MonoBehaviour {
 
+    public static int NO_DESTINATION_CELL_ID = -1;
 
+    public Grid grid;
+    public GameLogic game;
+
+    public int entityId;
     public string displayedName = "NONE";
     public Color modelColor = Color.white;
     public int destinationCellId = NO_DESTINATION_CELL_ID;
     public int currentCellId = NO_DESTINATION_CELL_ID;
-    public static int NO_DESTINATION_CELL_ID = -1;
+    public int currentHealth, maxHealth;
+    public int currentAP, maxAP;
+    public int currentMP, maxMP;
 
-    public int entityId;
+    // buffs
+    public int rangeModifier;
+    public int damageModifier;
+    public int resistanceModifier;
+    public int stunCount; // mécanique à implémenter?
+    public bool isStunt { get { return stunCount > 0; } }
+    public void stun() {
+        stunCount++;
+    }
+    public void unstun() {
+        stunCount = stunCount > 1 ? stunCount - 1 : 0 ;
+    }
+
+
     public Queue<Order> orders = new Queue<Order>();
+
     public Animator animator;
     public TextMesh entityNameText;
     public Transform meshTransform;
@@ -31,12 +52,12 @@ public class Entity : MonoBehaviour {
             //    meshTransform = gameObject.transform.GetChild(1).transform;
             //}
             if (destinationCellId != NO_DESTINATION_CELL_ID) {
-                Cell destCell = GameLogicClient.game.map.GetCell(destinationCellId);
+                Cell destCell = GameLogicClient.game.grid.GetCell(destinationCellId);
                 Vector3 pos = gameObject.transform.position;
                 Vector3 dest = new Vector3(destCell.x, 0, destCell.y);
                 Vector3 dir = dest - pos;
                 if (transform != null) {
-                    transform.rotation = Quaternion.LookRotation(dir.normalized, new Vector3(0,1,0));
+                    transform.rotation = Quaternion.LookRotation(dir.normalized, new Vector3(0, 1, 0));
                 }
                 if (dir.magnitude > 0.1f) {
                     gameObject.transform.position = pos + dir / 2;
@@ -89,5 +110,29 @@ public class Entity : MonoBehaviour {
 
     public void applyColor() {
         gameObject.GetComponentInChildren<SkinnedMeshRenderer>().material.color = modelColor;
+    }
+
+    public void modMP(int MP) {
+        currentMP += MP;
+        if (currentMP > maxMP)
+            currentMP = maxMP;
+        if (currentMP < 0)
+            currentMP = 0;
+    }
+    public void modAP(int AP) {
+        currentAP += AP;
+        if (currentAP > maxAP)
+            currentAP = maxAP;
+        if (currentAP < 0)
+            currentAP = 0;
+    }
+    public void heal(int amount) {
+        currentHealth += amount;
+        if (currentHealth > maxHealth)
+            currentHealth = maxHealth;
+    }
+    public bool damage(int amount) { // returns true if the unit dies because of the damage
+        currentHealth -= amount;
+        return currentHealth <= 0;
     }
 }

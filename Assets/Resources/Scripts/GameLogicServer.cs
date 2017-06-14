@@ -17,7 +17,7 @@ public class GameLogicServer : GameLogic {
         Entity e = entityList[o.entityId];
         if (o is MovementOrder) {
             MovementOrder mo = (MovementOrder)o;
-            e.setCurrentCell(map.GetCell(mo.cellId));
+            e.setCurrentCell(grid.GetCell(mo.cellId));
         }
     }
 

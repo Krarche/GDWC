@@ -118,7 +118,7 @@ public class NetworkMasterClient : MonoBehaviour {
 
         if (!GameLogicClient.game.containsPlayerId(msg.playerId)) {
             Debug.Log("COLOR : " + msg.r + " " + msg.g + " " + msg.b);
-            Cell cell = GameLogicClient.game.map.GetCell(msg.cellId);
+            Cell cell = GameLogicClient.game.grid.GetCell(msg.cellId);
             Entity e = GameLogicClient.game.createEntity(msg.entityId);
             e.setCurrentCell(cell);
             e.setColor(msg.r, msg.g, msg.b);

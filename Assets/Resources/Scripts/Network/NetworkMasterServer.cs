@@ -144,7 +144,7 @@ public class NetworkMasterServer : MonoBehaviour {
 
     public void CreatePlayer(GameLogicServer game, int cellId, Player p) {
         game.lastEntityIdGenerated++;
-        Cell cell = game.map.GetCell(cellId);
+        Cell cell = game.grid.GetCell(cellId);
         p.entity = game.createEntity(game.lastEntityIdGenerated);
         p.entity.setCurrentCell(cell);
         p.entity.setColor(p.playerColor);

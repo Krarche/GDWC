@@ -78,7 +78,7 @@ public class GameLogicClient : GameLogic {
     }
 
     public void clearGame() {
-        game.map.clearGrid();
+        game.grid.clearGrid();
 
         foreach (Entity e in game.entityList.Values) {
             game.removeEntity(e);

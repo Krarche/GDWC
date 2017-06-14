@@ -1,0 +1,36 @@
+
+{
+	//{"onGained", "onLost", "onTurnStart", "onTurnEnd", "onMoveHandler", "onHeal", "onDamage", "onSpell", "onBuffed"}
+	buffs : [
+		{"id":"B001",
+		"name":"Weakness", "iconPath":"SPRITE",
+		"description":"Each time the affected entity uses a spell, they lost 1 MP.",
+		"effects" : [
+			{"onSpell" : {"class" : "EffectHandlerModMP", "MP" : -1}}
+		]}
+	},
+	spells : [
+		{"id":"S001",
+		"name" : "Spark", "iconPath":"SPRITE",
+		"description":"Deals {effect0,damage} damages. Quick cast.",
+		"cost":"2", "cooldown":"0",
+		"minRange":"2","maxRange":"5","rangeType":"circle",
+		"priority":"0",
+		"effects" : [
+			{"minArea":"0","maxArea":"0","areaType":"point",
+			"affectAlly","affectEnemy","affectCell","affectSelf",
+			"handler" : {"class" : "EffectHandlerDamage", "damage" : 3}}
+		]},
+		{"id":"S001",
+		"name" : "Pest", "iconPath":"SPRITE",
+		"description":"",
+		"cost":"4", "cooldown":"4",
+		"minRange":"3","maxRange":"5","rangeType":"circle",
+		"priority":"0",
+		"effects" : [
+			{"minArea":"0","maxArea":"2","areaType":"circle",
+			"affectAlly","affectEnemy","affectCell","affectSelf",
+			"handler" : {"class" : "EffectHandlerBuff", "id" : "B001"}}
+		]}
+	]
+}

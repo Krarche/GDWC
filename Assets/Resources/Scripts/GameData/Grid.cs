@@ -11,6 +11,7 @@ public class Grid {
 	public Dictionary<GameObject, Cell> worldObjects;
 	public GameObject cellBase;
     public GameObject gridHolder;
+    public GameLogic game;
     public List<Cell> selectedCells;
 
 	public void initialisation (int x, int y) {
@@ -40,6 +41,8 @@ public class Grid {
 				c.id = x + y * sizeX;
 				cells [x, y] = c;
 				c.inWorld = o;
+                c.grid = this;
+                c.game = game;
                 o.name = "Cell #" + c.id;
                 worldObjects.Add (o, c);
 			}

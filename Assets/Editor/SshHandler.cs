@@ -62,7 +62,7 @@ public class SshHandler {
 
         float i = 0f;
         while (i < 1.1f) {
-            
+
             Thread.Sleep(1000);
             i = i + 0.1f;
         }
@@ -70,13 +70,12 @@ public class SshHandler {
 
         if (sftpclient.IsConnected) {
             var fileStream = new FileStream(path, FileMode.Open);
-            if (fileStream != null) { 
+            if (fileStream != null) {
                 string[] fileSplit = fileStream.Name.Split('/');
                 string fileName = fileSplit[fileSplit.Length - 1];
-                fileSize = (ulong) fileStream.Length;
-                
-                new Thread(() =>
-                {
+                fileSize = (ulong)fileStream.Length;
+
+                new Thread(() => {
                     Thread.CurrentThread.IsBackground = true;
                     Debug.Log("Starting upload");
                     sftpclient.UploadFile(fileStream, "/root/gdwc/" + fileName, UpdateProgressBar);
@@ -87,11 +86,11 @@ public class SshHandler {
             }
         }
     }
-    
+
     private static ulong step = 1;
 
     private static void UpdateProgressBar(ulong uploaded) {
-        ulong percentage = (ulong) ((float)uploaded / (float) fileSize * 100);
+        ulong percentage = (ulong)((float)uploaded / (float)fileSize * 100);
         if (percentage >= 20 * step) {
             Debug.Log("Uploading build to server... " + percentage + " %");
             step++;

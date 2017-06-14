@@ -13,6 +13,9 @@ public class Cell {
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
     public Vector3 position { get {return new Vector3(x, 0, y);} }
+    public Grid grid;
+    public GameLogic game;
+
 
     public GameObject inWorld;
 
