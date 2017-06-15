@@ -45,13 +45,11 @@ public class ParserJSON {
             }
             if (nesters.Count == 0 && c == ',') { // end of current data, cut here
                 string newEntry = json.Substring(startPos, i - startPos);
-                Debug.Log("newEntry " + newEntry);
                 dataList.Add(newEntry);
                 startPos = i + 1;
             }
         }
         string lastEntry = json.Substring(startPos, json.Length - startPos);
-        Debug.Log("lastEntry " + lastEntry);
         dataList.Add(lastEntry);
         return dataList.ToArray();
     }
@@ -86,7 +84,6 @@ public class ParserJSON {
         }
         key = StringParsingTool.cleanString(key);
         value = StringParsingTool.cleanString(value);
-        Debug.Log("Key:Value " + key + ":" + value);
         dataList.Add(key);
         dataList.Add(value);
         return dataList.ToArray();

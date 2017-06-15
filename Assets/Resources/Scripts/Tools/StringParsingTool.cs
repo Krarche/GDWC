@@ -29,8 +29,8 @@ public class StringParsingTool {
     }
 
     public static string getNextMacro(string str) {
-        int opening = str.IndexOf('<');
-        int closing = str.IndexOf('>');
+        int opening = str.IndexOf('@');
+        int closing = str.IndexOf(';');
         if (opening > -1 && closing > -1 && opening < closing)
             return str.Substring(opening, 1 + closing - opening);
         else
@@ -53,12 +53,8 @@ public class StringParsingTool {
         return getBetweenCharacter(input, '<', '>');
     }
 
-    public static string[][] splitOnChar(string input, char separator) {
-        return null;
-    }
-
-    public static string[][] splitOnComa(string input) {
-        return splitOnChar(input, ',');
+    public static string getBetweenMacro(string input) {
+        return getBetweenCharacter(input, '@', ';');
     }
 
     public static char firstCharacter(string input) {

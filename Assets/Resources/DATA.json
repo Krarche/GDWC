@@ -2,7 +2,7 @@
 	"buffs":[
 		{"id":"B001",
 		"name":"Weakness","iconPath":"SPRITE",
-		"description":"Each time the affected entity uses a spell, they lost <B001,effects,0,onSpellHandler,MP> MP.",
+		"description":"Each time the affected entity uses a spell, they lost <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color>.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
@@ -12,7 +12,7 @@
 	"spells":[
 		{"id":"S001",
 		"name":"Spark","iconPath":"SPRITE",
-		"description":"Deals <S001,effects,0,effectHandler,damage> damages. Quick cast.",
+		"description":"Deals <color=#ff0000>@S001,effects,0,effectHandler,damage;</color> damages.\n<color=#404040>Quick cast.</color>",
 		"cost":"2","cooldown":"0",
 		"minRange":"2","maxRange":"5","rangeType":"circle",
 		"priority":"0",
@@ -23,7 +23,7 @@
 		]},
 		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",
-		"description":"Apply <B001,name> to the entities in a circle for <S002,effects,0,effectHandler,duration> turns. Entities affected by <B001,name> loose <B001,effects,0,onSpellHandler,MP> MP each time they use a spell. Slow cast.",
+		"description":"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,effectHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.\n<color=#404040>Slow cast.</color>",
 		"cost":"4","cooldown":"4",
 		"minRange":"3","maxRange":"5","rangeType":"circle",
 		"priority":"2",

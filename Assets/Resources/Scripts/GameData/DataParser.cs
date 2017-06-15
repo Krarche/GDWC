@@ -5,6 +5,16 @@ using System;
 
 public class DataParser {
 
+    /*
+     * Call those lines in the LoadingScreen.Start() function for an example
+     * 
+     *  DataParser.buildSpellAndBuffData();
+     *  Debug.Log(DataParser.BUFF_DATA["B001"].description);
+     *  Debug.Log(DataParser.SPELL_DATA["S001"].description);
+     *  Debug.Log(DataParser.SPELL_DATA["S002"].description);
+     * 
+     */
+
     public static Dictionary<string, GameData> GAME_DATA = new Dictionary<string, GameData>();
     public static Dictionary<string, Spell> SPELL_DATA = new Dictionary<string, Spell>();
     public static Dictionary<string, Buff> BUFF_DATA = new Dictionary<string, Buff>();
@@ -88,16 +98,14 @@ public class DataParser {
         foreach (Spell s in SPELL_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(s.description);
             while (macro != "") {
-                Debug.Log("MACRO " + macro);
-                s.description = s.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenDiamond(macro)));
+                s.description = s.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
                 macro = StringParsingTool.getNextMacro(s.description);
             }
         }
         foreach (Buff b in BUFF_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(b.description);
             while (macro != "") {
-                Debug.Log("MACRO " + macro);
-                b.description = b.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenDiamond(macro)));
+                b.description = b.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
                 macro = StringParsingTool.getNextMacro(b.description);
             }
         }
