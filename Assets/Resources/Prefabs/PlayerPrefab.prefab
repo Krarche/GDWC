@@ -97,7 +97,6 @@ GameObject:
   - component: {fileID: 4617242442276450}
   - component: {fileID: 95329202691036586}
   - component: {fileID: 114152116749382646}
-  - component: {fileID: 23074160314772178}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -375,7 +374,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1465969238641324}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1427.7732, y: 35.937866, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4369521674657758}
@@ -451,38 +450,6 @@ Transform:
   m_Father: {fileID: 4369521674657758}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23074160314772178
-MeshRenderer:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1465969238641324}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
 --- !u!23 &23752614604176624
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -564,13 +531,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4325f1a9bfc471644a50efa9cedfa1d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  entityId: 0
   displayedName: NONE
   modelColor: {r: 1, g: 1, b: 1, a: 1}
   destinationCellId: -1
   currentCellId: -1
-  entityId: 0
+  currentHealth: 0
+  maxHealth: 0
+  currentAP: 0
+  maxAP: 0
+  currentMP: 0
+  maxMP: 0
+  rangeModifier: 0
+  damageModifier: 0
+  resistanceModifier: 0
+  stunCount: 0
   animator: {fileID: 0}
   entityNameText: {fileID: 0}
+  meshTransform: {fileID: 0}
 --- !u!137 &137343478932012542
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
@@ -584,7 +562,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 423685cbbda00814fa5fe85f7c39c263, type: 2}
+  - {fileID: 2100000, guid: 7a162dae06dbb094b872469538d14a57, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
