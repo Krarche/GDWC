@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Type : int
-{
+public enum Type : int {
     NORMAL, TREE, ROCK, GAP, COUNT
 }
 
-public class CellType
-{
+public class CellType : GameData {
     public Mesh model;
     public Material material;
 

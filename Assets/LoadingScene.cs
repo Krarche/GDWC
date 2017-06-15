@@ -11,6 +11,11 @@ public class LoadingScene : MonoBehaviour {
         } else {
             GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ClientHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
         }
+        DataParser.buildSpellAndBuffData();
+
+        Debug.Log(DataParser.BUFF_DATA["B001"].description);
+        Debug.Log(DataParser.SPELL_DATA["S001"].description);
+        Debug.Log(DataParser.SPELL_DATA["S002"].description);
     }
 
     // Update is called once per frame

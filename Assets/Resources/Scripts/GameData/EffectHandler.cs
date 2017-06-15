@@ -12,14 +12,14 @@ public abstract class EffectHandler {
 }
 
 public class EffectHandlerDamage : EffectHandler {
-    int damage;
+    public int damage;
     public override void effect(Entity e) {
         // e.damage(damage);
     }
 }
 
 public class EffectHandlerHeal : EffectHandler {
-    int heal;
+    public int heal;
     public override void effect(Entity e) {
         // e.heal(heal);
     }
@@ -27,27 +27,31 @@ public class EffectHandlerHeal : EffectHandler {
 
 public class EffectHandlerBuff : EffectHandler {
     // Buff buff
+    public string buffId;
+    public int duration;
     public override void effect(Entity e) {
         // e.addBuff(buff);
     }
 }
 
 public class EffectHandlerModAP : EffectHandler {
-    int AP;
+    public int AP;
+    public int direction = 1;
     public override void effect(Entity e) {
         e.modAP(AP);
     }
 }
 
 public class EffectHandlerModMP : EffectHandler {
-    int MP;
+    public int MP;
+    public int direction = 1;
     public override void effect(Entity e) {
         e.modMP(MP);
     }
 }
 
 public class EffectHandlerModRange : EffectHandler {
-    int range;
+    public int range;
     public override void effect(Entity e) {
         e.rangeModifier += range;
     }

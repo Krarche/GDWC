@@ -1,21 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class Spell {
-    List<EffectSpell> effectList;
+public class Spell : GameData {
 
     public string name;
+    public string iconPath;
+    public string description;
     public int cost;
     public int cooldown;
     public int minRange;
     public int maxRange;
     public int rangeType;
-    public string iconPath;
-    public bool priority;
+    public int priority;
+    public EffectSpell[] effects;
 
     public void onAlly(Entity target) {
-        foreach (EffectSpell e in effectList) {
+        foreach (EffectSpell e in effects) {
             if (e.affectAlly) {
                 e.apply(target);
             }
@@ -23,7 +25,7 @@ public class Spell {
     }
 
     public void onEnnemy(Entity target) {
-        foreach (EffectSpell e in effectList) {
+        foreach (EffectSpell e in effects) {
             if (e.affectEnemy) {
                 e.apply(target);
             }
@@ -31,7 +33,7 @@ public class Spell {
     }
 
     public void onSelf(Entity target) {
-        foreach (EffectSpell e in effectList) {
+        foreach (EffectSpell e in effects) {
             if (e.affectSelf) {
                 e.apply(target);
             }
@@ -39,7 +41,7 @@ public class Spell {
     }
 
     public void onCell(Cell target) {
-        foreach (EffectSpell e in effectList) {
+        foreach (EffectSpell e in effects) {
             if (e.affectCell) {
                 e.apply(target);
             }
@@ -48,6 +50,21 @@ public class Spell {
 
     public void use(Grid g, Entity user, Cell target) {
 
+    }
+
+    public static int RANGE_AREA_POINT = 0;
+    public static int RANGE_AREA_CIRCLE = 1;
+    public static int RANGE_AREA_ORTHOGONAL = 2;
+    public static int RANGE_AREA_DIAGONAL = 3;
+
+    public static int stringToRangeAreaType(string str) {
+        if (str == "cicrle")
+            return RANGE_AREA_CIRCLE;
+        if (str == "orthogonal")
+            return RANGE_AREA_ORTHOGONAL;
+        if (str == "diagonal")
+            return RANGE_AREA_DIAGONAL;
+        return RANGE_AREA_POINT;
     }
 }
 

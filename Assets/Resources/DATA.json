@@ -1,37 +1,36 @@
-
 {
 	"buffs":[
 		{"id":"B001",
 		"name":"Weakness","iconPath":"SPRITE",
-		"description":"Each time the affected entity uses a spell, they lost <B001,effect0,MP> MP.",
+		"description":"Each time the affected entity uses a spell, they lost <B001,effects,0,onSpellHandler,MP> MP.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"onSpell":{"class":"EffectHandlerModMP","MP":"-1"}}
+			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"}}
 		]}
 	],
 	"spells":[
 		{"id":"S001",
 		"name":"Spark","iconPath":"SPRITE",
-		"description":"Deals <S001,effect0,damage> damages. Quick cast.",
+		"description":"Deals <S001,effects,0,effectHandler,damage> damages. Quick cast.",
 		"cost":"2","cooldown":"0",
 		"minRange":"2","maxRange":"5","rangeType":"circle",
 		"priority":"0",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"handler":{"class":"EffectHandlerDamage","damage":"3"}}
+			"effectHandler":{"class":"EffectHandlerDamage","damage":"3"}}
 		]},
-		{"id":"S001",
+		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",
-		"description":"Apply Weakness to the entities in a circle for <S001,effect0,duration> turns. Entities affected by Weakness loose {B001,effect0,MP} MP each time they use a spell. Slow cast.",
+		"description":"Apply <B001,name> to the entities in a circle for <S002,effects,0,effectHandler,duration> turns. Entities affected by <B001,name> loose <B001,effects,0,onSpellHandler,MP> MP each time they use a spell. Slow cast.",
 		"cost":"4","cooldown":"4",
 		"minRange":"3","maxRange":"5","rangeType":"circle",
 		"priority":"2",
 		"effects":[
 			{"minArea":"0","maxArea":"2","areaType":"circle",
 			"affectAlly","affectEnemy","affectSelf",
-			"handler":{"class":"EffectHandlerBuff","id":"B001","duration":"3"}}
+			"effectHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"}}
 		]}
 	]
 }

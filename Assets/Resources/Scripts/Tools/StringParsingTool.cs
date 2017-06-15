@@ -28,6 +28,15 @@ public class StringParsingTool {
         return input.Substring(startPosition, endPosition - startPosition);
     }
 
+    public static string getNextMacro(string str) {
+        int opening = str.IndexOf('<');
+        int closing = str.IndexOf('>');
+        if (opening > -1 && closing > -1 && opening < closing)
+            return str.Substring(opening, 1 + closing - opening);
+        else
+            return "";
+    }
+
     public static string getBetweenParenhsis(string input) {
         return getBetweenCharacter(input, '(', ')');
     }
@@ -38,6 +47,10 @@ public class StringParsingTool {
 
     public static string getBetweenSquareBracket(string input) {
         return getBetweenCharacter(input, '[', ']');
+    }
+
+    public static string getBetweenDiamond(string input) {
+        return getBetweenCharacter(input, '<', '>');
     }
 
     public static string[][] splitOnChar(string input, char separator) {

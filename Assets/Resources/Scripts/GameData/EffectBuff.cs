@@ -5,7 +5,7 @@ using UnityEngine;
 public class EffectBuff {
     public int minAera;
     public int maxAera;
-    public int aeraType;
+    public int areaType;
 
     public bool affectAlly = true;
     public bool affectEnemy = true;
@@ -15,21 +15,21 @@ public class EffectBuff {
     public int buffMaxTriggerTime;
 
     // entity
-    EffectHandler onGainedHandler; // when the entity gained the buff
-    EffectHandler onLostHandler; // when the entity lost the buff
-    EffectHandler onMoveHandler; // when the entity starts a movement
-    EffectHandler onHealHandler; // when the entity received heal
-    EffectHandler onSpellHandler; // each time the entity uses an abality
-    EffectHandler onDamageHandler; // when the entity received damage
-    EffectHandler onBuffedHandler; // when the entity received a new buff
+    public EffectHandler onGainedHandler; // when the entity gained the buff
+    public EffectHandler onLostHandler; // when the entity lost the buff
+    public EffectHandler onMoveHandler; // when the entity starts a movement
+    public EffectHandler onHealHandler; // when the entity received heal
+    public EffectHandler onSpellHandler; // each time the entity uses an abality
+    public EffectHandler onDamageHandler; // when the entity received damage
+    public EffectHandler onBuffedHandler; // when the entity received a new buff
 
     // cell
-    EffectHandler onEnterHandler; // when an entity enter the cell
-    EffectHandler onLeaveHandler; // when an entity leave the cell
+    public EffectHandler onEnterHandler; // when an entity enter the cell
+    public EffectHandler onLeaveHandler; // when an entity leave the cell
 
     // common
-    EffectHandler onTurnStartHandler; // when a new turn starts
-    EffectHandler onTurnEndHandler; // when a turn ends
+    public EffectHandler onTurnStartHandler; // when a new turn starts
+    public EffectHandler onTurnEndHandler; // when a turn ends
 
 
     public void onGained(Entity e) {
