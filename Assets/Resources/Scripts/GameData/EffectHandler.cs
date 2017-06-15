@@ -65,4 +65,25 @@ public class EffectHandlerUnstun : EffectHandler {
     }
 }
 
+public class EffectHandlerPush : EffectHandler {
+    // dir
+    public override void effect(Entity e) {
+        //e.push(dir);
+    }
+}
+
+public class EffectHandlerDash : EffectHandler {
+    // dir
+    public override void effect(Entity e) {
+        //e.push(dir);
+    }
+}
+
+public class EffectHandlerWarp : EffectHandler {
+    // destination
+    public override void effect(Entity e) {
+        //e.setCurrentCell(destination);
+    }
+}
+
 

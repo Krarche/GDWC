@@ -52,7 +52,7 @@ public class Spell {
 }
 
 public class SpellInstance {
-
+    public Entity owner;
     public Spell spell;
     public int cooldown;
 
