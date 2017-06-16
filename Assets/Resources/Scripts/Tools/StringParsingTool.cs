@@ -66,7 +66,7 @@ public class StringParsingTool {
     }
 
     public static char lastCharacter(string input) {
-        for (int i = input.Length; i > 0; i--) {
+        for (int i = input.Length-1; i >= 0; i--) {
             char c = input[i];
             if (c != ' ')
                 return c;

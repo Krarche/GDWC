@@ -136,6 +136,10 @@ public class ParserJSON {
     public static bool isStringArrayJSON(string input) {
         return StringParsingTool.firstCharacter(input) == '[' && StringParsingTool.lastCharacter(input) == ']';
     }
+
+    public static bool isStringValueJSON(string input) {
+        return StringParsingTool.firstCharacter(input) == '"' && StringParsingTool.lastCharacter(input) == '"';
+    }
 }
 
 

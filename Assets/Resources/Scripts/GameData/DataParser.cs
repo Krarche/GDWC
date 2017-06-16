@@ -8,10 +8,10 @@ public class DataParser {
     /*
      * Call those lines in the LoadingScreen.Start() function for an example
      * 
-     *  DataParser.buildSpellAndBuffData();
-     *  Debug.Log(DataParser.BUFF_DATA["B001"].description);
-     *  Debug.Log(DataParser.SPELL_DATA["S001"].description);
-     *  Debug.Log(DataParser.SPELL_DATA["S002"].description);
+        DataParser.buildSpellAndBuffData();
+        Debug.Log(DataParser.BUFF_DATA["B001"].description);
+        Debug.Log(DataParser.SPELL_DATA["S001"].description);
+        Debug.Log(DataParser.SPELL_DATA["S002"].description);
      * 
      */
 
@@ -114,7 +114,7 @@ public class DataParser {
     public static Buff[] buildBuffs(ArrayJSON array) {
         Buff[] output = new Buff[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildBuff(array[i]);
+            output[i] = buildBuff((ObjectJSON)array[i]);
         return output;
     }
 
@@ -131,7 +131,7 @@ public class DataParser {
     public static EffectBuff[] buildEffectBuffs(ArrayJSON effects) {
         EffectBuff[] output = new EffectBuff[effects.Length];
         for (int i = 0; i < effects.Length; i++)
-            output[i] = buildEffectBuff(effects[i]);
+            output[i] = buildEffectBuff((ObjectJSON)effects[i]);
         return output;
     }
 
@@ -160,7 +160,7 @@ public class DataParser {
     public static Spell[] buildSpells(ArrayJSON array) {
         Spell[] output = new Spell[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildSpell(array[i]);
+            output[i] = buildSpell((ObjectJSON)array[i]);
         return output;
     }
 
@@ -183,7 +183,7 @@ public class DataParser {
     public static EffectSpell[] buildEffectSpells(ArrayJSON effects) {
         EffectSpell[] output = new EffectSpell[effects.Length];
         for (int i = 0; i < effects.Length; i++)
-            output[i] = buildEffectSpell(effects[i]);
+            output[i] = buildEffectSpell((ObjectJSON)effects[i]);
         return output;
     }
 
