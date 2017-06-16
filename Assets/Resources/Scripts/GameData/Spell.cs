@@ -4,8 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public class Spell : GameData {
-
-    public string name;
+    
     public string iconPath;
     public string description;
     public int cost;
@@ -58,7 +57,7 @@ public class Spell : GameData {
     public static int RANGE_AREA_DIAGONAL = 3;
 
     public static int stringToRangeAreaType(string str) {
-        if (str == "cicrle")
+        if (str == "circle")
             return RANGE_AREA_CIRCLE;
         if (str == "orthogonal")
             return RANGE_AREA_ORTHOGONAL;

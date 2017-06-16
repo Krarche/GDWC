@@ -4,8 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public class Buff : GameData {
-
-    public string name;
+    
     public string iconPath;
     public string description;
     public EffectBuff[] effects;
