@@ -5,10 +5,6 @@ using UnityEngine;
 
 public class GameLogicServer : GameLogic {
 
-    public GameLogicServer() : base() {
-
-    }
-
     public override void registerAction() {
         throw new NotImplementedException();
     }

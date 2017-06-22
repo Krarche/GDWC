@@ -35,7 +35,8 @@ public class ScriptBatch {
     public static void PushToServer() {
         SshHandler.SendCommand(SshHandler.stream, "pkill gdwc");
         SshHandler.SendCommand(SshHandler.stream, "rm -rf ~/gdwc");
-        SshHandler.SendCommand(SshHandler.stream, "mkdir gdwc && cd gdwc");
+        SshHandler.SendCommand(SshHandler.stream, "mkdir gdwc");
+        SshHandler.SendCommand(SshHandler.stream, "cd ~/gdwc");
 
         if (File.Exists("./Build/Server/gdwc.zip")) {
             SshHandler.sendFile("./Build/Server/gdwc.zip");
@@ -44,7 +45,8 @@ public class ScriptBatch {
 
     [MenuItem("Server/Status/Start %&s")]
     public static void StartServer() {
-        SshHandler.SendCommand(SshHandler.stream, "cd gdwc && nohup ./gdwc.x86_64 &");
+        SshHandler.SendCommand(SshHandler.stream, "cd ~/gdwc");
+        SshHandler.SendCommand(SshHandler.stream, "nohup ./gdwc.x86_64 &");
         Debug.Log("Server started");
     }
 
@@ -56,7 +58,7 @@ public class ScriptBatch {
 
     [MenuItem("Server/Status/Restart %&r")]
     public static void RestartServer() {
-        SshHandler.SendCommand(SshHandler.stream, "cd gdwc && pkill gdwc && nohup ./gdwc.x86_64 &");
-        Debug.Log("Server restarted");
+        StopServer();
+        StartServer();
     }
 }

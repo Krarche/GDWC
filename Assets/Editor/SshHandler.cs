@@ -15,10 +15,10 @@ public class SshHandler {
     private static ulong fileSize;
 
     static SshHandler() {
-        sshclient = new SshClient("217.182.205.172", "root", "4uzPqvqU");
+        sshclient = new SshClient("217.182.205.172", "root", "otsu");
         sshclient.Connect();
         stream = sshclient.CreateShellStream("customCommand", 80, 24, 800, 600, 1024);
-        sftpclient = new SftpClient("217.182.205.172", "root", "4uzPqvqU");
+        sftpclient = new SftpClient("217.182.205.172", "root", "otsu");
         sftpclient.Connect();
     }
 

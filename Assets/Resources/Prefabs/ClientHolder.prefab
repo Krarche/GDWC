@@ -48,11 +48,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 1778427203048940}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 360ad48ffa8893248ba16c3776c66252, type: 3}
+  m_Script: {fileID: 11500000, guid: 8ef0f6a0006726a4ea3ca29f26357652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dedicatedServer: 0
   MasterServerIpAddress: vps.studio-otsu.fr
   MasterServerPort: 25000
-  updateRate: 0
-  gamePort: 0

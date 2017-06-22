@@ -11,6 +11,7 @@ public class ClientMovementOrderMessage : ClientMessage
     public static short ID = 1102;
     public int cellId;
     public int entityId;
+    public ulong gameID;
 }
 
 public class ClientSendPathMessage : ClientMessage {
@@ -24,28 +25,26 @@ public class ClientSendSpellMessage : ClientMessage {
 	public int cellId; // id of the cell targeted
 }
 
-public class ClientIdentificationMessage : ClientMessage {
+public class ClientIdentificationRequestMessage : ClientMessage {
     public static short ID = 1113;
-    public string playerName;
+    public string userName;
+}
+
+public class ClientJoinGameRequestMessage : ClientMessage {
+    public static short ID = 1114;
+    public ulong userId;
+    public string userName;
+}
+
+public class ClientLeaveGameRequestMessage : ClientMessage {
+    public static short ID = 1115;
+    public ulong userId;
+    public string userName;
 }
 
 
 // server to client
 // ID = 2xxx
-
-public class ServerCreatePlayerMessage : ServerMessage
-{
-    public static short ID = 2101;
-    public int cellId;
-    public ulong playerId;
-    public int entityId;
-    public string displayedName;
-    public float r, g, b;
-}
-
-public class ServerCreateGameMessage : ServerMessage {
-    public static short ID = 2102;
-}
 
 public class ServerMovementOrderMessage : ServerMessage
 {
@@ -72,10 +71,44 @@ public class ServerSendAllySpellPrevisualisationMessage : ServerMessage {
 	public int cellId; // id of the cell targeted
 }
 
-public class ServerIdentificationMessage : ServerMessage {
+public class ServerIdentificationResponseMessage : ServerMessage {
     public static short ID = 2113;
-    public bool state;
+    public bool isSuccessful;
+    public ulong userId;
+    public string userName; // temporary : user informations will be fetched from DB
+    public ulong currentGameId;
+}
+
+public class ServerJoinGameResponseMessage : ServerMessage {
+    public static short ID = 2114;
+    public ulong gameID;
+    public ulong clientPlayerId;
+    public int[] cellIds;
+    public ulong[] playerIds;
+    public int[] entityIds;
+    public string[] displayedNames;
+    public float[] r, g, b;
+    public bool hasJoined;
+}
+
+public class ServerPlayerJoinedMessage : ServerMessage {
+    public static short ID = 2115;
+    public int cellId;
     public ulong playerId;
+    public int entityId;
+    public string displayedName;
+    public float r, g, b;
+}
+
+public class ServerLeaveGameResponseMessage : ServerMessage {
+    public static short ID = 2116;
+    public bool hasLeft;
+}
+
+public class ServerPlayerLeftGameMessage : ServerMessage {
+    public static short ID = 2117;
+    public ulong playerId;
+    public string playerName;
 }
 
 
