@@ -9,18 +9,20 @@ public class ButtonHandler : MonoBehaviour {
     public short type = 0;
 
     // Use this for initialization
-    void Start () {
+    void Start() {
         Button btn = GetComponent<Button>();
         btn.onClick.AddListener(Handler);
         this.GetComponent<Image>().alphaHitTestMinimumThreshold = alphaThreshold;
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
+    // Update is called once per frame
+    void Update() {
+
+    }
 
     void Handler() {
-        GameLogicClient.game.buttonInput(type);
+        if(GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(type);
+        }
     }
 }

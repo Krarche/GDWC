@@ -7,9 +7,10 @@ public class User {
     public Player player;
 
     public static ulong userCount = 0;
-    public ulong userId;
 
+    public ulong userId;
     public string userName;
+    public string userToken;
 
     public bool isIdentified;
     public ulong currentGameId = 0; // if 0, then no current game

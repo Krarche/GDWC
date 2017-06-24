@@ -11,7 +11,7 @@ public class ClientMovementOrderMessage : ClientMessage
     public static short ID = 1102;
     public int cellId;
     public int entityId;
-    public ulong gameID;
+    public ulong gameId;
 }
 
 public class ClientSendPathMessage : ClientMessage {
@@ -46,11 +46,11 @@ public class ClientLeaveGameRequestMessage : ClientMessage {
 // server to client
 // ID = 2xxx
 
-public class ServerMovementOrderMessage : ServerMessage
-{
+public class ServerMovementOrderMessage : ServerMessage {
     public static short ID = 2103;
     public int cellId;
     public int entityId;
+    public ulong gameId;
 }
 
 public class ServerSendTurnActionsMessage : ServerMessage {
@@ -81,7 +81,7 @@ public class ServerIdentificationResponseMessage : ServerMessage {
 
 public class ServerJoinGameResponseMessage : ServerMessage {
     public static short ID = 2114;
-    public ulong gameID;
+    public ulong gameId;
     public ulong clientPlayerId;
     public int[] cellIds;
     public ulong[] playerIds;

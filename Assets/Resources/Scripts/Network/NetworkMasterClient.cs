@@ -2,10 +2,11 @@
 using System.Collections;
 using UnityEngine.Networking;
 using System;
+using UnityEngine.SceneManagement;
 
 public class NetworkMasterClient : MonoBehaviour {
 
-    public User user = new User("defaultUsername");
+    public User user;
 
     public string MasterServerIpAddress;
     public int MasterServerPort;
@@ -19,13 +20,18 @@ public class NetworkMasterClient : MonoBehaviour {
         }
     }
 
-    void Awake() {
+    private void Awake() {
         if (singleton == null) {
             singleton = this;
             DontDestroyOnLoad(gameObject);
         } else {
             Destroy(gameObject);
         }
+    }
+
+    private void Start() {
+        user = Login.localUser;
+        InitializeClient();
     }
 
     public void InitializeClient() {
@@ -121,7 +127,7 @@ public class NetworkMasterClient : MonoBehaviour {
 
         if(msg.hasJoined) {
             GameLogicClient game = new GameLogicClient();
-            game.gameId = msg.gameID;
+            game.gameId = msg.gameId;
             user.currentGameId = game.gameId;
 
             for (int i = 0; i < msg.cellIds.Length; i++) {
@@ -201,7 +207,7 @@ public class NetworkMasterClient : MonoBehaviour {
 
 
     // --------------- Movement handlers -----------------
-    void OnMovementOrder(NetworkMessage netMsg) {
+    private void OnMovementOrder(NetworkMessage netMsg) {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
         GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId, msg.entityId));
         GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId, msg.entityId));
@@ -212,19 +218,20 @@ public class NetworkMasterClient : MonoBehaviour {
         ClientMovementOrderMessage msg = new ClientMovementOrderMessage();
         msg.cellId = cellId;
         msg.entityId = entityId;
-        msg.gameID = GameLogicClient.game.gameId;
+        msg.gameId = GameLogicClient.game.gameId;
         client.Send(ClientMovementOrderMessage.ID, msg);
         Debug.Log("Client sent MovementOrder ");
     }
 
-    void OnGUI() {
+    private void OnGUI() {
         if (client != null && client.isConnected && user.isIdentified) {
             GUI.Label(new Rect(10, 20, 200, 20), "Identified as : " + user.userName);
-            if (GUI.Button(new Rect(10, 60, 200, 20), "MasterClient Disconnect")) {
+            if (GUI.Button(new Rect(10, 60, 200, 20), "Disconnect")) {
                 ResetClient();
                 if (NetworkManager.singleton != null) {
                     NetworkManager.singleton.StopClient();
                 }
+                SceneManager.LoadScene("login");
             }
             if (user.currentGameId == 0) {
                 if (GUI.Button(new Rect(10, 100, 200, 20), "Join game")) {
@@ -236,12 +243,6 @@ public class NetworkMasterClient : MonoBehaviour {
                     ClientLeaveGameRequest();
                 }
             }
-        } else {
-            user.userName = GUI.TextField(new Rect(10, 30, 200, 20), user.userName);
-            if (GUI.Button(new Rect(10, 60, 200, 20), "MasterClient Connect")) {
-                InitializeClient();
-            }
-            return;
         }
     }
 }

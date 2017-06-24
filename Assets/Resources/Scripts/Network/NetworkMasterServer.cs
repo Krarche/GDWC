@@ -5,11 +5,11 @@ using UnityEngine.Networking;
 using System;
 
 public class NetworkMasterServer : MonoBehaviour {
+
     public int MasterServerPort;
 
     public Dictionary<ulong, GameLogicServer> games = new Dictionary<ulong, GameLogicServer>();
     public GameLogicServer defaultGame = null;
-    public ulong gameCount;
 
     public Dictionary<NetworkConnection, User> usersByConnection = new Dictionary<NetworkConnection, User>();
     public Dictionary<string, User> usersByName = new Dictionary<string, User>();
@@ -34,8 +34,7 @@ public class NetworkMasterServer : MonoBehaviour {
 
         // Temporary defaultGame
         if (defaultGame == null) {
-            gameCount = 0;
-            defaultGame = createGame();
+            defaultGame = GameLogicServer.createGame();
             games.Add(defaultGame.gameId, defaultGame);
         }
 
@@ -55,20 +54,25 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Server initialized");
     }
 
-    public void ResetServer() {
-        NetworkServer.Shutdown();
-    }
-
-    public GameLogicServer createGame() {
-        GameLogicServer game = new GameLogicServer();
-        game.gameId = ++gameCount;
-        return game;
-    }
-
-    void OnServerConnect(NetworkMessage netMsg) {
+    
+    // --------------- System handlers -----------------
+    private void OnServerConnect(NetworkMessage netMsg) {
         Debug.Log("Received connection request from client " + netMsg.conn.address);
     }
 
+    private void OnServerDisconnect(NetworkMessage netMsg) {
+        Debug.Log("Master lost client");
+        User u = usersByConnection[netMsg.conn];
+        if (u.isIdentified) {
+            usersByConnection.Remove(netMsg.conn);
+        }
+    }
+
+    private void OnServerError(NetworkMessage netMsg) {
+        Debug.Log("ServerError from Master");
+    }
+
+    // --------------- Identification handlers -----------------
     void OnServerIdentificationRequest(NetworkMessage netMsg) {
         ClientIdentificationRequestMessage msg = netMsg.ReadMessage<ClientIdentificationRequestMessage>();
         Debug.Log("Server received Identification request from " + msg.userName);
@@ -104,6 +108,8 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Sent ServerIdentificationResponse " + msg.isSuccessful);
     }
 
+
+    // --------------- Join game handlers -----------------
     private void OnServerJoinGameRequest(NetworkMessage netMsg) {
         ClientJoinGameRequestMessage msg = netMsg.ReadMessage<ClientJoinGameRequestMessage>();
         Debug.Log("Server received JoinGame request from "  + msg.userId + " " + msg.userName);
@@ -153,7 +159,7 @@ public class NetworkMasterServer : MonoBehaviour {
             i++;
         }
 
-        msg.gameID = gameId;
+        msg.gameId = gameId;
         msg.clientPlayerId = u.player.playerId;
         msg.hasJoined = true;
 
@@ -184,6 +190,8 @@ public class NetworkMasterServer : MonoBehaviour {
         return p;
     }
 
+
+    // --------------- Leave game handlers -----------------
     private void OnServerLeaveGameRequest(NetworkMessage netMsg) {
         ClientLeaveGameRequestMessage msg = netMsg.ReadMessage<ClientLeaveGameRequestMessage>();
         Debug.Log("Server received LeaveGame request from " + msg.userId);
@@ -217,27 +225,12 @@ public class NetworkMasterServer : MonoBehaviour {
         conn.Send(ServerLeaveGameResponseMessage.ID, msg);
     }
 
-    void OnServerDisconnect(NetworkMessage netMsg) {
-        Debug.Log("Master lost client");
-        User u = usersByConnection[netMsg.conn];
-        if (u.isIdentified) {
-            usersByConnection.Remove(netMsg.conn);
-        }
-    }
 
-    void OnServerError(NetworkMessage netMsg) {
-        Debug.Log("ServerError from Master");
-    }
-
-    
-
-    // --------------- Application Handlers -----------------
-
-
+    // --------------- Movement handlers -----------------
     void OnClientMovementOrder(NetworkMessage netMsg) {
         ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
         Debug.Log("Server received OnClientMovementOrder ");
-        GameLogicServer game = games[msg.gameID];
+        GameLogicServer game = games[msg.gameId];
         MovementOrder(game, msg.cellId, msg.entityId);
     }
 
@@ -252,6 +245,8 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Server sent MovementOrder ");
     }
 
+
+    // --------------- Send to in game players handlers -----------------
     private void SendToOtherGamePlayers(ServerMessage msg, short msgId, ulong gameId, User sender) {
         foreach (NetworkConnection client in usersByConnection.Keys) {
             if (usersByConnection[client] != sender && usersByConnection[client].player != null && games[gameId].players.ContainsKey(usersByConnection[client].player.playerId)) {
