@@ -18,10 +18,6 @@ public class Login : MonoBehaviour {
     void Start () {
         usernameField = GameObject.Find("usernameField").GetComponent<InputField>();
         passwordField = GameObject.Find("passwordField").GetComponent<InputField>();
-
-        usernameField.text = "kevin.gutierrez@studio-otsu.fr";
-        passwordField.text = "otsu";
-
         loginButton = GameObject.Find("loginButton").GetComponent<Button>();
         loginButton.onClick.AddListener(login);
     }

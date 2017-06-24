@@ -85,8 +85,8 @@ public class NetworkMasterServer : MonoBehaviour {
             u = new User();
             usersByName[msg.userName] = u;
         }
-            
-        u.identify(msg.userName);
+
+        u.identify(msg.userName, msg.userId);
         usersByConnection[netMsg.conn] = u;
         ServerIdentificationResponse(u, netMsg.conn);
     }

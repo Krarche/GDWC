@@ -28,6 +28,7 @@ public class ClientSendSpellMessage : ClientMessage {
 public class ClientIdentificationRequestMessage : ClientMessage {
     public static short ID = 1113;
     public string userName;
+    public ulong userId;
 }
 
 public class ClientJoinGameRequestMessage : ClientMessage {

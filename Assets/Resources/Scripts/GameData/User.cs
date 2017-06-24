@@ -31,8 +31,9 @@ public class User {
         this.userName = userName;
     }
 
-    public void identify(string userName) {
+    public void identify(string userName, ulong userId) {
         this.userName = userName;
+        this.userId = userId;
         this.isIdentified = true;
     }
 }

@@ -92,6 +92,7 @@ public class NetworkMasterClient : MonoBehaviour {
     void ClientIdentificationRequest() {
         ClientIdentificationRequestMessage msg = new ClientIdentificationRequestMessage();
         msg.userName = user.userName;
+        msg.userId = user.userId;
         client.Send(ClientIdentificationRequestMessage.ID, msg);
         Debug.Log("Sent identification request");
     }
