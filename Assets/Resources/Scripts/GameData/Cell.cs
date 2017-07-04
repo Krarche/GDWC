@@ -26,7 +26,7 @@ public class Cell {
                 distance[i, j] = -1;
             }
         }
-        type = new CellType(Type.NORMAL);
+        type = new CellType();
         inWorld = o;
     }
 }

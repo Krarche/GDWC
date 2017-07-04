@@ -7,9 +7,4 @@ public class MapData : GameData {
     public int width, height;
     public CellType[] cells;
     public int[] spawns;
-
-
-    public MapData() {
-
-    }
 }

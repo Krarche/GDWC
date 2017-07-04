@@ -80,30 +80,35 @@ public class DataParser {
         ObjectJSON data = ParserJSON.getObjectJSONFromAsset("DATA");
         ArrayJSON buffs = data.getArrayJSON("buffs");
         ArrayJSON spells = data.getArrayJSON("spells");
+        ArrayJSON cellTypes = data.getArrayJSON("cellTypes");
         ArrayJSON maps = data.getArrayJSON("maps");
-        Spell[] spellData = buildSpells(spells);
-        Buff[] buffData = buildBuffs(buffs);
-        MapData[] mapData = buildMaps(maps);
 
-        // save loaded data
-        foreach (Spell s in spellData) {
+        // parse and save data
+        foreach (Spell s in buildSpells(spells)) {
             if (s != null) {
                 GAME_DATA[s.id] = s;
                 SPELL_DATA[s.id] = s;
             }
         }
-        foreach (Buff b in buffData) {
+        foreach (Buff b in buildBuffs(buffs)) {
             if (b != null) {
                 GAME_DATA[b.id] = b;
                 BUFF_DATA[b.id] = b;
             }
         }
-        foreach (MapData m in mapData) {
+        foreach (CellType ct in buildCellTypes(cellTypes)) {
+            if (ct != null) {
+                GAME_DATA[ct.id] = ct;
+                CELL_DATA[ct.id] = ct;
+            }
+        }
+        foreach (MapData m in buildMaps(maps)) {
             if (m != null) {
                 GAME_DATA[m.id] = m;
                 MAP_DATA[m.id] = m;
             }
         }
+
         // fill description macro
         foreach (Spell s in SPELL_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(s.description);
@@ -148,6 +153,22 @@ public class DataParser {
         int[] output = new int[array.Length];
         for (int i = 0; i < array.Length; i++)
             output[i] = int.Parse((string)array[i]);
+        return output;
+    }
+
+    public static CellType[] buildCellTypes(ArrayJSON array) {
+        CellType[] output = new CellType[array.Length];
+        for (int i = 0; i < array.Length; i++)
+            output[i] = buildCellType((ObjectJSON)array[i]);
+        return output;
+    }
+
+    public static CellType buildCellType(ObjectJSON cellType) {
+        CellType output = new CellType();
+        output.id = cellType.getString("id");
+        output.name = cellType.getString("name");
+        output.blockMovement = cellType.getBool("blockMovement");
+        output.blockLineOfSight = cellType.getBool("blockLineOfSight");
         return output;
     }
 

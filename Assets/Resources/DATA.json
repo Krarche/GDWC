@@ -27,8 +27,8 @@
 		"blockLineOfSight",
 		"modelPath":"highGroundModel"},
 		{"id":"C003",
-		"blockMovement",
-		"name":"Hole"}
+		"name":"Hole",
+		"blockMovement"}
 	],
 	"entities":[
 		{"id:":"E001",
