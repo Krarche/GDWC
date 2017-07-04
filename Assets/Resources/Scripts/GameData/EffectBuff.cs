@@ -12,6 +12,8 @@ public class EffectBuff {
     public bool affectSelf = true;
     public bool affectCell = true;
 
+    public EffectCondition[] conditions;
+
     public int buffMaxTriggerTime;
 
     // entity

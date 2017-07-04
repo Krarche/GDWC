@@ -215,6 +215,7 @@ public class DataParser {
         output.onLeaveHandler = buildEffectHandler(effect.getObjectJSON("onLeaveHandler"));
         output.onTurnStartHandler = buildEffectHandler(effect.getObjectJSON("onTurnStartHandler"));
         output.onTurnEndHandler = buildEffectHandler(effect.getObjectJSON("onTurnEndHandler"));
+        output.conditions = buildEffectConditions(effect.getArrayJSON("conditions"));
         return output;
     }
 
@@ -258,7 +259,72 @@ public class DataParser {
         output.maxArea = effect.getInt("maxArea", 0);
         output.areaType = Spell.stringToRangeAreaType(effect.getString("areaType", ""));
         output.effectHandler = buildEffectHandler(effect.getObjectJSON("effectHandler"));
+        output.conditions = buildEffectConditions(effect.getArrayJSON("conditions"));
         return output;
+    }
+
+    public static EffectCondition[] buildEffectConditions(ArrayJSON array) {
+        EffectCondition[] output = new EffectCondition[array.Length];
+        for (int i = 0; i < array.Length; i++)
+            output[i] = buildEffectCondition((ObjectJSON)array[i]);
+        return output;
+    }
+
+    public static EffectCondition buildEffectCondition(ObjectJSON condition) {
+        EffectCondition output;
+        if (condition != null && condition.containsValue("class")) { // should always contain it
+            string className = condition.getString("class");
+            if (className == "EffectConditionTurnNumberAbove") {
+                output = new EffectConditionTurnNumberAbove();
+                ((EffectConditionTurnNumberAbove)output).turnNumber = condition.getInt("turnNumber");
+            }
+            else if(className == "EffectConditionTurnNumberBelow") {
+                output = new EffectConditionTurnNumberBelow();
+                ((EffectConditionTurnNumberBelow)output).turnNumber = condition.getInt("turnNumber");
+            } else if (className == "EffectConditionHealthAbove") {
+                output = new EffectConditionHealthAbove();
+                ((EffectConditionHealthAbove)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionHealthAbove)output).health = condition.getInt("health");
+                ((EffectConditionHealthAbove)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionHealthBelow") {
+                output = new EffectConditionHealthBelow();
+                ((EffectConditionHealthBelow)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionHealthBelow)output).health = condition.getInt("health");
+                ((EffectConditionHealthBelow)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionAPAbove") {
+                output = new EffectConditionAPAbove();
+                ((EffectConditionAPAbove)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionAPAbove)output).AP = condition.getInt("AP");
+                ((EffectConditionAPAbove)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionAPBelow") {
+                output = new EffectConditionAPBelow();
+                ((EffectConditionAPBelow)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionAPBelow)output).AP = condition.getInt("AP");
+                ((EffectConditionAPBelow)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionMPAbove") {
+                output = new EffectConditionMPAbove();
+                ((EffectConditionMPAbove)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionMPAbove)output).MP = condition.getInt("MP");
+                ((EffectConditionMPAbove)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionMPBelow") {
+                output = new EffectConditionMPBelow();
+                ((EffectConditionMPBelow)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionMPBelow)output).MP = condition.getInt("MP");
+                ((EffectConditionMPBelow)output).percent = condition.containsValue("percent");
+            } else if (className == "EffectConditionHasBuff") {
+                output = new EffectConditionHasBuff();
+                ((EffectConditionHasBuff)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionHasBuff)output).buffId = condition.getString("buffId");
+            } else if (className == "EffectConditionHasNotBuff") {
+                output = new EffectConditionHasNotBuff();
+                ((EffectConditionHasNotBuff)output).target = EffectConditionTarget.stringToConditionTarget(condition.getString("target"));
+                ((EffectConditionHasNotBuff)output).buffId = condition.getString("buffId");
+            } else {
+                output = null;
+            }
+            return output;
+        } else
+            return null;
     }
 
     public static EffectHandler buildEffectHandler(ObjectJSON effectHandler) {

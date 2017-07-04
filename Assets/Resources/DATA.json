@@ -45,7 +45,8 @@
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"}}
+			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"},
+			"conditions":[{"class":"EffectConditionAPAbove","target":"TARGET","AP":"50","percent"}]}
 		]}
 	],
 	"spells":[
@@ -58,7 +59,8 @@
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"effectHandler":{"class":"EffectHandlerDamage","damage":"3"}}
+			"effectHandler":{"class":"EffectHandlerDamage","damage":"3"},
+			"conditions":[]}
 		]},
 		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",
@@ -69,7 +71,8 @@
 		"effects":[
 			{"minArea":"0","maxArea":"2","areaType":"circle",
 			"affectAlly","affectEnemy","affectSelf",
-			"effectHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"}}
+			"effectHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"},
+			"conditions":[]}
 		]}
 	]
 }

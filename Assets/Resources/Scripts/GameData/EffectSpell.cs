@@ -12,6 +12,8 @@ public class EffectSpell {
     public bool affectSelf = true;
     public bool affectCell = true;
 
+    public EffectCondition[] conditions;
+
     public EffectHandler effectHandler;
 
     public void apply(Entity e) {
