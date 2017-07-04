@@ -45,6 +45,9 @@ public class DataParser {
                 if (content is EffectBuff[]) {
                     content = ((EffectBuff[])content)[index];
                 }
+                if (content is EffectCondition[]) {
+                    content = ((EffectCondition[])content)[index];
+                }
                 Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
             } else {
                 Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
@@ -52,8 +55,11 @@ public class DataParser {
                     content = GameData.getFieldContent<EffectSpell>((EffectSpell)content, path[i]);
                 else if (content is EffectBuff)
                     content = GameData.getFieldContent<EffectBuff>((EffectBuff)content, path[i]);
-                else if (content is EffectHandlerDamage) {
-                    content = GameData.getFieldContent<EffectHandlerDamage>((EffectHandlerDamage)content, path[i]).ToString();
+                else if (content is EffectHandlerDirectDamage) {
+                    content = GameData.getFieldContent<EffectHandlerDirectDamage>((EffectHandlerDirectDamage)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectHandlerIndirectDamage) {
+                    content = GameData.getFieldContent<EffectHandlerIndirectDamage>((EffectHandlerIndirectDamage)content, path[i]).ToString();
                     i++;
                 } else if (content is EffectHandlerHeal) {
                     content = GameData.getFieldContent<EffectHandlerHeal>((EffectHandlerHeal)content, path[i]).ToString();
@@ -66,6 +72,36 @@ public class DataParser {
                     i++;
                 } else if (content is EffectHandlerModMP) {
                     content = GameData.getFieldContent<EffectHandlerModMP>((EffectHandlerModMP)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionTurnNumberAbove) {
+                    content = GameData.getFieldContent<EffectConditionTurnNumberAbove>((EffectConditionTurnNumberAbove)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionTurnNumberBelow) {
+                    content = GameData.getFieldContent<EffectConditionTurnNumberBelow>((EffectConditionTurnNumberBelow)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionHealthAbove) {
+                    content = GameData.getFieldContent<EffectConditionHealthAbove>((EffectConditionHealthAbove)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionHealthBelow) {
+                    content = GameData.getFieldContent<EffectConditionHealthBelow>((EffectConditionHealthBelow)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionAPAbove) {
+                    content = GameData.getFieldContent<EffectConditionAPAbove>((EffectConditionAPAbove)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionAPBelow) {
+                    content = GameData.getFieldContent<EffectConditionAPBelow>((EffectConditionAPBelow)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionMPAbove) {
+                    content = GameData.getFieldContent<EffectConditionMPAbove>((EffectConditionMPAbove)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionMPBelow) {
+                    content = GameData.getFieldContent<EffectConditionMPBelow>((EffectConditionMPBelow)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionHasBuff) {
+                    content = GameData.getFieldContent<EffectConditionHasBuff>((EffectConditionHasBuff)content, path[i]).ToString();
+                    i++;
+                } else if (content is EffectConditionHasNotBuff) {
+                    content = GameData.getFieldContent<EffectConditionHasNotBuff>((EffectConditionHasNotBuff)content, path[i]).ToString();
                     i++;
                 }
                 if (i < path.Length)
@@ -129,7 +165,7 @@ public class DataParser {
     public static MapData[] buildMaps(ArrayJSON array) {
         MapData[] output = new MapData[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildMap((ObjectJSON)array[i]);
+            output[i] = buildMap(array.getObjectJSONAt(i));
         return output;
     }
 
@@ -138,28 +174,28 @@ public class DataParser {
         output.id = map.getString("id");
         output.name = map.getString("name");
         output.cells = buildMapCells(map.getArrayJSON("cells"));
-        output.spawns = buildMapSpawns(map.getArrayJSON("spanws"));
+        output.spawns = buildMapSpawns(map.getArrayJSON("spawns"));
         return output;
     }
 
     public static CellType[] buildMapCells(ArrayJSON array) {
         CellType[] output = new CellType[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = CELL_DATA[(string)array[i]];
+            output[i] = CELL_DATA[array.getStringAt(i)];
         return output;
     }
 
     public static int[] buildMapSpawns(ArrayJSON array) {
         int[] output = new int[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = int.Parse((string)array[i]);
+            output[i] = int.Parse(array.getStringAt(i));
         return output;
     }
 
     public static CellType[] buildCellTypes(ArrayJSON array) {
         CellType[] output = new CellType[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildCellType((ObjectJSON)array[i]);
+            output[i] = buildCellType(array.getObjectJSONAt(i));
         return output;
     }
 
@@ -175,7 +211,7 @@ public class DataParser {
     public static Buff[] buildBuffs(ArrayJSON array) {
         Buff[] output = new Buff[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildBuff((ObjectJSON)array[i]);
+            output[i] = buildBuff(array.getObjectJSONAt(i));
         return output;
     }
 
@@ -222,7 +258,7 @@ public class DataParser {
     public static Spell[] buildSpells(ArrayJSON array) {
         Spell[] output = new Spell[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = buildSpell((ObjectJSON)array[i]);
+            output[i] = buildSpell(array.getObjectJSONAt(i));
         return output;
     }
 
@@ -245,7 +281,7 @@ public class DataParser {
     public static EffectSpell[] buildEffectSpells(ArrayJSON effects) {
         EffectSpell[] output = new EffectSpell[effects.Length];
         for (int i = 0; i < effects.Length; i++)
-            output[i] = buildEffectSpell((ObjectJSON)effects[i]);
+            output[i] = buildEffectSpell(effects.getObjectJSONAt(i));
         return output;
     }
 
@@ -264,10 +300,13 @@ public class DataParser {
     }
 
     public static EffectCondition[] buildEffectConditions(ArrayJSON array) {
-        EffectCondition[] output = new EffectCondition[array.Length];
-        for (int i = 0; i < array.Length; i++)
-            output[i] = buildEffectCondition((ObjectJSON)array[i]);
-        return output;
+        if (array != null) {
+            EffectCondition[] output = new EffectCondition[array.Length];
+            for (int i = 0; i < array.Length; i++)
+                output[i] = buildEffectCondition(array.getObjectJSONAt(i));
+            return output;
+        }
+        return null;
     }
 
     public static EffectCondition buildEffectCondition(ObjectJSON condition) {
@@ -277,8 +316,7 @@ public class DataParser {
             if (className == "EffectConditionTurnNumberAbove") {
                 output = new EffectConditionTurnNumberAbove();
                 ((EffectConditionTurnNumberAbove)output).turnNumber = condition.getInt("turnNumber");
-            }
-            else if(className == "EffectConditionTurnNumberBelow") {
+            } else if (className == "EffectConditionTurnNumberBelow") {
                 output = new EffectConditionTurnNumberBelow();
                 ((EffectConditionTurnNumberBelow)output).turnNumber = condition.getInt("turnNumber");
             } else if (className == "EffectConditionHealthAbove") {
@@ -331,9 +369,12 @@ public class DataParser {
         EffectHandler output;
         if (effectHandler != null && effectHandler.containsValue("class")) { // should always contain it
             string className = effectHandler.getString("class");
-            if (className == "EffectHandlerDamage") {
-                output = new EffectHandlerDamage();
-                ((EffectHandlerDamage)output).damage = effectHandler.getInt("damage");
+            if (className == "EffectHandlerDirectDamage") {
+                output = new EffectHandlerDirectDamage();
+                ((EffectHandlerDirectDamage)output).damage = effectHandler.getInt("damage");
+            } else if (className == "EffectHandlerIndirectDamage") {
+                output = new EffectHandlerIndirectDamage();
+                ((EffectHandlerIndirectDamage)output).damage = effectHandler.getInt("damage");
             } else if (className == "EffectHandlerHeal") {
                 output = new EffectHandlerHeal();
                 ((EffectHandlerHeal)output).heal = effectHandler.getInt("heal");

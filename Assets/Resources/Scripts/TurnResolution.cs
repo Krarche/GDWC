@@ -21,8 +21,8 @@ public class TurnResolution {
 
     // this function will check the conditions for each affected entity, and apply if the effect if necessary
     void resolveSpellEffect(EffectSpell effect, Entity origin, Cell target) {
-        foreach(Entity e in getSpellEffectTargets(effect, origin, target)) {
-            if(areConditionsValid(effect.conditions, origin, e)) {
+        foreach (Entity e in getSpellEffectTargets(effect, origin, target)) {
+            if (areConditionsValid(effect.conditions, origin, e)) {
                 handleEffect(effect.effectHandler, origin, e);
             }
         }
@@ -35,8 +35,10 @@ public class TurnResolution {
 
     // handle the effect, spell or buff alike
     void handleEffect(EffectHandler handler, Entity origin, Entity target) {
-        if(handler is EffectHandlerDamage) {
-            handleEffectDamage((EffectHandlerDamage)handler, origin, target);
+        if (handler is EffectHandlerDirectDamage) {
+            handleEffectDirectDamage((EffectHandlerDirectDamage)handler, origin, target);
+        } else if (handler is EffectHandlerIndirectDamage) {
+            handleEffectIndirectDamage((EffectHandlerIndirectDamage)handler, origin, target);
         } else if (handler is EffectHandlerHeal) {
             handleEffectHeal((EffectHandlerHeal)handler, origin, target);
         } else if (handler is EffectHandlerBuff) {
@@ -48,8 +50,12 @@ public class TurnResolution {
         }
     }
 
-    void handleEffectDamage(EffectHandlerDamage handler, Entity origin, Entity target) {
-        damageEntity(origin, target, handler.damage);
+    void handleEffectDirectDamage(EffectHandlerDirectDamage handler, Entity origin, Entity target) {
+        indirectDamageEntity(origin, target, handler.damage);
+    }
+
+    void handleEffectIndirectDamage(EffectHandlerIndirectDamage handler, Entity origin, Entity target) {
+        directDamageEntity(origin, target, handler.damage);
     }
 
     void handleEffectHeal(EffectHandlerHeal handler, Entity origin, Entity target) {
@@ -78,6 +84,14 @@ public class TurnResolution {
 
     bool isConditionValid(EffectCondition condition, Entity origin, Entity target) {
         return true;
+    }
+
+    void directDamageEntity(Entity origin, Entity target, int damage) {
+        damageEntity(origin, target, damage + (origin.damageModifier - target.resistanceModifier));
+    }
+
+    void indirectDamageEntity(Entity origin, Entity target, int damage) {
+        damageEntity(origin, target, damage + (origin.damageModifier - target.resistanceModifier));
     }
 
     void damageEntity(Entity origin, Entity target, int damage) {
