@@ -18,6 +18,8 @@ public class DataParser {
     public static Dictionary<string, GameData> GAME_DATA = new Dictionary<string, GameData>();
     public static Dictionary<string, Spell> SPELL_DATA = new Dictionary<string, Spell>();
     public static Dictionary<string, Buff> BUFF_DATA = new Dictionary<string, Buff>();
+    public static Dictionary<string, CellType> CELL_DATA = new Dictionary<string, CellType>();
+    public static Dictionary<string, MapData> MAP_DATA = new Dictionary<string, MapData>();
 
     public static string getMacroContent(string macro) {
         string[] path = macro.Replace(" ", "").Split(',');
@@ -78,8 +80,10 @@ public class DataParser {
         ObjectJSON data = ParserJSON.getObjectJSONFromAsset("DATA");
         ArrayJSON buffs = data.getArrayJSON("buffs");
         ArrayJSON spells = data.getArrayJSON("spells");
+        ArrayJSON maps = data.getArrayJSON("maps");
         Spell[] spellData = buildSpells(spells);
         Buff[] buffData = buildBuffs(buffs);
+        MapData[] mapData = buildMaps(maps);
 
         // save loaded data
         foreach (Spell s in spellData) {
@@ -92,6 +96,12 @@ public class DataParser {
             if (b != null) {
                 GAME_DATA[b.id] = b;
                 BUFF_DATA[b.id] = b;
+            }
+        }
+        foreach (MapData m in mapData) {
+            if (m != null) {
+                GAME_DATA[m.id] = m;
+                MAP_DATA[m.id] = m;
             }
         }
         // fill description macro
@@ -109,6 +119,36 @@ public class DataParser {
                 macro = StringParsingTool.getNextMacro(b.description);
             }
         }
+    }
+
+    public static MapData[] buildMaps(ArrayJSON array) {
+        MapData[] output = new MapData[array.Length];
+        for (int i = 0; i < array.Length; i++)
+            output[i] = buildMap((ObjectJSON)array[i]);
+        return output;
+    }
+
+    public static MapData buildMap(ObjectJSON map) {
+        MapData output = new MapData();
+        output.id = map.getString("id");
+        output.name = map.getString("name");
+        output.cells = buildMapCells(map.getArrayJSON("cells"));
+        output.spawns = buildMapSpawns(map.getArrayJSON("spanws"));
+        return output;
+    }
+
+    public static CellType[] buildMapCells(ArrayJSON array) {
+        CellType[] output = new CellType[array.Length];
+        for (int i = 0; i < array.Length; i++)
+            output[i] = CELL_DATA[(string)array[i]];
+        return output;
+    }
+
+    public static int[] buildMapSpawns(ArrayJSON array) {
+        int[] output = new int[array.Length];
+        for (int i = 0; i < array.Length; i++)
+            output[i] = int.Parse((string)array[i]);
+        return output;
     }
 
     public static Buff[] buildBuffs(ArrayJSON array) {

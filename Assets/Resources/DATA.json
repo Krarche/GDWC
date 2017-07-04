@@ -1,5 +1,7 @@
 {
-	"map0": {
+	"maps": [
+		{"id":"M001",
+		"name":"Dankest dungeon",
 		"width":"7",
 		"height":"7",
 		"cells":[
@@ -13,8 +15,8 @@
 		],
 		"spawns":[
 			"21","27"
-		]
-	},
+		]}
+	],
 	"cellTypes":[
 		{"id":"C001",
 		"name":"Low ground",
