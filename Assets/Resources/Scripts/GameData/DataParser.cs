@@ -141,8 +141,8 @@ public class DataParser {
         output.affectEnemy = effect.containsValue("affectEnemy");
         output.affectSelf = effect.containsValue("affectSelf");
         output.affectCell = effect.containsValue("affectCell");
-        output.minAera = effect.getInt("minAera", 0);
-        output.maxAera = effect.getInt("maxAera", 0);
+        output.minArea = effect.getInt("minArea", 0);
+        output.maxArea = effect.getInt("maxArea", 0);
         output.areaType = Spell.stringToRangeAreaType(effect.getString("areaType", ""));
         output.onGainedHandler = buildEffectHandler(effect.getObjectJSON("onGainedHandler"));
         output.onLostHandler = buildEffectHandler(effect.getObjectJSON("onLostHandler"));
@@ -193,8 +193,8 @@ public class DataParser {
         output.affectEnemy = effect.containsValue("affectEnemy");
         output.affectSelf = effect.containsValue("affectSelf");
         output.affectCell = effect.containsValue("affectCell");
-        output.minAera = effect.getInt("minAera", 0);
-        output.maxAera = effect.getInt("maxAera", 0);
+        output.minArea = effect.getInt("minArea", 0);
+        output.maxArea = effect.getInt("maxArea", 0);
         output.areaType = Spell.stringToRangeAreaType(effect.getString("areaType", ""));
         output.effectHandler = buildEffectHandler(effect.getObjectJSON("effectHandler"));
         return output;

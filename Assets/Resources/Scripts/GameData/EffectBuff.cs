@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EffectBuff {
-    public int minAera;
-    public int maxAera;
+    public int minArea;
+    public int maxArea;
     public int areaType;
 
     public bool affectAlly = true;
