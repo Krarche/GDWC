@@ -6,33 +6,21 @@ public abstract class GameLogic {
 
     public static int MAX_APT = 3; // max actions per turn
 
-    public ulong id { set; get; }
+    public ulong gameId;
 
-    public Dictionary<ulong, Player> playerList = new Dictionary<ulong, Player>();
+    public Dictionary<ulong, Player> players = new Dictionary<ulong, Player>();
+    public GameObject playerPrefab; // temporary
+
     public Dictionary<int, Entity> entityList = new Dictionary<int, Entity>();
     public int lastEntityIdGenerated = -1;
-    public Grid grid;
-    public GameObject playerPrefab;
 
+    public Grid grid;
+    
     public GameLogic() {
         grid = new Grid();
         grid.game = this;
         grid.initialisation(15, 15);
         playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
-    }
-
-    protected void OnDrawGizmos() {
-        if (grid != null) {
-            Gizmos.color = Color.green;
-            Vector3 pos = new Vector3();
-            for (int i = 0; i < grid.sizeX; i++) {
-                for (int j = 0; j < grid.sizeY; j++) {
-                    pos.x = i;
-                    pos.z = j;
-                    Gizmos.DrawSphere(pos, 0.1f);
-                }
-            }
-        }
     }
 
     public Entity createEntity(int entityId) {
@@ -50,14 +38,15 @@ public abstract class GameLogic {
     }
 
     public void addPlayer(Player p) {
-        if (!playerList.ContainsKey(p.playerId)) {
-            playerList[p.playerId] = p;
+        if (!players.ContainsKey(p.playerId)) {
+            players[p.playerId] = p;
         }
     }
 
     public void removePlayer(Player p) {
-        removeEntity(p.entity);
-        playerList.Remove(p.playerId);
+        removeEntity(p.playerEntity);
+        entityList.Remove(p.playerEntity.entityId);
+        players.Remove(p.playerId);
     }
 
     public abstract void registerAction();
@@ -76,9 +65,9 @@ public abstract class GameLogic {
         Queue<Order> slow = new Queue<Order>();
 
         for (int i = 0; i < MAX_APT ; i++) {
-            foreach (Player p in playerList.Values) {
-                if (p.entity.orders.Count > 0) {
-                    Order o = p.entity.orders.Dequeue();
+            foreach (Player p in players.Values) {
+                if (p.playerEntity.orders.Count > 0) {
+                    Order o = p.playerEntity.orders.Dequeue();
                     switch (o.getPriority()) {
                         case 0:
                             fast.Enqueue(o);

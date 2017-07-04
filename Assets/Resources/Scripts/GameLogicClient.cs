@@ -5,14 +5,31 @@ using UnityEngine;
 
 public class GameLogicClient : GameLogic {
 
-    public static ulong localPlayerId = 0;
     public static GameLogicClient game;
-    public static Player localPlayer {
-        get {return game.playerList[localPlayerId]; }
-}
 
     public GameLogicClient(): base() {
         game = this;
+    }
+
+    public override void registerAction() {
+        throw new NotImplementedException();
+    }
+
+    public override void resolveAction(Order o) {
+        base.resolveAction(o);
+    }
+
+    public override void resolveTurn() {
+        throw new NotImplementedException();
+    }
+
+    public void clearGame() {
+        game.grid.clearGrid();
+        foreach (Entity e in game.entityList.Values) {
+            game.removeEntity(e);
+        }
+        entityList.Clear();
+        game = null;
     }
 
     public const short BUTTON_TYPE_SPELL_0 = 0;
@@ -45,14 +62,6 @@ public class GameLogicClient : GameLogic {
         }
     }
 
-    public bool containsPlayerId(ulong playerId) {
-        foreach(ulong key in playerList.Keys) {
-            if (key == playerId)
-                return true;
-        }
-        return false;
-    }
-
     private void buttonSpell(short spellIndex) {
 
     }
@@ -63,27 +72,5 @@ public class GameLogicClient : GameLogic {
 
     private void buttonConfirm() {
 
-    }
-
-    public override void registerAction() {
-        throw new NotImplementedException();
-    }
-
-    public override void resolveAction(Order o) {
-        base.resolveAction(o);
-    }
-
-    public override void resolveTurn() {
-        throw new NotImplementedException();
-    }
-
-    public void clearGame() {
-        game.grid.clearGrid();
-
-        foreach (Entity e in game.entityList.Values) {
-            game.removeEntity(e);
-        }
-
-        game = null;
     }
 }

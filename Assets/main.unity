@@ -285,7 +285,7 @@ GameObject:
   - component: {fileID: 871336138}
   - component: {fileID: 871336137}
   m_Layer: 5
-  m_Name: EndTurnButton
+  m_Name: ReadyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

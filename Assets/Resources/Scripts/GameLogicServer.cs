@@ -5,8 +5,12 @@ using UnityEngine;
 
 public class GameLogicServer : GameLogic {
 
-    public GameLogicServer() : base() {
+    public static ulong gameCount = 0;
 
+    public static GameLogicServer createGame() {
+        GameLogicServer game = new GameLogicServer();
+        game.gameId = ++gameCount;
+        return game;
     }
 
     public override void registerAction() {
