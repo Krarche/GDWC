@@ -1,17 +1,27 @@
 fileFormatVersion: 2
-guid: db4a5869a6ef6e144a07ab7791d8f5c7
-timeCreated: 1497567020
+guid: 6e5f5eb4f29287844b39fb483e3c0596
+timeCreated: 1499199429
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
-    100000: default
+    100000: DoubleQuadAnimation
     100002: //RootNode
-    400000: default
+    100004: LowerBone
+    100006: Planes
+    100008: UpperBone
+    400000: DoubleQuadAnimation
     400002: //RootNode
-    2300000: default
-    3300000: default
-    4300000: default
+    400004: LowerBone
+    400006: Planes
+    400008: UpperBone
+    4300000: Planes
+    7400000: Default Take
+    7400002: Birth
+    7400004: Death
+    7400006: Stand
+    9500000: //RootNode
+    13700000: Planes
   materials:
     importMaterials: 1
     materialName: 2
@@ -76,7 +86,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

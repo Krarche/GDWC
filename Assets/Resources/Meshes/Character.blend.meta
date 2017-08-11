@@ -1,17 +1,43 @@
 fileFormatVersion: 2
-guid: db4a5869a6ef6e144a07ab7791d8f5c7
-timeCreated: 1497567020
+guid: e47d1eb7086d0f54183d51451589428f
+timeCreated: 1502472282
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
-    100000: default
+    100000: Armature
     100002: //RootNode
-    400000: default
+    100004: Chest
+    100006: Head
+    100008: LeftArm
+    100010: LeftLeg
+    100012: Mesh
+    100014: RightArm
+    100016: RightLeg
+    400000: Armature
     400002: //RootNode
-    2300000: default
-    3300000: default
-    4300000: default
+    400004: Chest
+    400006: Head
+    400008: LeftArm
+    400010: LeftLeg
+    400012: Mesh
+    400014: RightArm
+    400016: RightLeg
+    4300000: Mesh
+    7400000: Default Take
+    7400002: Emote_1
+    7400004: Idle_1
+    7400006: NONE
+    7400008: Spell_1
+    7400010: Spell_2
+    7400012: WalkEndL
+    7400014: WalkEndR
+    7400016: WalkHalfL
+    7400018: WalkHalfR
+    7400020: WalkLoop
+    7400022: WalkStart
+    9500000: //RootNode
+    13700000: Mesh
   materials:
     importMaterials: 1
     materialName: 2
@@ -52,7 +78,7 @@ ModelImporter:
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
-    useFileScale: 1
+    useFileScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -76,7 +102,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
