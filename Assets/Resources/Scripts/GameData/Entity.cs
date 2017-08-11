@@ -111,21 +111,6 @@ public class Entity : MonoBehaviour {
     public void applyColor() {
         gameObject.GetComponentInChildren<SkinnedMeshRenderer>().material.color = modelColor;
     }
-
-    public void modMP(int MP) {
-        currentMP += MP;
-        if (currentMP > maxMP)
-            currentMP = maxMP;
-        if (currentMP < 0)
-            currentMP = 0;
-    }
-    public void modAP(int AP) {
-        currentAP += AP;
-        if (currentAP > maxAP)
-            currentAP = maxAP;
-        if (currentAP < 0)
-            currentAP = 0;
-    }
     public void heal(int amount) {
         currentHealth += amount;
         if (currentHealth > maxHealth)
@@ -134,5 +119,28 @@ public class Entity : MonoBehaviour {
     public bool damage(int amount) { // returns true if the unit dies because of the damage
         currentHealth -= amount;
         return currentHealth <= 0;
+    }
+    public void modAP(int AP) {
+        currentAP += AP;
+        if (currentAP > maxAP)
+            currentAP = maxAP;
+        if (currentAP < 0)
+            currentAP = 0;
+    }
+    public void modMP(int MP) {
+        currentMP += MP;
+        if (currentMP > maxMP)
+            currentMP = maxMP;
+        if (currentMP < 0)
+            currentMP = 0;
+    }
+    public void modRange(int range) {
+        rangeModifier += range;
+    }
+    public void modDamage(int damage) {
+        damageModifier += damage;
+    }
+    public void modResistance(int resistance) {
+        resistanceModifier += resistance;
     }
 }
