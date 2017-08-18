@@ -173,8 +173,10 @@ public class DataParser {
 
     public static CellData[] buildMapCells(ArrayJSON array) {
         CellData[] output = new CellData[array.Length];
-        for (int i = 0; i < array.Length; i++)
+        for (int i = 0; i < array.Length; i++) {
             output[i] = DataManager.CELL_DATA[array.getStringAt(i)];
+            Debug.Log("(" + i + ") " + output[i].id);
+        }
         return output;
     }
 

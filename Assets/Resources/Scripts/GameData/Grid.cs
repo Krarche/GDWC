@@ -49,6 +49,7 @@ public class Grid {
                 MeshCollider meshCollider = (MeshCollider)cellPrefab.AddComponent<MeshCollider>();
                 meshCollider.sharedMesh = mesh;
             }
+            cellPrefab.SetActive(false);
         }
     }
 
@@ -79,6 +80,7 @@ public class Grid {
                 if (map != null && cd != null) {
                     Debug.Log("CellData " + cd.id + " found");
                     o = GameObject.Instantiate(cellPrefabs[cd.id], new Vector3(x, 0, y), Quaternion.identity);
+                    o.SetActive(true);
                 } else {
                     o = GameObject.Instantiate(cellBase, new Vector3(x, 0, y), Quaternion.identity);
                 }
