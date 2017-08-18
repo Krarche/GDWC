@@ -23,15 +23,15 @@ public class MovementOrder : Order{
 }
 
 public class SpellOrder : Order{
-    int spellId;
-    int cellId;
+    public string spellId;
+    public int cellId;
 
-    public SpellOrder(int s, int c) {
+    public SpellOrder(string s, int c) {
         spellId = s;
         cellId = c;
     }
 
     public override short getPriority() {
-        return (spellId<1000) ? (short)0 : (short)2;
+        return (String.CompareOrdinal(spellId, "S500") < 0) ? (short)0 : (short)2;
     }
 }

@@ -4,9 +4,13 @@ using UnityEngine;
 
 public abstract class GameLogic {
 
+    public static int MAX_TURN_NUMBER = 20;
     public static int MAX_APT = 3; // max actions per turn
 
     public ulong gameId;
+    public int currentTurn;
+    public bool allowActionRegistration;
+
 
     public Dictionary<ulong, Player> players = new Dictionary<ulong, Player>();
     public GameObject playerPrefab; // temporary
@@ -15,12 +19,14 @@ public abstract class GameLogic {
     public int lastEntityIdGenerated = -1;
 
     public Grid grid;
-    
+    public TurnResolution solver;
+
     public GameLogic() {
+        playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
+        solver = new TurnResolution(this);
         grid = new Grid();
         grid.game = this;
         grid.initialisation(15, 15);
-        playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
     }
 
     public Entity createEntity(int entityId) {
@@ -49,22 +55,29 @@ public abstract class GameLogic {
         players.Remove(p.playerId);
     }
 
-    public abstract void registerAction();
 
-    public virtual void resolveAction(Order o) {
-        Entity e = entityList[o.entityId];
-        if(o is MovementOrder) {
-            MovementOrder mo = (MovementOrder)o;
-            e.orderMoveToCell(mo.cellId);
-        }
+    public abstract void startNewTurn();
+    public void sendActionToServer() {
+
+    }
+    public void sendActionToClient() {
+
+    }
+    public void registerAction() { // general action registration
+
+    }
+    public abstract void registerLocalAction(); // from current client
+    public abstract void registerForeignAction(); // from other client
+    public virtual void resolveTurn() {
+
     }
 
-    public virtual void resolveTurn() {
+    public virtual void resolveActions() {
         Queue<Order> fast = new Queue<Order>();
         Queue<Order> move = new Queue<Order>();
         Queue<Order> slow = new Queue<Order>();
 
-        for (int i = 0; i < MAX_APT ; i++) {
+        for (int i = 0; i < MAX_APT; i++) {
             foreach (Player p in players.Values) {
                 if (p.playerEntity.orders.Count > 0) {
                     Order o = p.playerEntity.orders.Dequeue();
@@ -92,6 +105,20 @@ public abstract class GameLogic {
         while (q.Count > 0) {
             o = q.Dequeue();
             resolveAction(o);
+        }
+    }
+
+    public virtual void resolveAction(Order o) {
+        Entity e = entityList[o.entityId];
+        if (o is MovementOrder) {
+            MovementOrder mo = (MovementOrder)o;
+            Cell dest = grid.GetCell(so.cellId);
+            resolveMovement(e, dest);
+        } else if (o is SpellOrder) {
+            SpellOrder so = (SpellOrder) o;
+            Cell target = grid.GetCell(so.cellId);
+            Spell spell = DataManager.SPELL_DATA[so.spellId];
+            solver.resolveSpell(spell, e, target);
         }
     }
 

@@ -13,8 +13,20 @@ public class GameLogicServer : GameLogic {
         return game;
     }
 
-    public override void registerAction() {
-        throw new NotImplementedException();
+    public override void startNewTurn() {
+
+    }
+
+    public override void registerLocalAction() { 
+
+    }
+
+    public override void registerForeignAction() {
+
+    }
+
+    public override void resolveTurn() {
+        base.resolveTurn();
     }
 
     public override void resolveAction(Order o) {
@@ -23,9 +35,5 @@ public class GameLogicServer : GameLogic {
             MovementOrder mo = (MovementOrder)o;
             e.setCurrentCell(grid.GetCell(mo.cellId));
         }
-    }
-
-    public override void resolveTurn() {
-        throw new NotImplementedException();
     }
 }

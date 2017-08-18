@@ -9,23 +9,17 @@ public class DataParser {
      * Call those lines in the LoadingScreen.Start() function for an example
      * 
         DataParser.buildSpellAndBuffData();
-        Debug.Log(DataParser.BUFF_DATA["B001"].description);
-        Debug.Log(DataParser.SPELL_DATA["S001"].description);
-        Debug.Log(DataParser.SPELL_DATA["S002"].description);
+        Debug.Log(DataParser.DataManager.BUFF_DATA["B001"].description);
+        Debug.Log(DataParser.DataManager.SPELL_DATA["S001"].description);
+        Debug.Log(DataParser.DataManager.SPELL_DATA["S002"].description);
      * 
      */
-
-    public static Dictionary<string, GameData> GAME_DATA = new Dictionary<string, GameData>();
-    public static Dictionary<string, Spell> SPELL_DATA = new Dictionary<string, Spell>();
-    public static Dictionary<string, Buff> BUFF_DATA = new Dictionary<string, Buff>();
-    public static Dictionary<string, CellType> CELL_DATA = new Dictionary<string, CellType>();
-    public static Dictionary<string, MapData> MAP_DATA = new Dictionary<string, MapData>();
 
     public static string getMacroContent(string macro) {
         string[] path = macro.Replace(" ", "").Split(',');
         if (path.Length == 1)
             return ""; // should not happen
-        GameData data = GAME_DATA[path[0]];
+        GameData data = DataManager.GAME_DATA[path[0]];
         Debug.Log("(" + 0 + "/" + path.Length + ") " + path[0] + " : " + data.ToString());
         int i = 1;
         object content = null;
@@ -122,38 +116,34 @@ public class DataParser {
         // parse and save data
         foreach (Spell s in buildSpells(spells)) {
             if (s != null) {
-                GAME_DATA[s.id] = s;
-                SPELL_DATA[s.id] = s;
+                DataManager.registerData(s.id, s);
             }
         }
         foreach (Buff b in buildBuffs(buffs)) {
             if (b != null) {
-                GAME_DATA[b.id] = b;
-                BUFF_DATA[b.id] = b;
+                DataManager.registerData(b.id, b);
             }
         }
         foreach (CellType ct in buildCellTypes(cellTypes)) {
             if (ct != null) {
-                GAME_DATA[ct.id] = ct;
-                CELL_DATA[ct.id] = ct;
+                DataManager.registerData(ct.id, ct);
             }
         }
         foreach (MapData m in buildMaps(maps)) {
             if (m != null) {
-                GAME_DATA[m.id] = m;
-                MAP_DATA[m.id] = m;
+                DataManager.registerData(m.id, m);
             }
         }
 
         // fill description macro
-        foreach (Spell s in SPELL_DATA.Values) {
+        foreach (Spell s in DataManager.SPELL_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(s.description);
             while (macro != "") {
                 s.description = s.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
                 macro = StringParsingTool.getNextMacro(s.description);
             }
         }
-        foreach (Buff b in BUFF_DATA.Values) {
+        foreach (Buff b in DataManager.BUFF_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(b.description);
             while (macro != "") {
                 b.description = b.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
@@ -181,7 +171,7 @@ public class DataParser {
     public static CellType[] buildMapCells(ArrayJSON array) {
         CellType[] output = new CellType[array.Length];
         for (int i = 0; i < array.Length; i++)
-            output[i] = CELL_DATA[array.getStringAt(i)];
+            output[i] = DataManager.CELL_DATA[array.getStringAt(i)];
         return output;
     }
 
