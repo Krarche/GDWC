@@ -23,12 +23,9 @@ public class Login : MonoBehaviour {
     }
 	
 	private void login() {
-        string username = usernameField.text;
-        string password = passwordField.text;
-
-        if(username.Length != 0 && password.Length != 0) {
-            StartCoroutine(Identify(username,password));
-        }
+        localUser.userId = 1;
+        localUser.userName = "Bob";
+        SceneManager.LoadScene("main");
     }
 
     IEnumerator Identify(string username, string password) {
