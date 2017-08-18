@@ -24,9 +24,8 @@ public abstract class GameLogic {
     public GameLogic() {
         playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
         solver = new TurnResolution(this);
-        grid = new Grid();
-        grid.game = this;
-        grid.initialisation(15, 15);
+        grid = new Grid(this, DataManager.MAP_DATA["M002"]);
+        // grid.initialisation(15, 15);
     }
 
     public Entity createEntity(int entityId) {

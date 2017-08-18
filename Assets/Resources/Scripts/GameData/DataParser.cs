@@ -8,10 +8,10 @@ public class DataParser {
     /*
      * Call those lines in the LoadingScreen.Start() function for an example
      * 
-        DataParser.buildSpellAndBuffData();
-        Debug.Log(DataParser.DataManager.BUFF_DATA["B001"].description);
-        Debug.Log(DataParser.DataManager.SPELL_DATA["S001"].description);
-        Debug.Log(DataParser.DataManager.SPELL_DATA["S002"].description);
+        DataParser.loadDataJSON();
+        Debug.Log(DataManager.BUFF_DATA["B001"].description);
+        Debug.Log(DataManager.SPELL_DATA["S001"].description);
+        Debug.Log(DataManager.SPELL_DATA["S002"].description);
      * 
      */
 
@@ -106,7 +106,7 @@ public class DataParser {
         return content.ToString();
     }
 
-    public static void buildSpellAndBuffData() {
+    public static void loadDataJSON() {
         ObjectJSON data = ParserJSON.getObjectJSONFromAsset("DATA");
         ArrayJSON buffs = data.getArrayJSON("buffs");
         ArrayJSON spells = data.getArrayJSON("spells");
@@ -163,6 +163,8 @@ public class DataParser {
         MapData output = new MapData();
         output.id = map.getString("id");
         output.name = map.getString("name");
+        output.width = map.getInt("width");
+        output.height = map.getInt("height");
         output.cells = buildMapCells(map.getArrayJSON("cells"));
         output.spawns = buildMapSpawns(map.getArrayJSON("spawns"));
         output.buildCellDataIdList();
@@ -194,6 +196,7 @@ public class DataParser {
         CellData output = new CellData();
         output.id = cellType.getString("id");
         output.name = cellType.getString("name");
+        output.modelPath = cellType.getString("modelPath");
         output.blockMovement = cellType.getBool("blockMovement");
         output.blockLineOfSight = cellType.getBool("blockLineOfSight");
         return output;

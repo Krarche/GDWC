@@ -8,7 +8,7 @@ public enum Direction : int {
 
 public class Cell {
 
-	public CellData type;
+	public CellData data;
 	public int x, y, id;
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
@@ -19,14 +19,22 @@ public class Cell {
 
     public GameObject inWorld;
 
-    public Cell(int x, int y, GameObject o) {
+    public Cell(int x, int y, GameObject o, CellData data = null) {
         distance = new int[x, y];
         for(int i=0; i<x; i++) {
             for(int j=0; j<y; j++) {
                 distance[i, j] = -1;
             }
         }
-        type = new CellData();
+        this.data = data != null ? data : new CellData();
         inWorld = o;
+    }
+
+    public bool blockLineOfSight() {
+        return data.blockLineOfSight;
+    }
+
+    public bool blockMovement() {
+        return data.blockMovement;
     }
 }

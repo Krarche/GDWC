@@ -55,7 +55,7 @@ public class ServerStartTurnMessage : ServerMessage {
 }
 
 public class ServerMovementOrderMessage : ServerMessage {
-    public static short ID = 2102;
+    public static short ID = 2103;
     public int cellId;
     public int entityId;
     public ulong gameId;

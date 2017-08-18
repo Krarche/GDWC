@@ -11,6 +11,7 @@ public class MapData : GameData {
 
 
     public void buildCellDataIdList() {
+        cellDataIdList = new HashSet<string>();
         foreach (CellData c in cells)
             cellDataIdList.Add(c.id);
     }
