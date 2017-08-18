@@ -20,7 +20,7 @@ public class TurnResolution {
     }
 
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
-    public void resolveSpell(Spell spell, Entity origin, Cell target) {
+    public void resolveSpell(SpellData spell, Entity origin, Cell target) {
         foreach (EffectSpell effect in spell.effects) {
             resolveSpellEffect(effect, origin, target);
         }

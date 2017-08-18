@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Spell : GameData {
+public class SpellData : GameData {
     
     public string iconPath;
     public string description;
@@ -69,7 +69,7 @@ public class Spell : GameData {
 
 public class SpellInstance {
     public Entity owner;
-    public Spell spell;
+    public SpellData spell;
     public int cooldown;
 
     public int getCost() {

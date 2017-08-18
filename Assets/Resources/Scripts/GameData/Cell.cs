@@ -8,7 +8,7 @@ public enum Direction : int {
 
 public class Cell {
 
-	public CellType type;
+	public CellData type;
 	public int x, y, id;
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
@@ -26,7 +26,7 @@ public class Cell {
                 distance[i, j] = -1;
             }
         }
-        type = new CellType();
+        type = new CellData();
         inWorld = o;
     }
 }

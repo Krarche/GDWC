@@ -23,10 +23,10 @@ public class DataParser {
         Debug.Log("(" + 0 + "/" + path.Length + ") " + path[0] + " : " + data.ToString());
         int i = 1;
         object content = null;
-        if (data is Spell)
-            content = GameData.getFieldContent<Spell>((Spell)data, path[i]);
-        else if (data is Buff)
-            content = GameData.getFieldContent<Buff>((Buff)data, path[i]);
+        if (data is SpellData)
+            content = GameData.getFieldContent<SpellData>((SpellData)data, path[i]);
+        else if (data is BuffData)
+            content = GameData.getFieldContent<BuffData>((BuffData)data, path[i]);
         Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
         i++;
         while (i < path.Length) { // going down nested objects
@@ -114,17 +114,17 @@ public class DataParser {
         ArrayJSON maps = data.getArrayJSON("maps");
 
         // parse and save data
-        foreach (Spell s in buildSpells(spells)) {
+        foreach (SpellData s in buildSpells(spells)) {
             if (s != null) {
                 DataManager.registerData(s.id, s);
             }
         }
-        foreach (Buff b in buildBuffs(buffs)) {
+        foreach (BuffData b in buildBuffs(buffs)) {
             if (b != null) {
                 DataManager.registerData(b.id, b);
             }
         }
-        foreach (CellType ct in buildCellTypes(cellTypes)) {
+        foreach (CellData ct in buildCellTypes(cellTypes)) {
             if (ct != null) {
                 DataManager.registerData(ct.id, ct);
             }
@@ -136,14 +136,14 @@ public class DataParser {
         }
 
         // fill description macro
-        foreach (Spell s in DataManager.SPELL_DATA.Values) {
+        foreach (SpellData s in DataManager.SPELL_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(s.description);
             while (macro != "") {
                 s.description = s.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
                 macro = StringParsingTool.getNextMacro(s.description);
             }
         }
-        foreach (Buff b in DataManager.BUFF_DATA.Values) {
+        foreach (BuffData b in DataManager.BUFF_DATA.Values) {
             string macro = StringParsingTool.getNextMacro(b.description);
             while (macro != "") {
                 b.description = b.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
@@ -165,11 +165,12 @@ public class DataParser {
         output.name = map.getString("name");
         output.cells = buildMapCells(map.getArrayJSON("cells"));
         output.spawns = buildMapSpawns(map.getArrayJSON("spawns"));
+        output.buildCellDataIdList();
         return output;
     }
 
-    public static CellType[] buildMapCells(ArrayJSON array) {
-        CellType[] output = new CellType[array.Length];
+    public static CellData[] buildMapCells(ArrayJSON array) {
+        CellData[] output = new CellData[array.Length];
         for (int i = 0; i < array.Length; i++)
             output[i] = DataManager.CELL_DATA[array.getStringAt(i)];
         return output;
@@ -182,15 +183,15 @@ public class DataParser {
         return output;
     }
 
-    public static CellType[] buildCellTypes(ArrayJSON array) {
-        CellType[] output = new CellType[array.Length];
+    public static CellData[] buildCellTypes(ArrayJSON array) {
+        CellData[] output = new CellData[array.Length];
         for (int i = 0; i < array.Length; i++)
             output[i] = buildCellType(array.getObjectJSONAt(i));
         return output;
     }
 
-    public static CellType buildCellType(ObjectJSON cellType) {
-        CellType output = new CellType();
+    public static CellData buildCellType(ObjectJSON cellType) {
+        CellData output = new CellData();
         output.id = cellType.getString("id");
         output.name = cellType.getString("name");
         output.blockMovement = cellType.getBool("blockMovement");
@@ -198,15 +199,15 @@ public class DataParser {
         return output;
     }
 
-    public static Buff[] buildBuffs(ArrayJSON array) {
-        Buff[] output = new Buff[array.Length];
+    public static BuffData[] buildBuffs(ArrayJSON array) {
+        BuffData[] output = new BuffData[array.Length];
         for (int i = 0; i < array.Length; i++)
             output[i] = buildBuff(array.getObjectJSONAt(i));
         return output;
     }
 
-    public static Buff buildBuff(ObjectJSON buff) {
-        Buff output = new Buff();
+    public static BuffData buildBuff(ObjectJSON buff) {
+        BuffData output = new BuffData();
         output.id = buff.getString("id");
         output.name = buff.getString("name");
         output.iconPath = buff.getString("iconPath");
@@ -230,7 +231,7 @@ public class DataParser {
         output.affectCell = effect.containsValue("affectCell");
         output.minArea = effect.getInt("minArea", 0);
         output.maxArea = effect.getInt("maxArea", 0);
-        output.areaType = Spell.stringToRangeAreaType(effect.getString("areaType", ""));
+        output.areaType = SpellData.stringToRangeAreaType(effect.getString("areaType", ""));
         output.onGainedHandler = buildEffectHandler(effect.getObjectJSON("onGainedHandler"));
         output.onLostHandler = buildEffectHandler(effect.getObjectJSON("onLostHandler"));
         output.onDamageHandler = buildEffectHandler(effect.getObjectJSON("onDamageHandler"));
@@ -245,15 +246,15 @@ public class DataParser {
         return output;
     }
 
-    public static Spell[] buildSpells(ArrayJSON array) {
-        Spell[] output = new Spell[array.Length];
+    public static SpellData[] buildSpells(ArrayJSON array) {
+        SpellData[] output = new SpellData[array.Length];
         for (int i = 0; i < array.Length; i++)
             output[i] = buildSpell(array.getObjectJSONAt(i));
         return output;
     }
 
-    public static Spell buildSpell(ObjectJSON spell) {
-        Spell output = new Spell();
+    public static SpellData buildSpell(ObjectJSON spell) {
+        SpellData output = new SpellData();
         output.id = spell.getString("id");
         output.name = spell.getString("name");
         output.iconPath = spell.getString("iconPath");
@@ -262,7 +263,7 @@ public class DataParser {
         output.cooldown = spell.getInt("cooldown");
         output.minRange = spell.getInt("minRange");
         output.maxRange = spell.getInt("maxRange");
-        output.rangeType = Spell.stringToRangeAreaType(spell.getString("rangeType", ""));
+        output.rangeType = SpellData.stringToRangeAreaType(spell.getString("rangeType", ""));
         output.priority = spell.getInt("priority");
         output.effects = buildEffectSpells(spell.getArrayJSON("effects"));
         return output;
@@ -283,7 +284,7 @@ public class DataParser {
         output.affectCell = effect.containsValue("affectCell");
         output.minArea = effect.getInt("minArea", 0);
         output.maxArea = effect.getInt("maxArea", 0);
-        output.areaType = Spell.stringToRangeAreaType(effect.getString("areaType", ""));
+        output.areaType = SpellData.stringToRangeAreaType(effect.getString("areaType", ""));
         output.effectHandler = buildEffectHandler(effect.getObjectJSON("effectHandler"));
         output.conditions = buildEffectConditions(effect.getArrayJSON("conditions"));
         return output;

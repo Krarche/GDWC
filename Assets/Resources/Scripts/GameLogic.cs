@@ -112,12 +112,12 @@ public abstract class GameLogic {
         Entity e = entityList[o.entityId];
         if (o is MovementOrder) {
             MovementOrder mo = (MovementOrder)o;
-            Cell dest = grid.GetCell(so.cellId);
-            resolveMovement(e, dest);
+            Cell dest = grid.GetCell(mo.cellId);
+            solver.resolveMovement(e, dest);
         } else if (o is SpellOrder) {
             SpellOrder so = (SpellOrder) o;
             Cell target = grid.GetCell(so.cellId);
-            Spell spell = DataManager.SPELL_DATA[so.spellId];
+            SpellData spell = DataManager.SPELL_DATA[so.spellId];
             solver.resolveSpell(spell, e, target);
         }
     }
