@@ -56,7 +56,7 @@ public class ServerMovementOrderMessage : ServerMessage {
 
 public class ServerSendTurnActionsMessage : ServerMessage {
     public static short ID = 2110;
-    public int[][] actions; // {action type(move/spell), player id, priority (first, normal, last), datas}
+    public string actions; // {action type(move/spell), player id, priority (first, normal, last), datas}
 }
 
 public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
