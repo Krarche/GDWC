@@ -1,15 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class GameLogic {
 
+    public static float TURN_DURATION_SECONDS = 10;
+    public static float SERVER_DATA_TIMEOUT_SECONDS = 3;
     public static int MAX_TURN_NUMBER = 20;
     public static int MAX_APT = 3; // max actions per turn
 
     public ulong gameId;
     public int currentTurn;
     public bool allowActionRegistration;
+    public DateTime startTurnDate;
+    public DateTime endTurnDate;
+    public DateTime serverDataTimeoutDate;
 
 
     public Dictionary<ulong, Player> players = new Dictionary<ulong, Player>();
@@ -54,22 +60,68 @@ public abstract class GameLogic {
         players.Remove(p.playerId);
     }
 
+    // called when client received
+    public virtual void prepareNewTurn(long startTurnTimestamp) {
+        startTurnDate = DateTime.FromFileTimeUtc(startTurnTimestamp);
+        endTurnDate = startTurnDate.AddSeconds(TURN_DURATION_SECONDS);
+        serverDataTimeoutDate = endTurnDate.AddSeconds(SERVER_DATA_TIMEOUT_SECONDS);
 
-    public abstract void startNewTurn();
+        CoroutineMaster.startCoroutine(waitForTurnStart());
+    }
+
+    protected IEnumerator waitForTurnStart() {
+        DateTime now = DateTime.UtcNow;
+        TimeSpan nowToStart = startTurnDate.Subtract(now);
+
+        yield return new WaitForSecondsRealtime((float)nowToStart.TotalSeconds);
+        startTurn();
+    }
+
+    public virtual void startTurn() {
+
+        allowActionRegistration = true;
+        CoroutineMaster.startCoroutine(waitForTurnEnd());
+    }
+
+    protected IEnumerator waitForTurnEnd() {
+        DateTime now = DateTime.UtcNow;
+        TimeSpan nowToEnd = endTurnDate.Subtract(now);
+        
+        yield return new WaitForSecondsRealtime((float)nowToEnd.TotalSeconds);
+    }
+
+    public virtual void endTurn() {
+
+        allowActionRegistration = false;
+        CoroutineMaster.startCoroutine(waitForServerData());
+    }
+
+    protected IEnumerator waitForServerData() {
+        DateTime now = DateTime.UtcNow;
+        TimeSpan nowToTimeout = serverDataTimeoutDate.Subtract(now);
+        yield return new WaitForSecondsRealtime((float)nowToTimeout.TotalSeconds);
+        resolveTurn();
+    }
+
+    public virtual void resolveTurn() {
+        // resolve action
+        // notify server turn ended on client
+    }
+
     public void sendActionToServer() {
 
     }
+
     public void sendActionToClient() {
 
     }
+
     public void registerAction() { // general action registration
 
     }
+
     public abstract void registerLocalAction(); // from current client
     public abstract void registerForeignAction(); // from other client
-    public virtual void resolveTurn() {
-
-    }
 
     public virtual void resolveActions() {
         Queue<Order> fast = new Queue<Order>();

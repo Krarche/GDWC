@@ -13,8 +13,9 @@ public class GameLogicServer : GameLogic {
         return game;
     }
 
-    public override void startNewTurn() {
+    public override void startTurn() {
 
+        base.startTurn();
     }
 
     public override void registerLocalAction() { 

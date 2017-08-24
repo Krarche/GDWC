@@ -50,7 +50,7 @@ public class ClientLeaveGameRequestMessage : ClientMessage {
 public class ServerStartTurnMessage : ServerMessage {
     public static short ID = 2101;
     public int turnNumber;
-    public ulong endTurnTimeStamp;
+    public long endTurnTimestamp;
     public ulong gameId;
 }
 
