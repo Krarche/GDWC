@@ -11,16 +11,28 @@ public class GameLogicClient : GameLogic {
         game = this;
     }
 
-    public override void registerAction() {
-        throw new NotImplementedException();
+    public override void startTurn() {
+        base.startTurn();
     }
 
-    public override void resolveAction(Order o) {
-        base.resolveAction(o);
+    public override void registerLocalAction() {
+
+    }
+
+    public override void registerForeignAction() {
+
     }
 
     public override void resolveTurn() {
-        throw new NotImplementedException();
+        base.resolveTurn();
+    }
+
+    public override void resolveAction(Order o) {
+        Entity e = entityList[o.entityId];
+        if (o is MovementOrder) {
+            MovementOrder mo = (MovementOrder)o;
+            e.setCurrentCell(grid.GetCell(mo.cellId));
+        }
     }
 
     public void clearGame() {

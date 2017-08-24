@@ -1,5 +1,7 @@
 {
-	"map0": {
+	"maps":[
+		{"id":"M001",
+		"name":"Dankest dungeon",
 		"width":"7",
 		"height":"7",
 		"cells":[
@@ -13,20 +15,44 @@
 		],
 		"spawns":[
 			"21","27"
-		]
-	},
+		]},
+		{"id":"M002",
+		"name":"Flat map",
+		"width":"15",
+		"height":"15",
+		"cells":[
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C002","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C002","C001",
+			"C001","C001","C002","C001","C001","C001","C001","C001","C001","C001","C001","C001","C002","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001",
+			"C001","C001","C002","C001","C001","C001","C001","C001","C001","C001","C001","C001","C002","C001","C001",
+			"C001","C002","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C002","C001",
+			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001"
+		],
+		"spawns":[
+			"21","27"
+		]}
+	],
 	"cellTypes":[
 		{"id":"C001",
 		"name":"Low ground",
-		"modelPath":"lowGroundModel"},
+		"modelPath":"lowGround"},
 		{"id":"C002",
 		"name":"High ground",
 		"blockMovement",
 		"blockLineOfSight",
-		"modelPath":"highGroundModel"},
+		"modelPath":"highGround"},
 		{"id":"C003",
-		"blockMovement",
-		"name":"Hole"}
+		"name":"Hole",
+		"blockMovement"}
 	],
 	"entities":[
 		{"id:":"E001",
@@ -43,20 +69,34 @@
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"}}
+			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"},
+			"conditions":[{"class":"EffectConditionAPAbove","target":"TARGET","AP":"50","percent"}]}
+		]},
+		{"id":"B002",
+		"name":"Neurotoxin","iconPath":"SPRITE",
+		"description":"Deals <color=#ff0000>@B002,effects,0,onTurnStartHandler,damage;</color> indirect damages every turn while the target is above <b>@B002,effects,0,conditions,0,health; %</b> health.",
+		"effects":[
+			{"minArea":"0","maxArea":"0","areaType":"point",
+			"affectAlly","affectEnemy","affectSelf",
+			"onTurnStartHandler":{"class":"EffectHandlerIndirectDamage","damage":"2"},
+			"conditions":[{"class":"EffectConditionHealthAbove","target":"TARGET","health":"70","percent"}]},
+			{"minArea":"0","maxArea":"0","areaType":"point",
+			"affectAlly","affectEnemy","affectSelf",
+			"onTurnStartHandler":{"class":"EffectHandlerDebuff","buffId":"B002"},
+			"conditions":[{"class":"EffectConditionHealthBelow","target":"TARGET","health":"70","percent"}]}
 		]}
 	],
 	"spells":[
 		{"id":"S001",
 		"name":"Spark","iconPath":"SPRITE",
-		"description":"Deals <color=#ff0000>@S001,effects,0,effectHandler,damage;</color> damages.\n<color=#404040>Quick cast.</color>",
+		"description":"Deals <color=#ff0000>@S001,effects,0,effectHandler,damage;</color> direct damages.\n<color=#404040>Quick cast.</color>",
 		"cost":"2","cooldown":"0",
 		"minRange":"2","maxRange":"5","rangeType":"circle",
 		"priority":"0",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"effectHandler":{"class":"EffectHandlerDamage","damage":"3"}}
+			"effectHandler":{"class":"EffectHandlerDirectDamage","damage":"3"}}
 		]},
 		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",

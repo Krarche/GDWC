@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Buff : GameData {
+public class BuffData : GameData {
     
     public string iconPath;
     public string description;
@@ -11,7 +11,7 @@ public class Buff : GameData {
 }
 
 public class BuffInstance {
-    Buff type;
+    BuffData type;
     Entity origin;
     Entity target;
 
