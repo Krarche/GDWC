@@ -15,4 +15,9 @@ public class MapData : GameData {
         foreach (CellData c in cells)
             cellDataIdList.Add(c.id);
     }
+
+    public int [] getSpawns(int playerCount) {
+        // TODO
+        return spawns;
+    }
 }

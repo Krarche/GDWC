@@ -6,16 +6,19 @@ using System;
 
 public class NetworkMasterServer : MonoBehaviour {
 
+    public bool forceServer = false;
+
     public int MasterServerPort;
 
     public Dictionary<ulong, GameLogicServer> games = new Dictionary<ulong, GameLogicServer>();
-    public GameLogicServer defaultGame = null;
 
     public Dictionary<NetworkConnection, User> usersByConnection = new Dictionary<NetworkConnection, User>();
     public Dictionary<string, User> usersByName = new Dictionary<string, User>();
 
+    public GameQueue soloQueue = new GameQueue();
+
     public void Awake() {
-        if(isHeadless()) {
+        if (forceServer || isHeadless()) {
             InitializeServer();
         }
     }
@@ -32,12 +35,6 @@ public class NetworkMasterServer : MonoBehaviour {
 
         NetworkServer.Listen(MasterServerPort);
 
-        // Temporary defaultGame
-        if (defaultGame == null) {
-            defaultGame = GameLogicServer.createGame();
-            games.Add(defaultGame.gameId, defaultGame);
-        }
-
         // system msgs
         NetworkServer.RegisterHandler(MsgType.Connect, OnServerConnect);
         NetworkServer.RegisterHandler(MsgType.Disconnect, OnServerDisconnect);
@@ -47,14 +44,20 @@ public class NetworkMasterServer : MonoBehaviour {
         NetworkServer.RegisterHandler(ClientIdentificationRequestMessage.ID, OnServerIdentificationRequest);
         NetworkServer.RegisterHandler(ClientJoinGameRequestMessage.ID, OnServerJoinGameRequest);
         NetworkServer.RegisterHandler(ClientLeaveGameRequestMessage.ID, OnServerLeaveGameRequest);
-        NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnClientMovementOrder);
+        NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnServerMovementOrder);
+
+        // queue
+        NetworkServer.RegisterHandler(ClientJoinSoloQueueRequestMessage.ID, OnServerJoinSoloQueueRequest);
+        NetworkServer.RegisterHandler(ClientLeaveSoloQueueRequestMessage.ID, OnServerLeaveSoloQueueRequest);
+        NetworkServer.RegisterHandler(ClientReadyToPlayMessage.ID, OnServerReadyToPlay);
+        //NetworkServer.RegisterHandler(ClientRegisterTurnActionsMessage.ID, OnSer);
 
         DontDestroyOnLoad(gameObject);
 
         Debug.Log("Server initialized");
     }
 
-    
+
     // --------------- System handlers -----------------
     private void OnServerConnect(NetworkMessage netMsg) {
         Debug.Log("Received connection request from client " + netMsg.conn.address);
@@ -88,21 +91,16 @@ public class NetworkMasterServer : MonoBehaviour {
 
         u.identify(msg.userName, msg.userId);
         usersByConnection[netMsg.conn] = u;
+        u.connection = netMsg.conn;
         ServerIdentificationResponse(u, netMsg.conn);
     }
-   
+
     void ServerIdentificationResponse(User u, NetworkConnection client) {
         ServerIdentificationResponseMessage msg = new ServerIdentificationResponseMessage();
         msg.isSuccessful = u.isIdentified;
         msg.userId = u.userId;
         msg.userName = u.userName; // temporary
-
-        if(u.currentGameId != 0) {
-            msg.currentGameId = u.currentGameId;
-        }
-        else {
-            msg.currentGameId = 0;
-        }
+        msg.currentGameId = u.currentGameId;
 
         client.Send(ServerIdentificationResponseMessage.ID, msg);
         Debug.Log("Sent ServerIdentificationResponse " + msg.isSuccessful);
@@ -110,45 +108,50 @@ public class NetworkMasterServer : MonoBehaviour {
 
 
     // --------------- Join game handlers -----------------
-    private void OnServerJoinGameRequest(NetworkMessage netMsg) {
-        ClientJoinGameRequestMessage msg = netMsg.ReadMessage<ClientJoinGameRequestMessage>();
-        Debug.Log("Server received JoinGame request from "  + msg.userId + " " + msg.userName);
+    // queue
+    private void OnServerJoinSoloQueueRequest(NetworkMessage netMsg) {
+        ClientJoinSoloQueueRequestMessage msg = netMsg.ReadMessage<ClientJoinSoloQueueRequestMessage>();
+        Debug.Log("Server received JoinSoloQueue request from " + msg.userId + " " + msg.userName);
         User u = usersByName[msg.userName];
         if (u.isIdentified) {
-            ServerJoinGameResponse(u, defaultGame.gameId, netMsg.conn);
-            u.currentGameId = defaultGame.gameId;
-        }
-        else {
-            ServerJoinGameResponseMessage responseMsg = new ServerJoinGameResponseMessage();
-            responseMsg.hasJoined = false;
-            netMsg.conn.Send(ServerJoinGameResponseMessage.ID, responseMsg);
+            if (soloQueue.queueUser(u)) {
+                GameLogic newgame = soloQueue.checkQueue();
+                if (newgame != null) {
+                    ServerSendNewGameDataToPlayers(newgame);
+                } else {
+                    ServerJoinSoloQueueResponseMessage responseMsg = new ServerJoinSoloQueueResponseMessage();
+                    responseMsg.joinedQueue = true;
+                    netMsg.conn.Send(ServerJoinSoloQueueResponseMessage.ID, responseMsg);
+                }
+            }
+        } else {
+            ServerJoinSoloQueueResponseMessage responseMsg = new ServerJoinSoloQueueResponseMessage();
+            responseMsg.joinedQueue = false;
+            netMsg.conn.Send(ServerJoinSoloQueueResponseMessage.ID, responseMsg);
         }
     }
 
-    void ServerJoinGameResponse(User u, ulong gameId, NetworkConnection conn) {
+    private void OnServerLeaveSoloQueueRequest(NetworkMessage netMsg) {
+        ClientLeaveSoloQueueRequestMessage msg = netMsg.ReadMessage<ClientLeaveSoloQueueRequestMessage>();
+        Debug.Log("Server received LeaveSoloQueue request from " + msg.userId + " " + msg.userName);
+        User u = usersByName[msg.userName];
+        if (u.isIdentified && u.currentGameId == 0) {
+            soloQueue.unqueueUser(u);
+        } else {
+            // game already found
+            // sad player :)
+        }
+    }
+
+    void ServerSendNewGameDataToPlayers(GameLogic game) {
         ServerJoinGameResponseMessage msg = new ServerJoinGameResponseMessage();
 
-
-        // Adding new player to server game
-        if (u.player == null) {
-            u.player = CreatePlayer(u, 0);
-            games[gameId].addPlayer(u.player);
-        } else if (games[gameId].players.ContainsKey(u.player.playerId)) {
-            u.player = games[gameId].players[u.player.playerId];
-        }
-
-        int playerCount = defaultGame.players.Count;
-        msg.cellIds = new int[playerCount];
-        msg.playerIds = new ulong[playerCount];
-        msg.entityIds = new int[playerCount];
-        msg.displayedNames = new string[playerCount];
-        msg.r = new float[playerCount];
-        msg.g = new float[playerCount];
-        msg.b = new float[playerCount];
+        int playerCount = game.players.Count;
+        msg.initArrays(playerCount);
 
         // Adding all existing players to message (including new player)
         int i = 0;
-        foreach(Player p in games[gameId].players.Values) {
+        foreach (Player p in game.players.Values) {
             msg.cellIds[i] = p.getCurrentCellId();
             msg.playerIds[i] = p.playerId;
             msg.entityIds[i] = p.playerEntity.entityId;
@@ -159,37 +162,64 @@ public class NetworkMasterServer : MonoBehaviour {
             i++;
         }
 
-        msg.gameId = gameId;
-        msg.clientPlayerId = u.player.playerId;
+        msg.gameId = game.gameId;
+        msg.mapId = game.mapId;
         msg.hasJoined = true;
 
-        // Sending new player to all other clients
-        ServerPlayerJoinedMessage msg_addPlayer = new ServerPlayerJoinedMessage();
-        Player newPlayer = u.player;
-        msg_addPlayer.cellId = newPlayer.getCurrentCellId();
-        msg_addPlayer.playerId = newPlayer.playerId;
-        msg_addPlayer.entityId = newPlayer.playerEntity.entityId;
-        msg_addPlayer.displayedName = newPlayer.playerName;
-        msg_addPlayer.r = newPlayer.playerColor.r;
-        msg_addPlayer.g = newPlayer.playerColor.g;
-        msg_addPlayer.b = newPlayer.playerColor.b;
+        foreach (Player player in game.players.Values) {
+            msg.clientPlayerId = player.playerId;
+            User u = player.user;
+            u.connection.Send(ServerJoinGameResponseMessage.ID, msg);
+        }
+    }
 
-        SendToOtherGamePlayers(msg_addPlayer, ServerPlayerJoinedMessage.ID, gameId, u);
+    private void OnServerReadyToPlay(NetworkMessage netMsg) {
+        ClientReadyToPlayMessage msg = netMsg.ReadMessage<ClientReadyToPlayMessage>();
+        GameLogicServer game = games[msg.gameId];
+    }
+
+    private void OnServerJoinGameRequest(NetworkMessage netMsg) {
+        ClientJoinGameRequestMessage msg = netMsg.ReadMessage<ClientJoinGameRequestMessage>();
+        Debug.Log("Server received JoinGame request from " + msg.userId + " " + msg.userName);
+        User u = usersByName[msg.userName];
+        GameLogic game = games[msg.gameId];
+        if (u.isIdentified) {
+            ServerJoinGameResponse(u, game, netMsg.conn);
+        } else {
+            ServerJoinGameResponseMessage responseMsg = new ServerJoinGameResponseMessage();
+            responseMsg.hasJoined = false;
+            netMsg.conn.Send(ServerJoinGameResponseMessage.ID, responseMsg);
+        }
+    }
+
+    void ServerJoinGameResponse(User u, GameLogic game, NetworkConnection conn) {
+        ServerJoinGameResponseMessage msg = new ServerJoinGameResponseMessage();
+
+        int playerCount = game.players.Count;
+        msg.initArrays(playerCount);
+
+        // Adding all existing players to message (including new player)
+        int i = 0;
+        foreach (Player p in game.players.Values) {
+            msg.cellIds[i] = p.getCurrentCellId();
+            msg.playerIds[i] = p.playerId;
+            msg.entityIds[i] = p.playerEntity.entityId;
+            msg.displayedNames[i] = p.playerName;
+            msg.r[i] = p.playerColor.r;
+            msg.g[i] = p.playerColor.g;
+            msg.b[i] = p.playerColor.b;
+            i++;
+        }
+
+        msg.gameId = game.gameId;
+        msg.currentTurn = game.currentTurn;
+        msg.mapId = game.mapId;
+        msg.hasJoined = true;
+
+
+        msg.clientPlayerId = u.player.playerId;
         conn.Send(ServerJoinGameResponseMessage.ID, msg);
     }
-
-    public Player CreatePlayer(User u, int cellId) {
-        Player p = new Player();
-        defaultGame.lastEntityIdGenerated++;
-        Cell cell = defaultGame.grid.GetCell(cellId);
-        p.playerEntity = defaultGame.createEntity(defaultGame.lastEntityIdGenerated);
-        p.playerEntity.setCurrentCell(cell);
-        p.playerEntity.setColor(p.playerColor);
-        p.playerEntity.setDisplayedName(u.userName); // Temporary userName = playerName
-        p.playerName = u.userName;
-        return p;
-    }
-
 
     // --------------- Leave game handlers -----------------
     private void OnServerLeaveGameRequest(NetworkMessage netMsg) {
@@ -197,10 +227,9 @@ public class NetworkMasterServer : MonoBehaviour {
         Debug.Log("Server received LeaveGame request from " + msg.userId);
         User u = usersByName[msg.userName];
         if (u.currentGameId != 0) {
-            ServerLeaveGameResponse(u, defaultGame.gameId, netMsg.conn); // temporary default gameId
+            ServerLeaveGameResponse(u, u.currentGameId, netMsg.conn); // temporary default gameId
             u.currentGameId = 0;
-        }
-        else {
+        } else {
             ServerLeaveGameResponseMessage responseMsg = new ServerLeaveGameResponseMessage();
             responseMsg.hasLeft = false;
             netMsg.conn.Send(ServerJoinGameResponseMessage.ID, responseMsg);
@@ -227,7 +256,7 @@ public class NetworkMasterServer : MonoBehaviour {
 
 
     // --------------- Movement handlers -----------------
-    void OnClientMovementOrder(NetworkMessage netMsg) {
+    void OnServerMovementOrder(NetworkMessage netMsg) {
         ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
         Debug.Log("Server received OnClientMovementOrder ");
         GameLogicServer game = games[msg.gameId];

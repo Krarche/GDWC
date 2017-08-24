@@ -34,12 +34,42 @@ public class ClientJoinGameRequestMessage : ClientMessage {
     public static short ID = 1114;
     public ulong userId;
     public string userName;
+    public ulong gameId;
 }
 
 public class ClientLeaveGameRequestMessage : ClientMessage {
     public static short ID = 1115;
     public ulong userId;
     public string userName;
+}
+
+// queue
+
+public class ClientJoinSoloQueueRequestMessage : ClientMessage {
+    public static short ID = 1200;
+    public ulong userId;
+    public string userName;
+}
+
+public class ClientLeaveSoloQueueRequestMessage : ClientMessage {
+    public static short ID = 1201;
+    public ulong userId;
+    public string userName;
+}
+
+public class ClientReadyToPlayMessage : ClientMessage {
+    public static short ID = 1202;
+    public ulong userId;
+    public string userName;
+    public ulong gameId;
+}
+
+public class ClientRegisterTurnActionsMessage : ClientMessage {
+    public static short ID = 1203;
+    public ulong userId;
+    public string userName;
+    public ulong gameId;
+    // actions
 }
 
 
@@ -59,11 +89,6 @@ public class ServerMovementOrderMessage : ServerMessage {
     public int cellId;
     public int entityId;
     public ulong gameId;
-}
-
-public class ServerSendTurnActionsMessage : ServerMessage {
-    public static short ID = 2110;
-    public string actions; // {action type(move/spell), player id, priority (first, normal, last), datas}
 }
 
 public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
@@ -90,6 +115,8 @@ public class ServerIdentificationResponseMessage : ServerMessage {
 public class ServerJoinGameResponseMessage : ServerMessage {
     public static short ID = 2114;
     public ulong gameId;
+    public string mapId;
+    public int currentTurn;
     public ulong clientPlayerId;
     public int[] cellIds;
     public ulong[] playerIds;
@@ -97,6 +124,16 @@ public class ServerJoinGameResponseMessage : ServerMessage {
     public string[] displayedNames;
     public float[] r, g, b;
     public bool hasJoined;
+
+    public void initArrays(int size) {
+        cellIds = new int[size];
+        playerIds = new ulong[size];
+        entityIds = new int[size];
+        displayedNames = new string[size];
+        r = new float[size];
+        g = new float[size];
+        b = new float[size];
+    }
 }
 
 public class ServerPlayerJoinedMessage : ServerMessage {
@@ -118,5 +155,39 @@ public class ServerPlayerLeftGameMessage : ServerMessage {
     public ulong playerId;
     public string playerName;
 }
+
+// queue
+
+public class ServerJoinSoloQueueResponseMessage : ServerMessage {
+    public static short ID = 2200;
+    public bool joinedQueue;
+}
+
+public class ServerStartGameMessage : ServerMessage {
+    public static short ID = 2300;
+    public long startFirstTurnTimestamp;
+    // timestamp du début du premier tour
+}
+
+public class ServerStartNewTurnMessage : ServerMessage {
+    public static short ID = 2301;
+    public long startTurnTimestamp;
+    // timestamp du début du nouveau tour
+}
+
+public class ServerSendTurnActionsMessage : ServerMessage {
+    public static short ID = 2302;
+    public bool joinedQueue;
+    // actions de tous les joueurs
+}
+
+public class ServerEndGameMessage : ServerMessage {
+    public static short ID = 2303;
+    public bool joinedQueue;
+    // résultats
+}
+
+
+
 
 

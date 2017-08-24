@@ -6,11 +6,20 @@ using UnityEngine;
 public class GameLogicServer : GameLogic {
 
     public static ulong gameCount = 0;
+    public int loadingPlayersNumber;
+
+    public bool isGameReady {
+        get { return loadingPlayersNumber == 0; }
+    }
 
     public static GameLogicServer createGame() {
         GameLogicServer game = new GameLogicServer();
-        game.gameId = ++gameCount;
+        game.gameId = gameCount++;
         return game;
+    }
+
+    private GameLogicServer() : base() {
+
     }
 
     public override void startTurn() {

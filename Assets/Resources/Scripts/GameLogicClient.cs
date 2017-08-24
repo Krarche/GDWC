@@ -7,7 +7,7 @@ public class GameLogicClient : GameLogic {
 
     public static GameLogicClient game;
 
-    public GameLogicClient(): base() {
+    public GameLogicClient(string mapId): base(mapId) {
         game = this;
     }
 

@@ -20,18 +20,18 @@ public class DataParser {
         if (path.Length == 1)
             return ""; // should not happen
         GameData data = DataManager.GAME_DATA[path[0]];
-        Debug.Log("(" + 0 + "/" + path.Length + ") " + path[0] + " : " + data.ToString());
+        //Debug.Log("(" + 0 + "/" + path.Length + ") " + path[0] + " : " + data.ToString());
         int i = 1;
         object content = null;
         if (data is SpellData)
             content = GameData.getFieldContent<SpellData>((SpellData)data, path[i]);
         else if (data is BuffData)
             content = GameData.getFieldContent<BuffData>((BuffData)data, path[i]);
-        Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+        //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
         i++;
         while (i < path.Length) { // going down nested objects
             if (content is Array) {
-                Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+                //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                 int index = int.Parse(path[i]);
                 if (content is EffectSpell[]) {
                     content = ((EffectSpell[])content)[index];
@@ -42,9 +42,9 @@ public class DataParser {
                 if (content is EffectCondition[]) {
                     content = ((EffectCondition[])content)[index];
                 }
-                Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+                //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
             } else {
-                Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+                //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                 if (content is EffectSpell)
                     content = GameData.getFieldContent<EffectSpell>((EffectSpell)content, path[i]);
                 else if (content is EffectBuff)
@@ -98,8 +98,8 @@ public class DataParser {
                     content = GameData.getFieldContent<EffectConditionHasNotBuff>((EffectConditionHasNotBuff)content, path[i]).ToString();
                     i++;
                 }
-                if (i < path.Length)
-                    Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+                //if (i < path.Length)
+                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
             }
             i++;
         }
@@ -175,7 +175,7 @@ public class DataParser {
         CellData[] output = new CellData[array.Length];
         for (int i = 0; i < array.Length; i++) {
             output[i] = DataManager.CELL_DATA[array.getStringAt(i)];
-            Debug.Log("(" + i + ") " + output[i].id);
+            //Debug.Log("(" + i + ") " + output[i].id);
         }
         return output;
     }

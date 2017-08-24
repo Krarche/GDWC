@@ -16,7 +16,7 @@ public class NetworkMasterClient : MonoBehaviour {
 
     public bool isConnected {
         get {
-            return client == null;
+            return client != null;
         }
     }
 
@@ -59,6 +59,11 @@ public class NetworkMasterClient : MonoBehaviour {
         
         client.RegisterHandler(ServerMovementOrderMessage.ID, OnMovementOrder);
 
+
+        // queue
+        client.RegisterHandler(ServerJoinSoloQueueResponseMessage.ID, OnClientJoinSoloQueue);
+        client.RegisterHandler(ServerStartGameMessage.ID, OnClientStartGame);
+        client.RegisterHandler(ServerStartNewTurnMessage.ID, OnClientStartNewTurn);
         DontDestroyOnLoad(gameObject);
     }
 
@@ -103,7 +108,7 @@ public class NetworkMasterClient : MonoBehaviour {
             Debug.Log("Client successfully identified");
             user = new User(msg.userId, msg.userName);
             user.isIdentified = true;
-
+            user.currentGameId = msg.currentGameId;
             // If client was in game on identification, join it
             if (msg.currentGameId != 0) {
                 ClientJoinGameRequest();
@@ -113,12 +118,42 @@ public class NetworkMasterClient : MonoBehaviour {
         }
     }
 
-
     // --------------- Join game handlers -----------------
+
+    // queue
+    private void ClientJoinSoloQueueRequest() {
+        ClientJoinSoloQueueRequestMessage msg = new ClientJoinSoloQueueRequestMessage();
+        msg.userId = user.userId;
+        msg.userName = user.userName;
+        client.Send(ClientJoinSoloQueueRequestMessage.ID, msg);
+        user.isQueued = true;
+        Debug.Log("Sent join solo queue request");
+    }
+
+    private void ClientLeaveSoloQueueRequest() {
+        ClientLeaveSoloQueueRequestMessage msg = new ClientLeaveSoloQueueRequestMessage();
+        msg.userId = user.userId;
+        msg.userName = user.userName;
+        client.Send(ClientLeaveSoloQueueRequestMessage.ID, msg);
+        user.isQueued = false;
+        Debug.Log("Sent join solo queue request");
+    }
+
+    private void OnClientJoinSoloQueue(NetworkMessage netMsg) {
+        ServerJoinSoloQueueResponseMessage msg = netMsg.ReadMessage<ServerJoinSoloQueueResponseMessage>();
+        if (msg.joinedQueue) {
+            Debug.Log("Successfully joined solo queue.");
+        } else {
+            Debug.LogError("Failed to join solo queue.");
+        }
+    }
+
+
     private void ClientJoinGameRequest() {
         ClientJoinGameRequestMessage msg = new ClientJoinGameRequestMessage();
         msg.userId = user.userId;
         msg.userName = user.userName;
+        msg.gameId = user.currentGameId;
         client.Send(ClientJoinGameRequestMessage.ID, msg);
         Debug.Log("Sent join game request");
     }
@@ -127,10 +162,10 @@ public class NetworkMasterClient : MonoBehaviour {
         ServerJoinGameResponseMessage msg = netMsg.ReadMessage<ServerJoinGameResponseMessage>();
 
         if(msg.hasJoined) {
-            GameLogicClient game = new GameLogicClient();
+            GameLogicClient game = new GameLogicClient(msg.mapId);
             game.gameId = msg.gameId;
+            game.currentTurn = msg.currentTurn;
             user.currentGameId = game.gameId;
-
             for (int i = 0; i < msg.cellIds.Length; i++) {
                 ulong playerId = msg.playerIds[i];
                 int cellId = msg.cellIds[i];
@@ -144,13 +179,32 @@ public class NetworkMasterClient : MonoBehaviour {
                 if(msg.clientPlayerId == playerId) {
                     user.player = temp;
                 }
-            
             }
+            ClientReadyToPlay();
             Debug.Log("Received ServerJoinGameResponseMessage " + msg.gameId);
         }
         else {
-            Debug.Log("Failed to join game.");
+            Debug.LogError("Failed to join game.");
         }
+    }
+
+    void ClientReadyToPlay() {
+        ClientReadyToPlayMessage msg = new ClientReadyToPlayMessage();
+        msg.userId = user.userId;
+        msg.userName = user.userName;
+        msg.gameId = user.currentGameId;
+        client.Send(ClientReadyToPlayMessage.ID, msg);
+    }
+
+    void OnClientStartGame(NetworkMessage netMsg) {
+        ServerStartGameMessage msg = netMsg.ReadMessage<ServerStartGameMessage>();
+        GameLogicClient.game.prepareNewTurn(msg.startFirstTurnTimestamp);
+        // passer l'écran d'attente des joueurs
+    }
+
+    void OnClientStartNewTurn(NetworkMessage netMsg) {
+        ServerStartNewTurnMessage msg = netMsg.ReadMessage<ServerStartNewTurnMessage>();
+        GameLogicClient.game.prepareNewTurn(msg.startTurnTimestamp);
     }
 
 
@@ -164,14 +218,14 @@ public class NetworkMasterClient : MonoBehaviour {
     private Player CreatePlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
         if (!GameLogicClient.game.players.ContainsKey(playerId)) {
             Cell cell = GameLogicClient.game.grid.GetCell(cellId);
-            Entity e = GameLogicClient.game.createEntity(entityId);
-            e.setCurrentCell(cell);
-            e.setColor(r, g, b);
-            e.applyColor();
-            e.setDisplayedName(displayedName);
-            Player p = new Player(playerId, e);
-            GameLogicClient.game.addPlayer(p);
-            Debug.Log("Client received OnCreatePlayer " + playerId);
+            Player p = new Player();
+            p.playerId = playerId;
+            p.playerName = displayedName;
+            GameLogicClient.game.spawnPlayer(p);
+            p.playerEntity.setColor(r, g, b);
+            p.playerEntity.applyColor();
+            p.playerEntity.setDisplayedName(displayedName);
+            p.playerEntity.setCurrentCell(cell);
             return p;
         } else {
             return GameLogicClient.game.players[playerId];
@@ -235,13 +289,22 @@ public class NetworkMasterClient : MonoBehaviour {
                 SceneManager.LoadScene("login");
             }
             if (user.currentGameId == 0) {
-                if (GUI.Button(new Rect(10, 100, 200, 20), "Join game")) {
-                    ClientJoinGameRequest();
+                if (user.isQueued) {
+                    if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
+                        ClientJoinSoloQueueRequest();
+                    }
+                } else {
+                    if (GUI.Button(new Rect(10, 100, 200, 20), "Leave solo queue")) {
+                        ClientLeaveSoloQueueRequest();
+                    }
                 }
-            }
-            else {
+            } else {
                 if (GUI.Button(new Rect(10, 100, 200, 20), "Leave game")) {
                     ClientLeaveGameRequest();
+                }
+                if(GameLogicClient.game != null) {
+                    GUI.Label(new Rect(10, 180, 200, 20), "Turn : " + GameLogicClient.game.currentTurn);
+                    GUI.Label(new Rect(10, 260, 200, 20), "Time remaininig : " + GameLogicClient.game.secondRemaining);
                 }
             }
         }

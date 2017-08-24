@@ -14,26 +14,23 @@ public class Grid {
     public GameObject gridHolder;
     public GameLogic game;
     public List<Cell> selectedCells;
+    public MapData mapData;
 
-    public Grid(GameLogic game) {
-        worldObjects = new Dictionary<GameObject, Cell>();
-        this.game = game;
-    }
-
-    public Grid(GameLogic game, MapData map) {
+    public Grid(GameLogic game, MapData mapData) {
+        this.mapData = mapData;
         worldObjects = new Dictionary<GameObject, Cell>();
         this.game = game;
         cellBase = Resources.Load<GameObject>("Prefabs/CellBase");
-        this.sizeX = map.width;
-        this.sizeY = map.height;
-        createCellPefabs(map);
-        initPosition(map);
+        this.sizeX = mapData.width;
+        this.sizeY = mapData.height;
+        createCellPefabs();
+        initPosition();
         initDistance();
     }
 
-    public void createCellPefabs(MapData map) {
+    public void createCellPefabs() {
         cellPrefabs = new Dictionary<string, GameObject>();
-        foreach (string idCellData in map.cellDataIdList) {
+        foreach (string idCellData in mapData.cellDataIdList) {
             GameObject cellPrefab = new GameObject();
             cellPrefabs[idCellData] = cellPrefab;
             CellData cellData = DataManager.CELL_DATA[idCellData];
@@ -53,20 +50,11 @@ public class Grid {
         }
     }
 
-
-    public void initialisation(int x, int y) {
-        cellBase = Resources.Load<GameObject>("Prefabs/CellBase");
-        this.sizeX = x;
-        this.sizeY = y;
-        initPosition();
-        initDistance();
-    }
-
     public void clearGrid() {
         GameObject.Destroy(gridHolder);
     }
 
-    private void initPosition(MapData map = null) {
+    private void initPosition() {
         gridHolder = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/GridHolder"), new Vector3(0, 0, 0), Quaternion.identity);
         gridHolder.name = "GridHolder";
         cells = new Cell[sizeX, sizeY];
@@ -74,10 +62,10 @@ public class Grid {
             for (int x = 0; x < sizeX; x++) {
                 int id = x + y * sizeX;
                 CellData cd = null;
-                if (map != null)
-                    cd = map.cells[id];
+                if (mapData != null)
+                    cd = mapData.cells[id];
                 GameObject o;
-                if (map != null && cd != null) {
+                if (mapData != null && cd != null) {
                     Debug.Log("CellData " + cd.id + " found");
                     o = GameObject.Instantiate(cellPrefabs[cd.id], new Vector3(x, 0, y), Quaternion.identity);
                     o.SetActive(true);
@@ -86,7 +74,7 @@ public class Grid {
                 }
                 o.transform.parent = gridHolder.transform;
                 Cell c;
-                if (map != null && cd != null) {
+                if (mapData != null && cd != null) {
                     c = new Cell(sizeX, sizeY, o, cd);
                 } else {
                     c = new Cell(sizeX, sizeY, o);

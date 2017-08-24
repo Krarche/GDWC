@@ -17,7 +17,7 @@ public class ParserJSON {
 
     public static ObjectJSON getObjectJSONFromAsset(string assetName) {
         TextAsset asset = Resources.Load(assetName) as TextAsset;
-        Debug.Log(asset.text);
+        //Debug.Log(asset.text);
         return new ObjectJSON(cleanJSON(asset.text));
     }
 

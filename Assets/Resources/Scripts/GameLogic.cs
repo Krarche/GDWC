@@ -12,10 +12,24 @@ public abstract class GameLogic {
 
     public ulong gameId;
     public int currentTurn;
+
+    public double timeRemaining {
+        get {
+            DateTime now = DateTime.UtcNow;
+            TimeSpan nowToStart = startTurnDate.Subtract(now);
+            return nowToStart.TotalSeconds;
+        }
+    }
+
+    public int secondRemaining {
+        get { return (int)timeRemaining; }
+    }
+
     public bool allowActionRegistration;
     public DateTime startTurnDate;
     public DateTime endTurnDate;
     public DateTime serverDataTimeoutDate;
+    public string mapId = "NULL";
 
 
     public Dictionary<ulong, Player> players = new Dictionary<ulong, Player>();
@@ -30,17 +44,23 @@ public abstract class GameLogic {
     public GameLogic() {
         playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
         solver = new TurnResolution(this);
-        grid = new Grid(this, DataManager.MAP_DATA["M002"]);
-        // grid.initialisation(15, 15);
+        mapId = "M002";
+        grid = new Grid(this, DataManager.MAP_DATA[mapId]);
+    }
+    public GameLogic(string mapId) {
+        playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
+        solver = new TurnResolution(this);
+        this.mapId = mapId;
+        grid = new Grid(this, DataManager.MAP_DATA[mapId]);
     }
 
-    public Entity createEntity(int entityId) {
+    public Entity createEntity() {
         Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
-        entity.entityId = entityId;
+        entity.entityId = lastEntityIdGenerated++;
         entity.game = this;
         entity.grid = grid;
         entity.setCurrentCell(grid.GetCell(0));
-        entityList[entityId] = entity;
+        entityList[lastEntityIdGenerated] = entity;
         return entity;
     }
 
@@ -48,8 +68,14 @@ public abstract class GameLogic {
         GameObject.Destroy(e.gameObject);
     }
 
-    public void addPlayer(Player p) {
+    public void spawnPlayer(Player p) {
         if (!players.ContainsKey(p.playerId)) {
+            p.playerEntity = createEntity();
+            p.playerEntity.setColor(p.playerColor);
+            p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
+            int cellId = grid.mapData.getSpawns(2)[players.Count];
+            Cell cell = grid.GetCell(cellId);
+            p.playerEntity.setCurrentCell(cell);
             players[p.playerId] = p;
         }
     }

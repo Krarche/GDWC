@@ -51,5 +51,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5dd5da7222a6c346859d75361ec1b43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  forceServer: 0
   MasterServerPort: 25000
-  gameCount: 0
