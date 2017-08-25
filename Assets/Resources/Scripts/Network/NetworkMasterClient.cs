@@ -31,8 +31,8 @@ public class NetworkMasterClient : MonoBehaviour {
 
     private void Start() {
         user = new User();
-        user.userId = 1;
-        user.userName = "Dara-Daratrix";
+        user.userId = 2;
+        user.userName = "PupaBestAnime";
         InitializeClient();
     }
 
