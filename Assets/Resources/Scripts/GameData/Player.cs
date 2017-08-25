@@ -26,7 +26,7 @@ public class Player {
         this.playerEntity = e;
     }
 
-    public void addOrder(Order o) {
+    public void addOrder(Action o) {
         playerEntity.addOrder(o);
     }
 

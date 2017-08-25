@@ -27,10 +27,10 @@ public class GameLogicClient : GameLogic {
         base.resolveTurn();
     }
 
-    public override void resolveAction(Order o) {
+    public override void resolveAction(Action o) {
         Entity e = entityList[o.entityId];
-        if (o is MovementOrder) {
-            MovementOrder mo = (MovementOrder)o;
+        if (o is MovementAction) {
+            MovementAction mo = (MovementAction)o;
             e.setCurrentCell(grid.GetCell(mo.cellId));
         }
     }

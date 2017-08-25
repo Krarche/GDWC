@@ -264,13 +264,13 @@ public class NetworkMasterServer : MonoBehaviour {
     }
 
     public void MovementOrder(GameLogicServer game, int cellId, int entityId) {
-        game.entityList[entityId].addOrder(new MovementOrder(cellId, entityId));
+        game.entityList[entityId].addOrder(new MovementAction(cellId, entityId));
         ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
         msg.cellId = cellId;
         msg.entityId = entityId;
         msg.gameId = game.gameId;
         SendToAllGamePlayers(msg, ServerMovementOrderMessage.ID, game.gameId);
-        game.resolveAction(new MovementOrder(cellId, entityId));
+        game.resolveAction(new MovementAction(cellId, entityId));
         Debug.Log("Server sent MovementOrder ");
     }
 

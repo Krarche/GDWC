@@ -33,7 +33,7 @@ public class Entity : MonoBehaviour {
     }
 
 
-    public Queue<Order> orders = new Queue<Order>();
+    public Queue<Action> orders = new Queue<Action>();
 
     public Animator animator;
     public TextMesh entityNameText;
@@ -88,7 +88,7 @@ public class Entity : MonoBehaviour {
         return currentCellId;
     }
 
-    public void addOrder(Order o) {
+    public void addOrder(Action o) {
         orders.Enqueue(o);
     }
 

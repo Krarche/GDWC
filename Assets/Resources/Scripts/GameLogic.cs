@@ -150,14 +150,14 @@ public abstract class GameLogic {
     public abstract void registerForeignAction(); // from other client
 
     public virtual void resolveActions() {
-        Queue<Order> fast = new Queue<Order>();
-        Queue<Order> move = new Queue<Order>();
-        Queue<Order> slow = new Queue<Order>();
+        Queue<Action> fast = new Queue<Action>();
+        Queue<Action> move = new Queue<Action>();
+        Queue<Action> slow = new Queue<Action>();
 
         for (int i = 0; i < MAX_APT; i++) {
             foreach (Player p in players.Values) {
                 if (p.playerEntity.orders.Count > 0) {
-                    Order o = p.playerEntity.orders.Dequeue();
+                    Action o = p.playerEntity.orders.Dequeue();
                     switch (o.getPriority()) {
                         case 0:
                             fast.Enqueue(o);
@@ -177,18 +177,18 @@ public abstract class GameLogic {
         }
     }
 
-    public virtual void resolvePriority(Queue<Order> q) {
-        Order o;
+    public virtual void resolvePriority(Queue<Action> q) {
+        Action o;
         while (q.Count > 0) {
             o = q.Dequeue();
             resolveAction(o);
         }
     }
 
-    public virtual void resolveAction(Order o) {
+    public virtual void resolveAction(Action o) {
         Entity e = entityList[o.entityId];
-        if (o is MovementOrder) {
-            MovementOrder mo = (MovementOrder)o;
+        if (o is MovementAction) {
+            MovementAction mo = (MovementAction)o;
             Cell dest = grid.GetCell(mo.cellId);
             solver.resolveMovement(e, dest);
         } else if (o is SpellOrder) {

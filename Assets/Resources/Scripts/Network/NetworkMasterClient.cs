@@ -264,8 +264,8 @@ public class NetworkMasterClient : MonoBehaviour {
     // --------------- Movement handlers -----------------
     private void OnMovementOrder(NetworkMessage netMsg) {
         ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
-        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementOrder(msg.cellId, msg.entityId));
-        GameLogicClient.game.resolveAction(new MovementOrder(msg.cellId, msg.entityId));
+        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementAction(msg.cellId, msg.entityId));
+        GameLogicClient.game.resolveAction(new MovementAction(msg.cellId, msg.entityId));
         Debug.Log("Client received OnMovementOrder " + msg.entityId);
     }
 
