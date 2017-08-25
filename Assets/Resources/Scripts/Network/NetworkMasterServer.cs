@@ -44,13 +44,16 @@ public class NetworkMasterServer : MonoBehaviour {
         NetworkServer.RegisterHandler(ClientIdentificationRequestMessage.ID, OnServerIdentificationRequest);
         NetworkServer.RegisterHandler(ClientJoinGameRequestMessage.ID, OnServerJoinGameRequest);
         NetworkServer.RegisterHandler(ClientLeaveGameRequestMessage.ID, OnServerLeaveGameRequest);
-        NetworkServer.RegisterHandler(ClientMovementOrderMessage.ID, OnServerMovementOrder);
 
         // queue
         NetworkServer.RegisterHandler(ClientJoinSoloQueueRequestMessage.ID, OnServerJoinSoloQueueRequest);
         NetworkServer.RegisterHandler(ClientLeaveSoloQueueRequestMessage.ID, OnServerLeaveSoloQueueRequest);
+
+        // game
         NetworkServer.RegisterHandler(ClientReadyToPlayMessage.ID, OnServerReadyToPlay);
-        //NetworkServer.RegisterHandler(ClientRegisterTurnActionsMessage.ID, OnSer);
+
+        // turn
+        NetworkServer.RegisterHandler(ClientRegisterTurnActionsMessage.ID, OnServerRegisterTurnActions);
 
         DontDestroyOnLoad(gameObject);
 
@@ -256,22 +259,21 @@ public class NetworkMasterServer : MonoBehaviour {
 
 
     // --------------- Movement handlers -----------------
-    void OnServerMovementOrder(NetworkMessage netMsg) {
-        ClientMovementOrderMessage msg = netMsg.ReadMessage<ClientMovementOrderMessage>();
-        Debug.Log("Server received OnClientMovementOrder ");
+    void OnServerRegisterTurnActions(NetworkMessage netMsg) {
+        ClientRegisterTurnActionsMessage msg = netMsg.ReadMessage<ClientRegisterTurnActionsMessage>();
+        Debug.Log("Server received OnServerRegisterTurnActions");
         GameLogicServer game = games[msg.gameId];
-        MovementOrder(game, msg.cellId, msg.entityId);
+        // save actions forsync
     }
 
-    public void MovementOrder(GameLogicServer game, int cellId, int entityId) {
-        game.entityList[entityId].addOrder(new MovementAction(cellId, entityId));
-        ServerMovementOrderMessage msg = new ServerMovementOrderMessage();
-        msg.cellId = cellId;
-        msg.entityId = entityId;
-        msg.gameId = game.gameId;
-        SendToAllGamePlayers(msg, ServerMovementOrderMessage.ID, game.gameId);
-        game.resolveAction(new MovementAction(cellId, entityId));
-        Debug.Log("Server sent MovementOrder ");
+    public void SyncTurnActions(GameLogicServer game) {
+        ServerSyncTurnActionsMessage msg = new ServerSyncTurnActionsMessage();
+        // msg.actions ="";
+        foreach (Player player in game.players.Values) {
+            User u = player.user;
+            u.connection.Send(ServerSyncTurnActionsMessage.ID, msg);
+        }
+        Debug.Log("Server sent SyncTurnActions");
     }
 
 

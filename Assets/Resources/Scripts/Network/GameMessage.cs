@@ -6,69 +6,58 @@ using UnityEngine.Networking;
 // client to server
 // ID = 1xxx
 
-public class ClientMovementOrderMessage : ClientMessage {
-    public static short ID = 1102;
-    public int cellId;
-    public int entityId;
-    public ulong gameId;
-}
-
-public class ClientSendPathMessage : ClientMessage {
-    public static short ID = 1111;
-    public int[] path; // path cells ids, from current position cell to new position cell
-}
-
-public class ClientSendSpellMessage : ClientMessage {
-    public static short ID = 1112;
-    public int spellId; // id of spell used
-    public int cellId; // id of the cell targeted
-}
+// identification 1000
 
 public class ClientIdentificationRequestMessage : ClientMessage {
-    public static short ID = 1113;
+    public static short ID = 1000;
     public string userName;
     public ulong userId;
 }
-
+// TODO remove/update
 public class ClientJoinGameRequestMessage : ClientMessage {
-    public static short ID = 1114;
+    public static short ID = 1001;
     public ulong userId;
     public string userName;
     public ulong gameId;
 }
 
 public class ClientLeaveGameRequestMessage : ClientMessage {
-    public static short ID = 1115;
+    public static short ID = 1002;
     public ulong userId;
     public string userName;
 }
 
-// queue
+// queue 1100
 
 public class ClientJoinSoloQueueRequestMessage : ClientMessage {
-    public static short ID = 1200;
+    public static short ID = 1100;
     public ulong userId;
     public string userName;
 }
 
 public class ClientLeaveSoloQueueRequestMessage : ClientMessage {
+    public static short ID = 1101;
+    public ulong userId;
+    public string userName;
+}
+
+// game 1200
+
+public class ClientReadyToPlayMessage : ClientMessage {
+    public static short ID = 1200;
+    public ulong userId;
+    public string userName;
+    public ulong gameId;
+}
+
+// turn 1300
+
+public class ClientRegisterTurnActionsMessage : ClientMessage {
     public static short ID = 1201;
     public ulong userId;
     public string userName;
-}
-
-public class ClientReadyToPlayMessage : ClientMessage {
-    public static short ID = 1202;
-    public ulong userId;
-    public string userName;
     public ulong gameId;
-}
-
-public class ClientRegisterTurnActionsMessage : ClientMessage {
-    public static short ID = 1203;
-    public ulong userId;
-    public string userName;
-    public ulong gameId;
+    public string actions;
     // actions
 }
 
@@ -76,32 +65,13 @@ public class ClientRegisterTurnActionsMessage : ClientMessage {
 // server to client
 // ID = 2xxx
 
+// identification 2000
 
 public class ServerStartTurnMessage : ServerMessage {
     public static short ID = 2101;
     public int turnNumber;
     public long endTurnTimestamp;
     public ulong gameId;
-}
-
-public class ServerMovementOrderMessage : ServerMessage {
-    public static short ID = 2103;
-    public int cellId;
-    public int entityId;
-    public ulong gameId;
-}
-
-public class ServerSendAllyPathPrevisualisationMessage : ServerMessage {
-    public static short ID = 2111;
-    public ulong playerId;
-    public int[] path; // path cells ids, from current position cell to new position cell
-}
-
-public class ServerSendAllySpellPrevisualisationMessage : ServerMessage {
-    public static short ID = 2112;
-    public ulong playerId;
-    public int spellId; // id of spell used
-    public int cellId; // id of the cell targeted
 }
 
 public class ServerIdentificationResponseMessage : ServerMessage {
@@ -111,6 +81,8 @@ public class ServerIdentificationResponseMessage : ServerMessage {
     public string userName; // temporary : user informations will be fetched from DB
     public ulong currentGameId;
 }
+
+// game 2200
 
 public class ServerJoinGameResponseMessage : ServerMessage {
     public static short ID = 2114;
@@ -163,11 +135,21 @@ public class ServerJoinSoloQueueResponseMessage : ServerMessage {
     public bool joinedQueue;
 }
 
+// game
+
 public class ServerStartGameMessage : ServerMessage {
     public static short ID = 2300;
     public long startFirstTurnTimestamp;
     // timestamp du début du premier tour
 }
+
+public class ServerEndGameMessage : ServerMessage {
+    public static short ID = 2303;
+    public bool joinedQueue;
+    // résultats
+}
+
+// turn
 
 public class ServerStartNewTurnMessage : ServerMessage {
     public static short ID = 2301;
@@ -175,16 +157,10 @@ public class ServerStartNewTurnMessage : ServerMessage {
     // timestamp du début du nouveau tour
 }
 
-public class ServerSendTurnActionsMessage : ServerMessage {
+public class ServerSyncTurnActionsMessage : ServerMessage {
     public static short ID = 2302;
-    public bool joinedQueue;
+    public string actions;
     // actions de tous les joueurs
-}
-
-public class ServerEndGameMessage : ServerMessage {
-    public static short ID = 2303;
-    public bool joinedQueue;
-    // résultats
 }
 
 

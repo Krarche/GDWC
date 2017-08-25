@@ -15,8 +15,10 @@ public class TurnResolution {
     }
 
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
-    public void resolveMovement(Entity origin, Cell target) {
-        origin.orderMoveToCell(target.id);
+    public void resolveMovement(Entity origin, int[] path) {
+        int destinationCellId = path[path.Length - 1];
+        origin.orderMoveToCell(destinationCellId);
+        // TODO : move along path
     }
 
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)

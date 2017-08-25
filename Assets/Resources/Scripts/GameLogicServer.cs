@@ -27,23 +27,7 @@ public class GameLogicServer : GameLogic {
         base.startTurn();
     }
 
-    public override void registerLocalAction() { 
-
-    }
-
-    public override void registerForeignAction() {
-
-    }
-
     public override void resolveTurn() {
         base.resolveTurn();
-    }
-
-    public override void resolveAction(Action o) {
-        Entity e = entityList[o.entityId];
-        if (o is MovementAction) {
-            MovementAction mo = (MovementAction)o;
-            e.setCurrentCell(grid.GetCell(mo.cellId));
-        }
     }
 }

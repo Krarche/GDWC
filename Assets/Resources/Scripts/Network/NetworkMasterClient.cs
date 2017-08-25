@@ -48,22 +48,23 @@ public class NetworkMasterClient : MonoBehaviour {
         client.RegisterHandler(MsgType.Disconnect, OnClientDisconnect);
         client.RegisterHandler(MsgType.Error, OnClientError);
 
-        // Custom messages
+        // identification
         client.RegisterHandler(ServerIdentificationResponseMessage.ID, OnClientIdentified);
-
-        client.RegisterHandler(ServerJoinGameResponseMessage.ID, OnClientJoinGame);
-        client.RegisterHandler(ServerLeaveGameResponseMessage.ID, OnClientLeaveGame);
-
-        client.RegisterHandler(ServerPlayerJoinedMessage.ID, OnClientCreateNewPlayer);
-        client.RegisterHandler(ServerPlayerLeftGameMessage.ID, OnClientRemovePlayer);
-        
-        client.RegisterHandler(ServerMovementOrderMessage.ID, OnMovementOrder);
-
 
         // queue
         client.RegisterHandler(ServerJoinSoloQueueResponseMessage.ID, OnClientJoinSoloQueue);
+
+        // game
         client.RegisterHandler(ServerStartGameMessage.ID, OnClientStartGame);
+        client.RegisterHandler(ServerJoinGameResponseMessage.ID, OnClientJoinGame);
+        client.RegisterHandler(ServerLeaveGameResponseMessage.ID, OnClientLeaveGame);
+        // turn
         client.RegisterHandler(ServerStartNewTurnMessage.ID, OnClientStartNewTurn);
+        client.RegisterHandler(ServerSyncTurnActionsMessage.ID, OnClientSyncTurnActions);
+        // TODO remove/u^date
+        client.RegisterHandler(ServerPlayerJoinedMessage.ID, OnClientCreateNewPlayer);
+        client.RegisterHandler(ServerPlayerLeftGameMessage.ID, OnClientRemovePlayer);
+
         DontDestroyOnLoad(gameObject);
     }
 
@@ -261,21 +262,21 @@ public class NetworkMasterClient : MonoBehaviour {
     }
 
 
-    // --------------- Movement handlers -----------------
-    private void OnMovementOrder(NetworkMessage netMsg) {
-        ServerMovementOrderMessage msg = netMsg.ReadMessage<ServerMovementOrderMessage>();
-        GameLogicClient.game.entityList[msg.entityId].addOrder(new MovementAction(msg.cellId, msg.entityId));
-        GameLogicClient.game.resolveAction(new MovementAction(msg.cellId, msg.entityId));
-        Debug.Log("Client received OnMovementOrder " + msg.entityId);
+    // --------------- Actions handlers -----------------
+    private void OnClientSyncTurnActions(NetworkMessage netMsg) {
+        ServerSyncTurnActionsMessage msg = netMsg.ReadMessage<ServerSyncTurnActionsMessage>();
+        GameLogicClient.game.registerAction(msg.actions);
+        Debug.Log("Client received SyncTurnActions");
     }
 
-    public void MovementOrder(int cellId, int entityId) {
-        ClientMovementOrderMessage msg = new ClientMovementOrderMessage();
-        msg.cellId = cellId;
-        msg.entityId = entityId;
-        msg.gameId = GameLogicClient.game.gameId;
-        client.Send(ClientMovementOrderMessage.ID, msg);
-        Debug.Log("Client sent MovementOrder ");
+    public void SyncTurnActions(GameLogicClient game) {
+        ClientRegisterTurnActionsMessage msg = new ClientRegisterTurnActionsMessage();
+        msg.gameId = game.gameId;
+        msg.userId = user.userId;
+        msg.userName = user.userName;
+        // msg.actions = "";
+        client.Send(ClientRegisterTurnActionsMessage.ID, msg);
+        Debug.Log("Client sent RegisterTurnActions");
     }
 
     private void OnGUI() {

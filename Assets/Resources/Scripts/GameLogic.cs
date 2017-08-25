@@ -112,7 +112,7 @@ public abstract class GameLogic {
     protected IEnumerator waitForTurnEnd() {
         DateTime now = DateTime.UtcNow;
         TimeSpan nowToEnd = endTurnDate.Subtract(now);
-        
+
         yield return new WaitForSecondsRealtime((float)nowToEnd.TotalSeconds);
     }
 
@@ -134,20 +134,9 @@ public abstract class GameLogic {
         // notify server turn ended on client
     }
 
-    public void sendActionToServer() {
+    public virtual void registerAction(string actions) { // general action registration
 
     }
-
-    public void sendActionToClient() {
-
-    }
-
-    public void registerAction() { // general action registration
-
-    }
-
-    public abstract void registerLocalAction(); // from current client
-    public abstract void registerForeignAction(); // from other client
 
     public virtual void resolveActions() {
         Queue<Action> fast = new Queue<Action>();
@@ -185,17 +174,21 @@ public abstract class GameLogic {
         }
     }
 
-    public virtual void resolveAction(Action o) {
-        Entity e = entityList[o.entityId];
-        if (o is MovementAction) {
-            MovementAction mo = (MovementAction)o;
-            Cell dest = grid.GetCell(mo.cellId);
-            solver.resolveMovement(e, dest);
-        } else if (o is SpellOrder) {
-            SpellOrder so = (SpellOrder) o;
-            Cell target = grid.GetCell(so.cellId);
-            SpellData spell = DataManager.SPELL_DATA[so.spellId];
-            solver.resolveSpell(spell, e, target);
+    public virtual void resolveAction(Action action) {
+        Entity e = entityList[action.entityId];
+        if (action is MovementAction) {
+            if (!action.isActionSkiped()) {
+                MovementAction movementACtion = (MovementAction)action;
+                solver.resolveMovement(e, movementACtion.path);
+            } // TODO else give MP
+        } else if (action is SpellAction) {
+            if (!action.isActionSkiped()) {
+                SpellAction spellAction = (SpellAction)action;
+                Cell target = grid.GetCell(spellAction.targetCellId);
+                SpellData spell = DataManager.SPELL_DATA[spellAction.spellId];
+                solver.resolveSpell(spell, e, target);
+                // TODO : QUICK != SLOW
+            } // TODO else give AP
         }
     }
 

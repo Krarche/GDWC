@@ -174,8 +174,8 @@ public class Grid {
         if (worldObjects.TryGetValue(cellObject, out cell)) {
             if (cell != null) {
                 selectedCells = getInLine(cell, 2, 4);
-                if (NetworkMasterClient.singleton != null)
-                    NetworkMasterClient.singleton.MovementOrder(cell.id, NetworkMasterClient.singleton.user.player.playerEntity.entityId);
+                //if (NetworkMasterClient.singleton != null)
+                //    NetworkMasterClient.singleton.MovementOrder(cell.id, NetworkMasterClient.singleton.user.player.playerEntity.entityId);
             }
 
         }
