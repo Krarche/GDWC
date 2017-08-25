@@ -118,8 +118,9 @@ public class NetworkMasterServer : MonoBehaviour {
         User u = usersByName[msg.userName];
         if (u.isIdentified) {
             if (soloQueue.queueUser(u)) {
-                GameLogic newgame = soloQueue.checkQueue();
+                GameLogicServer newgame = soloQueue.checkQueue();
                 if (newgame != null) {
+                    games[newgame.gameId] = newgame;
                     ServerSendNewGameDataToPlayers(newgame);
                 } else {
                     ServerJoinSoloQueueResponseMessage responseMsg = new ServerJoinSoloQueueResponseMessage();
@@ -174,11 +175,19 @@ public class NetworkMasterServer : MonoBehaviour {
             User u = player.user;
             u.connection.Send(ServerJoinGameResponseMessage.ID, msg);
         }
+        Debug.Log("ServerSendNewGameDataToPlayers " + msg.gameId);
     }
 
     private void OnServerReadyToPlay(NetworkMessage netMsg) {
         ClientReadyToPlayMessage msg = netMsg.ReadMessage<ClientReadyToPlayMessage>();
         GameLogicServer game = games[msg.gameId];
+        DateTime startFirstTurn = DateTime.UtcNow.AddSeconds(5);
+        long startFirstTurnTimestamp = startFirstTurn.ToFileTimeUtc();
+        ServerStartGameMessage msgOut = new ServerStartGameMessage();
+        msgOut.startFirstTurnTimestamp = startFirstTurnTimestamp;
+        foreach (Player p in game.players.Values) {
+            p.user.connection.Send(ServerStartGameMessage.ID, msgOut);
+        }
     }
 
     private void OnServerJoinGameRequest(NetworkMessage netMsg) {

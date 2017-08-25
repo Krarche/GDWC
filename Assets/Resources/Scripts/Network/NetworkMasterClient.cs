@@ -30,7 +30,9 @@ public class NetworkMasterClient : MonoBehaviour {
     }
 
     private void Start() {
-        user = Login.localUser;
+        user = new User();
+        user.userId = 1;
+        user.userName = "Dara-Daratrix";
         InitializeClient();
     }
 
@@ -137,7 +139,7 @@ public class NetworkMasterClient : MonoBehaviour {
         msg.userName = user.userName;
         client.Send(ClientLeaveSoloQueueRequestMessage.ID, msg);
         user.isQueued = false;
-        Debug.Log("Sent join solo queue request");
+        Debug.Log("Sent leave solo queue request");
     }
 
     private void OnClientJoinSoloQueue(NetworkMessage netMsg) {
@@ -195,6 +197,7 @@ public class NetworkMasterClient : MonoBehaviour {
         msg.userName = user.userName;
         msg.gameId = user.currentGameId;
         client.Send(ClientReadyToPlayMessage.ID, msg);
+        Debug.Log("Sent ClientReadyToPlay " + user.currentGameId + "/" + GameLogicClient.game.gameId);
     }
 
     void OnClientStartGame(NetworkMessage netMsg) {
