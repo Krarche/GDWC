@@ -81,12 +81,12 @@ public class Grid {
                 }
                 c.x = x;
                 c.y = y;
-                c.id = id;
+                c.cellId = id;
                 cells[x, y] = c;
                 c.inWorld = o;
                 c.grid = this;
                 c.game = game;
-                o.name = "Cell #" + c.id;
+                o.name = "Cell #" + c.cellId;
                 worldObjects.Add(o, c);
             }
         }
@@ -94,7 +94,7 @@ public class Grid {
         for (int y = 0; y < sizeY; y++) {
             for (int x = 0; x < sizeX; x++) {
                 Cell c = cells[x, y];
-                c.id = x + sizeX * y;
+                c.cellId = x + sizeX * y;
                 if (c.y + 1 < sizeY) {
                     c.adjacent[(int)Direction.NORTH] = cells[x, y + 1];
                 }

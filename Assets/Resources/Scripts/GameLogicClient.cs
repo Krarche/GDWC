@@ -6,8 +6,25 @@ using UnityEngine;
 public class GameLogicClient : GameLogic {
 
     public static GameLogicClient game;
+    public User localUser {
+        get { return NetworkMasterClient.singleton.user; }
+    }
+    public Player localPlayer {
+        get { return localUser.player; }
+    }
+    public Entity localEntity {
+        get { return localPlayer.playerEntity; }
+    }
+    public Queue<Action> localActions {
+        get { return localEntity.actions; }
+    }
+    public SpellInstance[] localSpells {
+        get {
+            return localEntity.spells;
+        }
+    }
 
-    public GameLogicClient(string mapId): base(mapId) {
+    public GameLogicClient(string mapId) : base(mapId) {
         game = this;
     }
 
@@ -28,12 +45,17 @@ public class GameLogicClient : GameLogic {
         game = null;
     }
 
-    public const short BUTTON_TYPE_SPELL_0 = 0;
-    public const short BUTTON_TYPE_SPELL_1 = 1;
-    public const short BUTTON_TYPE_SPELL_2 = 2;
-    public const short BUTTON_TYPE_SPELL_3 = 3;
-    public const short BUTTON_TYPE_CONFIRM = 4;
-    public const short BUTTON_TYPE_CANCEL = 5;
+    public const short BUTTON_TYPE_ACTION_ROOT = 0;
+    public const short BUTTON_TYPE_ACTION_MOVEMENT = 1;
+    public const short BUTTON_TYPE_ACTION_QUICK_SPELL = 2;
+    public const short BUTTON_TYPE_ACTION_SLOW_SPELL = 3;
+    public const short BUTTON_TYPE_SPELL_0 = 10;
+    public const short BUTTON_TYPE_SPELL_1 = 11;
+    public const short BUTTON_TYPE_SPELL_2 = 12;
+    public const short BUTTON_TYPE_SPELL_3 = 13;
+    public const short BUTTON_TYPE_CONFIRM = 20;
+    public const short BUTTON_TYPE_CANCEL = 21;
+    public const short BUTTON_TYPE_READy = 22;
 
     public void buttonInput(short type) {
         switch (type) {
@@ -50,10 +72,10 @@ public class GameLogicClient : GameLogic {
                 buttonSpellHandler(type);
                 break;
             case BUTTON_TYPE_CONFIRM:
-                buttonConfirm();
+                buttonConfirmHandler();
                 break;
             case BUTTON_TYPE_CANCEL:
-                buttonCancel();
+                buttonCancelHandler();
                 break;
         }
     }
@@ -63,18 +85,49 @@ public class GameLogicClient : GameLogic {
     public static short ACTION_SELECTION_STATE_QUICK = 1;
     public static short ACTION_SELECTION_STATE_SLOW = 2;
     public static short ACTION_SELECTION_STATE_MOVEMENT = 3;
-    public static short currentActionSelectionState = 0;
+    public static short ACTION_SELECTION_STATE_READY = 4;
+    public short currentActionSelectionState = 0;
+
+    public bool isAiming {
+        get {
+            return currentActionSelectionState != ACTION_SELECTION_STATE_ROOT &&
+                currentActionSelectionState != ACTION_SELECTION_STATE_READY;
+        }
+    }
+    public bool isSpelling {
+        get {
+            return isQuickSpelling || isSlowSpelling;
+        }
+    }
+    public bool isQuickSpelling {
+        get {
+            return currentActionSelectionState == ACTION_SELECTION_STATE_QUICK;
+        }
+    }
+    public bool isSlowSpelling {
+        get {
+            return currentActionSelectionState == ACTION_SELECTION_STATE_SLOW;
+        }
+    }
+    public bool isMoving {
+        get {
+            return currentActionSelectionState == ACTION_SELECTION_STATE_MOVEMENT;
+        }
+    }
+
 
     private void buttonMovementHandler() {
-
+        currentActionSelectionState = ACTION_SELECTION_STATE_MOVEMENT;
     }
 
     private void buttonQuickSpellHandler() {
-
+        currentActionSelectionState = ACTION_SELECTION_STATE_QUICK;
+        currentSelectedSpell = SELECTED_SPELL_NONE;
     }
 
     private void buttonSlowSpellHandler() {
-
+        currentActionSelectionState = ACTION_SELECTION_STATE_SLOW;
+        currentSelectedSpell = SELECTED_SPELL_NONE;
     }
 
     public static short SELECTED_SPELL_NONE = -1;
@@ -84,27 +137,88 @@ public class GameLogicClient : GameLogic {
     public static short SELECTED_SPELL_4 = 3;
     public short currentSelectedSpell = -1;
 
-    private void buttonSpellHandler(short spellIndex) {
-
+    public bool isAnySpellSelected {
+        get {
+            return currentSelectedSpell != SELECTED_SPELL_NONE;
+        }
     }
+
+    private void buttonSpellHandler(short spellIndex) {
+        currentSelectedSpell = spellIndex;
+        // display spell range preview
+    }
+
+    private Cell currentTargetCell = null;
 
     private void targetAction(Cell target) {
+        if (isAiming) {
+            if (isSpelling) {
+                if (isAnySpellSelected) {
+                    currentTargetCell = target;
+                }
+            } else if (isMoving) {
+                currentTargetCell = target;
+                // register movement
+            }
+        }
+    }
+
+    private Action currentAction = null;
+
+    private void registerSpellAction(string spellId, Cell target) {
+        if (isQuickSpelling) {
+            QuickSpellAction tempAction = new QuickSpellAction();
+            tempAction.spellId = spellId;
+            tempAction.targetCellId = target.cellId;
+            currentAction = tempAction;
+        } else if (isSlowSpelling) {
+            SlowSpellAction tempAction = new SlowSpellAction();
+            tempAction.spellId = spellId;
+            tempAction.targetCellId = target.cellId;
+            currentAction = tempAction;
+        }
+        currentAction.entityId = localEntity.entityId;
+    }
+
+    private void registerMovementAction(Cell target) {
+        MovementAction tempAction = new MovementAction();
+        tempAction.path = new int[] { target.cellId };
+        currentAction = tempAction;
+        currentAction.entityId = localEntity.entityId;
+    }
+
+    private void buttonConfirmHandler() {
+        if (isAiming) {
+            if (isSpelling) {
+                if (isAnySpellSelected) {
+                    SpellInstance spellInstance = localSpells[currentSelectedSpell];
+                    registerSpellAction(spellInstance.spell.id, currentTargetCell);
+                }
+            } else if (isMoving) {
+                registerMovementAction(currentTargetCell);
+            }
+        }
+    }
+
+    private void buttonCancelHandler() {
+        localActions.Dequeue();
+    }
+
+    private void buttonReadyHandler() {
 
     }
 
-    private void registerSpellAction() {
-
-    }
-
-    private void registerMovementAction() {
-
-    }
-
-    private void buttonCancel() {
-
-    }
-
-    private void buttonConfirm() {
-
+    public override string generateTurnActionsJSON() {
+        string output = "";
+        output += "\"actions\":" + "[{";
+        int i = 0;
+        while (localActions.Count > 0) {
+            Action action = localActions.Dequeue();
+            output += "\"action" + i + "\":" + action.toJSON();
+            if (localActions.Count > 0)
+                output += ",";
+        }
+        output += "}]";
+        return "{" + output + "}";
     }
 }

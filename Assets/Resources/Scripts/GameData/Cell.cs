@@ -9,7 +9,7 @@ public enum Direction : int {
 public class Cell {
 
 	public CellData data;
-	public int x, y, id;
+	public int x, y, cellId;
     public Cell[] adjacent = { null, null, null, null };
     public int[,] distance;
     public Vector3 position { get {return new Vector3(x, 0, y);} }

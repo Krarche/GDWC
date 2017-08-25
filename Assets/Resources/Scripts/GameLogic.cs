@@ -5,27 +5,54 @@ using UnityEngine;
 
 public abstract class GameLogic {
 
-    public static float TURN_DURATION_SECONDS = 10;
-    public static float SERVER_DATA_TIMEOUT_SECONDS = 3;
+    public static float TURN_DURATION_SECONDS = 5;
+    public static float SERVER_DATA_TIMEOUT_SECONDS = 2;
     public static int MAX_TURN_NUMBER = 20;
     public static int MAX_APT = 3; // max actions per turn
 
     public ulong gameId;
     public int currentTurn;
 
-    public double timeRemaining {
+    public double startTurnTimeRemaining {
         get {
             DateTime now = DateTime.UtcNow;
             TimeSpan nowToStart = startTurnDate.Subtract(now);
             return nowToStart.TotalSeconds;
         }
     }
-
-    public int secondRemaining {
-        get { return (int)timeRemaining; }
+    public double endTurnTimeRemaining {
+        get {
+            DateTime now = DateTime.UtcNow;
+            TimeSpan nowToEnd = endTurnDate.Subtract(now);
+            return nowToEnd.TotalSeconds;
+        }
+    }
+    public double serverDataTimeoutTimeRemaining {
+        get {
+            DateTime now = DateTime.UtcNow;
+            TimeSpan serverDataTimeout = serverDataTimeoutDate.Subtract(now);
+            return serverDataTimeout.TotalSeconds;
+        }
     }
 
-    public bool allowActionRegistration;
+    public int startTurnSecondRemaining {
+        get { return (int)startTurnTimeRemaining; }
+    }
+    public int endTurnSecondRemaining {
+        get { return (int)endTurnTimeRemaining; }
+    }
+    public int serverDataTimeoutSccondRemaining {
+        get { return (int)serverDataTimeoutTimeRemaining; }
+    }
+
+    public bool isActionRegistrationAllowed {
+        get { return ActionRegistrationAllowed(); }
+    }
+
+    protected virtual bool ActionRegistrationAllowed() {
+        return currentTurnState == TURN_STATE_ACT;
+    }
+
     public DateTime startTurnDate;
     public DateTime endTurnDate;
     public DateTime serverDataTimeoutDate;
@@ -87,13 +114,25 @@ public abstract class GameLogic {
     }
 
     // called when client received
+
+
+    public const short TURN_STATE_NONE = -1;
+    public const short TURN_STATE_PREP = 0;
+    public const short TURN_STATE_ACT = 1;
+    public const short TURN_STATE_SYNC = 2;
+    public const short TURN_STATE_RES = 3;
+    public short currentTurnState = -1;
+
     public virtual void prepareNewTurn(long startTurnTimestamp) {
+        currentTurn++;
+        currentTurnState = TURN_STATE_PREP;
         startTurnDate = DateTime.FromFileTimeUtc(startTurnTimestamp);
         endTurnDate = startTurnDate.AddSeconds(TURN_DURATION_SECONDS);
         serverDataTimeoutDate = endTurnDate.AddSeconds(SERVER_DATA_TIMEOUT_SECONDS);
-
         CoroutineMaster.startCoroutine(waitForTurnStart());
     }
+
+
 
     protected IEnumerator waitForTurnStart() {
         DateTime now = DateTime.UtcNow;
@@ -104,8 +143,7 @@ public abstract class GameLogic {
     }
 
     public virtual void startTurn() {
-
-        allowActionRegistration = true;
+        currentTurnState = TURN_STATE_ACT;
         CoroutineMaster.startCoroutine(waitForTurnEnd());
     }
 
@@ -114,11 +152,11 @@ public abstract class GameLogic {
         TimeSpan nowToEnd = endTurnDate.Subtract(now);
 
         yield return new WaitForSecondsRealtime((float)nowToEnd.TotalSeconds);
+        endTurn();
     }
 
     public virtual void endTurn() {
-
-        allowActionRegistration = false;
+        currentTurnState = TURN_STATE_SYNC;
         CoroutineMaster.startCoroutine(waitForServerData());
     }
 
@@ -130,8 +168,13 @@ public abstract class GameLogic {
     }
 
     public virtual void resolveTurn() {
-        // resolve action
-        // notify server turn ended on client
+        if (currentTurnState != TURN_STATE_RES) {
+            currentTurnState = TURN_STATE_RES;
+            // resolve action
+            // notify server turn ended on client
+
+            prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());
+        }
     }
 
     public virtual void registerAction(string actions) { // general action registration
@@ -145,8 +188,8 @@ public abstract class GameLogic {
 
         for (int i = 0; i < MAX_APT; i++) {
             foreach (Player p in players.Values) {
-                if (p.playerEntity.orders.Count > 0) {
-                    Action o = p.playerEntity.orders.Dequeue();
+                if (p.playerEntity.actions.Count > 0) {
+                    Action o = p.playerEntity.actions.Dequeue();
                     switch (o.getPriority()) {
                         case 0:
                             fast.Enqueue(o);
@@ -190,6 +233,11 @@ public abstract class GameLogic {
                 // TODO : QUICK != SLOW
             } // TODO else give AP
         }
+    }
+
+    public virtual string generateTurnActionsJSON() {
+        string output = "";
+        return output;
     }
 
 }

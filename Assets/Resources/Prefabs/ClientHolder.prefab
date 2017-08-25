@@ -53,3 +53,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MasterServerIpAddress: 127.0.0.1
   MasterServerPort: 25000
+  userId: 1
+  userName: Dara-Daratrix

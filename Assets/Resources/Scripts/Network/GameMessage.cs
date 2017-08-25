@@ -57,6 +57,8 @@ public class ClientRegisterTurnActionsMessage : ClientMessage {
     public ulong userId;
     public string userName;
     public ulong gameId;
+    public ulong playerId;
+    public ulong entityId;
     public string actions;
     // actions
 }
@@ -90,14 +92,24 @@ public class ServerJoinGameResponseMessage : ServerMessage {
     public string mapId;
     public int currentTurn;
     public ulong clientPlayerId;
+    public int[] currentHP, maxHP;
+    public int[] currentMP, maxMP;
+    public int[] currentAP, maxAP;
     public int[] cellIds;
     public ulong[] playerIds;
     public int[] entityIds;
     public string[] displayedNames;
     public float[] r, g, b;
+    public string[] spellIds;
     public bool hasJoined;
 
     public void initArrays(int size) {
+        currentHP = new int[size];
+        maxHP = new int[size];
+        currentMP = new int[size];
+        maxMP = new int[size];
+        currentAP = new int[size];
+        maxAP = new int[size];
         cellIds = new int[size];
         playerIds = new ulong[size];
         entityIds = new int[size];
@@ -105,6 +117,7 @@ public class ServerJoinGameResponseMessage : ServerMessage {
         r = new float[size];
         g = new float[size];
         b = new float[size];
+        spellIds = new string[size];
     }
 }
 
@@ -162,8 +175,3 @@ public class ServerSyncTurnActionsMessage : ServerMessage {
     public string actions;
     // actions de tous les joueurs
 }
-
-
-
-
-

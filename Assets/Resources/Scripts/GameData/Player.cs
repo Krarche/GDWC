@@ -12,9 +12,9 @@ public class Player {
     public string playerName = "";
     public Color playerColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
     public Entity playerEntity = null;
-
     
     public bool isReady = false; // to begin game and end turn
+    
 
     public Player() {
         playerId = playerCount;

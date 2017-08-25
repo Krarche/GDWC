@@ -25,6 +25,7 @@ public class Entity : MonoBehaviour {
     public int resistanceModifier;
     public int stunCount; // mécanique à implémenter?
     public bool isStunt { get { return stunCount > 0; } }
+
     public void stun() {
         stunCount++;
     }
@@ -33,8 +34,8 @@ public class Entity : MonoBehaviour {
     }
 
 
-    public Queue<Action> orders = new Queue<Action>();
-
+    public Queue<Action> actions = new Queue<Action>();
+    public SpellInstance[] spells;
     public Animator animator;
     public TextMesh entityNameText;
     public Transform meshTransform;
@@ -75,7 +76,7 @@ public class Entity : MonoBehaviour {
 
     public void setCurrentCell(Cell c) {
         transform.position = c.position;
-        currentCellId = c.id;
+        currentCellId = c.cellId;
     }
 
     public void orderMoveToCell(int destinationCellId) {
@@ -89,7 +90,7 @@ public class Entity : MonoBehaviour {
     }
 
     public void addOrder(Action o) {
-        orders.Enqueue(o);
+        actions.Enqueue(o);
     }
 
     public void setColor(float r, float g, float b) {
