@@ -38,16 +38,16 @@ public class GameLogicClient : GameLogic {
     public void buttonInput(short type) {
         switch (type) {
             case BUTTON_TYPE_SPELL_0:
-                buttonSpell(type);
+                buttonSpellHandler(type);
                 break;
             case BUTTON_TYPE_SPELL_1:
-                buttonSpell(type);
+                buttonSpellHandler(type);
                 break;
             case BUTTON_TYPE_SPELL_2:
-                buttonSpell(type);
+                buttonSpellHandler(type);
                 break;
             case BUTTON_TYPE_SPELL_3:
-                buttonSpell(type);
+                buttonSpellHandler(type);
                 break;
             case BUTTON_TYPE_CONFIRM:
                 buttonConfirm();
@@ -58,7 +58,45 @@ public class GameLogicClient : GameLogic {
         }
     }
 
-    private void buttonSpell(short spellIndex) {
+
+    public static short ACTION_SELECTION_STATE_ROOT = 0;
+    public static short ACTION_SELECTION_STATE_QUICK = 1;
+    public static short ACTION_SELECTION_STATE_SLOW = 2;
+    public static short ACTION_SELECTION_STATE_MOVEMENT = 3;
+    public static short currentActionSelectionState = 0;
+
+    private void buttonMovementHandler() {
+
+    }
+
+    private void buttonQuickSpellHandler() {
+
+    }
+
+    private void buttonSlowSpellHandler() {
+
+    }
+
+    public static short SELECTED_SPELL_NONE = -1;
+    public static short SELECTED_SPELL_1 = 0;
+    public static short SELECTED_SPELL_2 = 1;
+    public static short SELECTED_SPELL_3 = 2;
+    public static short SELECTED_SPELL_4 = 3;
+    public short currentSelectedSpell = -1;
+
+    private void buttonSpellHandler(short spellIndex) {
+
+    }
+
+    private void targetAction(Cell target) {
+
+    }
+
+    private void registerSpellAction() {
+
+    }
+
+    private void registerMovementAction() {
 
     }
 

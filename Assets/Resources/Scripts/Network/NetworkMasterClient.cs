@@ -290,7 +290,7 @@ public class NetworkMasterClient : MonoBehaviour {
                 SceneManager.LoadScene("login");
             }
             if (user.currentGameId == 0) {
-                if (user.isQueued) {
+                if (!user.isQueued) {
                     if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
                         ClientJoinSoloQueueRequest();
                     }
