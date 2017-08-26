@@ -43,8 +43,8 @@
 	],
 	"cellTypes":[
 		{"id":"C001",
-		"name":"Low ground",
-		"modelPath":"lowGround"},
+		"name":"Simple grid cell",
+		"modelPath":"simpleGridCell"},
 		{"id":"C002",
 		"name":"High ground",
 		"blockMovement":"true",
