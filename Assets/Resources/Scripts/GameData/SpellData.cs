@@ -15,46 +15,26 @@ public class SpellData : GameData {
     public int priority;
     public EffectSpell[] effects;
 
-    public void onAlly(Entity target) {
-        foreach (EffectSpell e in effects) {
-            if (e.affectAlly) {
-                e.apply(target);
-            }
-        }
+    public int areaType {
+        get { return effects[0].areaType; }
     }
 
-    public void onEnnemy(Entity target) {
-        foreach (EffectSpell e in effects) {
-            if (e.affectEnemy) {
-                e.apply(target);
-            }
-        }
+    public int minArea {
+        get { return effects[0].minArea; }
     }
 
-    public void onSelf(Entity target) {
-        foreach (EffectSpell e in effects) {
-            if (e.affectSelf) {
-                e.apply(target);
-            }
-        }
-    }
-
-    public void onCell(Cell target) {
-        foreach (EffectSpell e in effects) {
-            if (e.affectCell) {
-                e.apply(target);
-            }
-        }
+    public int maxArea {
+        get { return effects[0].maxArea; }
     }
 
     public void use(Grid g, Entity user, Cell target) {
 
     }
 
-    public static int RANGE_AREA_POINT = 0;
-    public static int RANGE_AREA_CIRCLE = 1;
-    public static int RANGE_AREA_ORTHOGONAL = 2;
-    public static int RANGE_AREA_DIAGONAL = 3;
+    public const int RANGE_AREA_POINT = 0;
+    public const int RANGE_AREA_CIRCLE = 1;
+    public const int RANGE_AREA_ORTHOGONAL = 2;
+    public const int RANGE_AREA_DIAGONAL = 3;
 
     public static int stringToRangeAreaType(string str) {
         if (str == "circle")
@@ -82,5 +62,29 @@ public class SpellInstance {
 
     public void use(Grid g, Entity user, Cell target) {
         spell.use(g, user, target);
+    }
+
+    public int rangeType {
+        get { return spell.rangeType; }
+    }
+
+    public int minRange {
+        get { return spell.minRange; }
+    }
+
+    public int maxRange {
+        get { return spell.maxRange; }
+    }
+
+    public int areaType {
+        get { return spell.areaType; }
+    }
+
+    public int minArea {
+        get { return spell.minArea; }
+    }
+
+    public int maxArea {
+        get { return spell.maxArea; }
     }
 }

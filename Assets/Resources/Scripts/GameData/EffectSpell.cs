@@ -14,16 +14,6 @@ public class EffectSpell {
 
     public EffectCondition[] conditions;
 
-    public EffectHandler effectHandler;
-
-    public void apply(Entity e) {
-        if (effectHandler != null) {
-            effectHandler.effect(e);
-        }
-    }
-    public void apply(Cell c) {
-        if (effectHandler != null) {
-            effectHandler.effect(c);
-        }
-    }
+    public EffectHandler quickHandler;
+    public EffectHandler slowHandler;
 }

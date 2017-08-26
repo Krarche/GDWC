@@ -74,6 +74,14 @@ public class Entity : MonoBehaviour {
         }
     }
 
+    public void initSpell(string[] spellIds) {
+        spells = new SpellInstance[spellIds.Length];
+        for(int i=0; i<spellIds.Length; i++) {
+            spells[i] = new SpellInstance();
+            spells[i].spell = DataManager.SPELL_DATA[spellIds[i]];
+        }
+    }
+
     public void setCurrentCell(Cell c) {
         transform.position = c.position;
         currentCellId = c.cellId;

@@ -30,6 +30,6 @@ public class InputHandler : MonoBehaviour {
     }
 
     public void clickCell(GameObject cellObject) {
-        GameLogicClient.game.grid.clickCell(cellObject);
+        GameLogicClient.game.targetAction(GameLogicClient.game.grid.worldObjects[cellObject]);
     }
 }

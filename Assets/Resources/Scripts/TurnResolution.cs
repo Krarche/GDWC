@@ -24,15 +24,19 @@ public class TurnResolution {
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
     public void resolveSpell(SpellData spell, Entity origin, Cell target) {
         foreach (EffectSpell effect in spell.effects) {
-            resolveSpellEffect(effect, origin, target);
+            resolveSpellEffect(effect, origin, target, true);
         }
     }
 
     // this function will check the conditions for each affected entity, and apply if the effect if necessary
-    public void resolveSpellEffect(EffectSpell effect, Entity origin, Cell target) {
+    public void resolveSpellEffect(EffectSpell effect, Entity origin, Cell target, bool priority) {
         foreach (Entity e in getSpellEffectTargets(effect, origin, target)) {
             if (areConditionsValid(effect.conditions, origin, e)) {
-                handleEffect(effect.effectHandler, origin, e);
+                if (priority) {
+                    handleEffect(effect.quickHandler, origin, e);
+                } else {
+                    handleEffect(effect.slowHandler, origin, e);
+                }
             }
         }
     }
@@ -60,11 +64,11 @@ public class TurnResolution {
     }
 
     public void handleEffectDirectDamage(EffectHandlerDirectDamage handler, Entity origin, Entity target) {
-        indirectDamageEntity(origin, target, handler.damage);
+        directDamageEntity(origin, target, handler.damage);
     }
 
     public void handleEffectIndirectDamage(EffectHandlerIndirectDamage handler, Entity origin, Entity target) {
-        directDamageEntity(origin, target, handler.damage);
+        indirectDamageEntity(origin, target, handler.damage);
     }
 
     public void handleEffectHeal(EffectHandlerHeal handler, Entity origin, Entity target) {
@@ -106,7 +110,7 @@ public class TurnResolution {
     public void damageEntity(Entity origin, Entity target, int damage) {
         target.damage(damage);
     }
-
+    
     public void healEntity(Entity origin, Entity target, int heal) {
         target.heal(heal);
     }

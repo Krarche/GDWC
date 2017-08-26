@@ -54,10 +54,13 @@ public class NetworkMasterClient : MonoBehaviour {
             float g = 255 * i;
             float b = 255 - 255 * i;
 
+
+
             Player temp = CreatePlayer(playerId, cellId, entityId, displayedName, r, g, b);
             if (user.userId == playerId) {
                 user.player = temp;
             }
+            temp.playerEntity.initSpell(new string[2] {"S001", "S002"});
         }
 
 

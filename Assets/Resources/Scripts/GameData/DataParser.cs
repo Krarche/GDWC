@@ -290,7 +290,8 @@ public class DataParser {
         output.minArea = effect.getInt("minArea", 0);
         output.maxArea = effect.getInt("maxArea", 0);
         output.areaType = SpellData.stringToRangeAreaType(effect.getString("areaType", ""));
-        output.effectHandler = buildEffectHandler(effect.getObjectJSON("effectHandler"));
+        output.quickHandler = buildEffectHandler(effect.getObjectJSON("quickHandler"));
+        output.slowHandler = buildEffectHandler(effect.getObjectJSON("slowHandler"));
         output.conditions = buildEffectConditions(effect.getArrayJSON("conditions"));
         return output;
     }

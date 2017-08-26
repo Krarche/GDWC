@@ -137,7 +137,7 @@ public class Grid {
         }
     }
 
-    public List<Cell> getInRange(Cell origin, int minRange, int maxRange) {
+    public List<Cell> getInCircle(Cell origin, int minRange, int maxRange) {
 
         List<Cell> output = new List<Cell>();
         for (int y = 0; y < sizeY; y++) {
@@ -168,18 +168,25 @@ public class Grid {
         return output;
     }
 
-    public void clickCell(GameObject cellObject) {
-        ClearSelection();
-        Cell cell;
-        if (worldObjects.TryGetValue(cellObject, out cell)) {
-            if (cell != null) {
-                selectedCells = getInLine(cell, 2, 4);
-                //if (NetworkMasterClient.singleton != null)
-                //    NetworkMasterClient.singleton.MovementOrder(cell.id, NetworkMasterClient.singleton.user.player.playerEntity.entityId);
-            }
-
+    public List<Cell> getCellsInRange(Cell origin, int minRange, int maxRange, int rangeType) {
+        // ClearSelection();
+        List<Cell> output;
+        switch (rangeType) {
+            case SpellData.RANGE_AREA_CIRCLE:
+                output = getInCircle(origin, minRange, maxRange);
+                break;
+            //case SpellData.RANGE_AREA_DIAGONAL:
+                //output = get(origin, minRange, maxRange);
+                //break;
+            case SpellData.RANGE_AREA_ORTHOGONAL:
+                output = getInLine(origin, minRange, maxRange);
+                break;
+            default:
+                output = new List<Cell>();
+                output.Add(origin);
+                break;
         }
-
+        return output;
     }
 
     public void ClearSelection() {
@@ -206,11 +213,19 @@ public class Grid {
     }
 
     public void SetCellColor(Cell c, Color color) {
-        c.inWorld.GetComponent<MeshRenderer>().material.color = color;
+        if (color != Color.white)
+            c.addColor(color);
+        else
+            c.removeColor();
     }
 
     public void SetCellColor(int[] cellId, Color color) {
         for (int i = 0; i < cellId.Length; i++)
             SetCellColor(GetCell(cellId[i]), color);
+    }
+
+    public void SetCellColor(List<Cell> cells, Color color) {
+        foreach (Cell c in cells)
+            SetCellColor(c, color);
     }
 }

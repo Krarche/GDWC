@@ -89,25 +89,27 @@
 	"spells":[
 		{"id":"S001",
 		"name":"Spark","iconPath":"SPRITE",
-		"description":"Deals <color=#ff0000>@S001,effects,0,effectHandler,damage;</color> direct damages.\n<color=#404040>Quick cast.</color>",
+		"description":"Deals <color=#ff0000>@S001,effects,0,quickHandler,damage;</color> direct damages.\n<color=#404040>Quick cast.</color>",
 		"cost":"2","cooldown":"0",
 		"minRange":"2","maxRange":"5","rangeType":"circle",
 		"priority":"0",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
 			"affectAlly","affectEnemy","affectSelf",
-			"effectHandler":{"class":"EffectHandlerDirectDamage","damage":"3"}}
+			"quickHandler":{"class":"EffectHandlerDirectDamage","damage":"2"},
+			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"5"}}
 		]},
 		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",
-		"description":"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,effectHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.\n<color=#404040>Slow cast.</color>",
+		"description":"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,quickHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.\n<color=#404040>Slow cast.</color>",
 		"cost":"4","cooldown":"4",
 		"minRange":"3","maxRange":"5","rangeType":"circle",
 		"priority":"2",
 		"effects":[
 			{"minArea":"0","maxArea":"2","areaType":"circle",
 			"affectAlly","affectEnemy","affectSelf",
-			"effectHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"}}
+			"quickHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"},
+			"slowHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"5"}}
 		]}
 	]
 }

@@ -144,24 +144,58 @@ public class GameLogicClient : GameLogic {
         }
     }
 
+    List<Cell> spellRangeCells = null;
+
     private void buttonSpellHandler(short spellIndex) {
-        currentSelectedSpell = spellIndex;
+        currentSelectedSpell = (short)(spellIndex - BUTTON_TYPE_SPELL_0);
         // display spell range preview
+        if(spellRangeCells != null) {
+            grid.SetCellColor(spellRangeCells, Color.white);
+            spellRangeCells = null;
+            if (effectRangeCells != null) {
+                grid.SetCellColor(effectRangeCells, Color.white);
+                effectRangeCells = null;
+            }
+        }
+
+        int rangeType = localSpells[currentSelectedSpell].rangeType;
+        int minRange = localSpells[currentSelectedSpell].minRange;
+        int maxRange = localSpells[currentSelectedSpell].maxRange;
+
+        spellRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), minRange, maxRange, rangeType);
+
+        grid.SetCellColor(spellRangeCells, Color.blue);
     }
 
     private Cell currentTargetCell = null;
+    List<Cell> effectRangeCells = null;
 
-    private void targetAction(Cell target) {
-        if (isAiming) {
-            if (isSpelling) {
+    public void targetAction(Cell target) {
+        //if (isAiming) {
+        //    if (isSpelling) {
                 if (isAnySpellSelected) {
-                    currentTargetCell = target;
-                }
-            } else if (isMoving) {
+            if(spellRangeCells.Contains(target)) {
                 currentTargetCell = target;
-                // register movement
+                // show spell area
+                if (effectRangeCells != null) {
+                    grid.SetCellColor(effectRangeCells, Color.white);
+                    effectRangeCells = null;
+                }
+                int areaType = localSpells[currentSelectedSpell].areaType;
+                int minArea = localSpells[currentSelectedSpell].minArea;
+                int maxArea = localSpells[currentSelectedSpell].maxArea;
+
+                effectRangeCells = grid.getCellsInRange(target, minArea, maxArea, areaType);
+                grid.SetCellColor(effectRangeCells, Color.red);
+
             }
+
         }
+         //   } else if (isMoving) {
+         //       currentTargetCell = target;
+                // register movement
+        //    }
+        //}
     }
 
     private Action currentAction = null;
