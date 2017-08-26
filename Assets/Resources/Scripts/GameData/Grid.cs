@@ -189,6 +189,19 @@ public class Grid {
         return output;
     }
 
+    public List<Cell> getCellsInRanges(Cell origin, int[] minRange, int[] maxRange, int[] rangeType) {
+        List<Cell> output = new List<Cell>();
+        for(int i = 0; i < maxRange.Length; i++) {
+            List<Cell> temp = getCellsInRange(origin, minRange[i], maxRange[i], rangeType[i]);
+            foreach(Cell c in temp) {
+                if(!output.Contains(c)) {
+                    output.Add(c);
+                }
+            }
+        }
+        return output;
+    }
+
     public void ClearSelection() {
         if (selectedCells != null) {
 

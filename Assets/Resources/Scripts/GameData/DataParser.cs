@@ -99,7 +99,7 @@ public class DataParser {
                     i++;
                 }
                 //if (i < path.Length)
-                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
+                //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
             }
             i++;
         }
@@ -137,10 +137,12 @@ public class DataParser {
 
         // fill description macro
         foreach (SpellData s in DataManager.SPELL_DATA.Values) {
-            string macro = StringParsingTool.getNextMacro(s.description);
-            while (macro != "") {
-                s.description = s.description.Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
-                macro = StringParsingTool.getNextMacro(s.description);
+            for (int i = 0; i < 2; i++) {
+                string macro = StringParsingTool.getNextMacro(s.description[i]);
+                while (macro != "") {
+                    s.description[i] = s.description[0].Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
+                    macro = StringParsingTool.getNextMacro(s.description[i]);
+                }
             }
         }
         foreach (BuffData b in DataManager.BUFF_DATA.Values) {
@@ -263,13 +265,13 @@ public class DataParser {
         output.id = spell.getString("id");
         output.name = spell.getString("name");
         output.iconPath = spell.getString("iconPath");
-        output.description = spell.getString("description");
-        output.cost = spell.getInt("cost");
-        output.cooldown = spell.getInt("cooldown");
-        output.minRange = spell.getInt("minRange");
-        output.maxRange = spell.getInt("maxRange");
-        output.rangeType = SpellData.stringToRangeAreaType(spell.getString("rangeType", ""));
-        output.priority = spell.getInt("priority");
+        output.description = spell.getStringArray("description");
+        output.cost = spell.getIntArray("cost");
+        output.cooldown = spell.getIntArray("cooldown");
+        output.minRange = spell.getIntArray("minRange");
+        output.maxRange = spell.getIntArray("maxRange");
+        output.rangeType = SpellData.stringToRangeAreaType(spell.getStringArray("rangeType"));
+        output.priority = spell.getIntArray("priority");
         output.effects = buildEffectSpells(spell.getArrayJSON("effects"));
         return output;
     }
@@ -283,13 +285,13 @@ public class DataParser {
 
     public static EffectSpell buildEffectSpell(ObjectJSON effect) {
         EffectSpell output = new EffectSpell();
-        output.affectAlly = effect.containsValue("affectAlly");
-        output.affectEnemy = effect.containsValue("affectEnemy");
-        output.affectSelf = effect.containsValue("affectSelf");
-        output.affectCell = effect.containsValue("affectCell");
-        output.minArea = effect.getInt("minArea", 0);
-        output.maxArea = effect.getInt("maxArea", 0);
-        output.areaType = SpellData.stringToRangeAreaType(effect.getString("areaType", ""));
+        output.affectAlly = effect.getBoolArray("affectAlly");
+        output.affectEnemy = effect.getBoolArray("affectEnemy");
+        output.affectSelf = effect.getBoolArray("affectSelf");
+        output.affectCell = effect.getBoolArray("affectCell");
+        output.minArea = effect.getIntArray("minArea");
+        output.maxArea = effect.getIntArray("maxArea");
+        output.areaType = SpellData.stringToRangeAreaType(effect.getStringArray("areaType"));
         output.quickHandler = buildEffectHandler(effect.getObjectJSON("quickHandler"));
         output.slowHandler = buildEffectHandler(effect.getObjectJSON("slowHandler"));
         output.conditions = buildEffectConditions(effect.getArrayJSON("conditions"));

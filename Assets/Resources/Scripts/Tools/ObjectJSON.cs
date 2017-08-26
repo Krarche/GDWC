@@ -83,6 +83,43 @@ public class ObjectJSON {
             return error;
         }
     }
+
+    public bool[] getBoolArray(string valueName) {
+        ArrayJSON array = getArrayJSON(valueName);
+        if (array != null) {
+            bool[] output = new bool[array.Length];
+            for (int i = 0; i < array.Length; i++) {
+                output[i] = array.getBoolAt(i);
+            }
+            return output;
+        }
+        return null;
+    }
+
+    public int[] getIntArray(string valueName) {
+        ArrayJSON array = getArrayJSON(valueName);
+        if (array != null) {
+            int[] output = new int[array.Length];
+            for (int i = 0; i < array.Length; i++) {
+                output[i] = array.getIntAt(i);
+            }
+            return output;
+        }
+        return null;
+    }
+
+    public string[] getStringArray(string valueName) {
+        ArrayJSON array = getArrayJSON(valueName);
+        if (array != null) {
+            string[] output = new string[array.Length];
+            for (int i = 0; i < array.Length; i++) {
+                output[i] = array.getStringAt(i);
+            }
+            return output;
+        }
+        return null;
+    }
+
     public ObjectJSON getObjectJSON(string valueName) {
         try {
             if (data.ContainsKey(valueName) && data[valueName] is ObjectJSON)

@@ -47,12 +47,12 @@
 		"modelPath":"lowGround"},
 		{"id":"C002",
 		"name":"High ground",
-		"blockMovement",
-		"blockLineOfSight",
+		"blockMovement":"true",
+		"blockLineOfSight":"true",
 		"modelPath":"highGround"},
 		{"id":"C003",
 		"name":"Hole",
-		"blockMovement"}
+		"blockMovement":"true"}
 	],
 	"entities":[
 		{"id:":"E001",
@@ -68,48 +68,82 @@
 		"description":"Each time the affected entity uses a spell, they lost <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color>.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
-			"affectAlly","affectEnemy","affectSelf",
+			"affectAlly":"true","affectEnemy":"true","affectSelf":"true",
 			"onSpellHandler":{"class":"EffectHandlerModMP","MP":"1","direction":"-1"},
-			"conditions":[{"class":"EffectConditionAPAbove","target":"TARGET","AP":"50","percent"}]}
+			"conditions":[{"class":"EffectConditionAPAbove","target":"TARGET","AP":"50","percent":"true"}]}
 		]},
 		{"id":"B002",
 		"name":"Neurotoxin","iconPath":"SPRITE",
 		"description":"Deals <color=#ff0000>@B002,effects,0,onTurnStartHandler,damage;</color> indirect damages every turn while the target is above <b>@B002,effects,0,conditions,0,health; %</b> health.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
-			"affectAlly","affectEnemy","affectSelf",
+			"affectAlly":"true","affectEnemy":"true","affectSelf":"true",
 			"onTurnStartHandler":{"class":"EffectHandlerIndirectDamage","damage":"2"},
-			"conditions":[{"class":"EffectConditionHealthAbove","target":"TARGET","health":"70","percent"}]},
+			"conditions":[{"class":"EffectConditionHealthAbove","target":"TARGET","health":"70","percent":"true"}]},
 			{"minArea":"0","maxArea":"0","areaType":"point",
-			"affectAlly","affectEnemy","affectSelf",
+			"affectAlly":"true","affectEnemy":"true","affectSelf":"true",
 			"onTurnStartHandler":{"class":"EffectHandlerDebuff","buffId":"B002"},
-			"conditions":[{"class":"EffectConditionHealthBelow","target":"TARGET","health":"70","percent"}]}
+			"conditions":[{"class":"EffectConditionHealthBelow","target":"TARGET","health":"70","percent":"true"}]}
 		]}
 	],
 	"spells":[
 		{"id":"S001",
 		"name":"Spark","iconPath":"SPRITE",
-		"description":"Deals <color=#ff0000>@S001,effects,0,quickHandler,damage;</color> direct damages.\n<color=#404040>Quick cast.</color>",
-		"cost":"2","cooldown":"0",
-		"minRange":"2","maxRange":"5","rangeType":"circle",
-		"priority":"0",
+		"color":"RED",
+		"description":[
+			"Deals <color=#ff0000>@S001,effects,0,quickHandler,damage;</color> direct damages.",
+			"Deals <color=#ff0000>@S001,effects,0,slowHandler,damage;</color> direct damages."
+		],
+		"cost":["3","3"],"cooldown":["0","0"],
+		"minRange":["1","1"],"maxRange":["6","8"],"rangeType":["circle","circle"],
+		"priority":["2","0"],"lineOfSight":["true","true"],
 		"effects":[
-			{"minArea":"0","maxArea":"0","areaType":"point",
-			"affectAlly","affectEnemy","affectSelf",
-			"quickHandler":{"class":"EffectHandlerDirectDamage","damage":"2"},
-			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"5"}}
+			{"minArea":["0","0"],"maxArea":["0","0"],"areaType":["point","point"],
+			"affectAlly":["true","true"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"quickHandler":{"class":"EffectHandlerDirectDamage","damage":"10"},
+			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"12"}},
+			
+			{"minArea":["2","2"],"maxArea":["4","4"],"areaType":["orthogonal","orthogonal"],
+			"affectAlly":["true","true"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"quickHandler":{"class":"EffectHandlerDirectDamage","damage":"10"},
+			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"12"}},
+			
+			{"minArea":["5","5"],"maxArea":["5","5"],"areaType":["circle","circle"],
+			"affectAlly":["true","true"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"quickHandler":{"class":"EffectHandlerDirectDamage","damage":"10"},
+			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"12"}}
 		]},
 		{"id":"S002",
 		"name":"Weakening pest","iconPath":"SPRITE",
-		"description":"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,quickHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.\n<color=#404040>Slow cast.</color>",
-		"cost":"4","cooldown":"4",
-		"minRange":"3","maxRange":"5","rangeType":"circle",
-		"priority":"2",
+		"color":"YELLOW",
+		"description":[
+			"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,quickHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.",
+			"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,slowHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell."
+		],
+		"cost":["4","4"],"cooldown":["4","4"],
+		"minRange":["3","3"],"maxRange":["5","5"],"rangeType":["circle","circle"],
+		"priority":["2","0"],"lineOfSight":["true","true"],
 		"effects":[
-			{"minArea":"0","maxArea":"2","areaType":"circle",
-			"affectAlly","affectEnemy","affectSelf",
+			{"minArea":["0","0"],"maxArea":["2","2"],"areaType":["circle","circle"],
+			"affectAlly":["false","false"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
 			"quickHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"},
 			"slowHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"5"}}
+		]},
+		{"id":"S003",
+		"name":"Windstep","iconPath":"SPRITE",
+		"color":"GREEN",
+		"description":[
+			"Dash on the target cell.",
+			"Blink on the target cell."
+		],
+		"cost":["4","4"],"cooldown":["2","3"],
+		"minRange":["1","3"],"maxRange":["3","5"],"rangeType":["orthogonal","circle"],
+		"priority":["0","2"],"lineOfSight":["true","false"],
+		"effects":[
+			{"minArea":["0","0"],"maxArea":["0","0"],"areaType":["point","point"],
+			"affectAlly":["false","false"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"quickHandler":{"class":"EffectHandlerDash"},
+			"slowHandler":{"class":"EffectHandlerWarp"}}
 		]}
 	]
 }

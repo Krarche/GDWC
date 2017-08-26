@@ -149,7 +149,7 @@ public class GameLogicClient : GameLogic {
     private void buttonSpellHandler(short spellIndex) {
         currentSelectedSpell = (short)(spellIndex - BUTTON_TYPE_SPELL_0);
         // display spell range preview
-        if(spellRangeCells != null) {
+        if (spellRangeCells != null) {
             grid.SetCellColor(spellRangeCells, Color.white);
             spellRangeCells = null;
             if (effectRangeCells != null) {
@@ -158,9 +158,9 @@ public class GameLogicClient : GameLogic {
             }
         }
 
-        int rangeType = localSpells[currentSelectedSpell].rangeType;
-        int minRange = localSpells[currentSelectedSpell].minRange;
-        int maxRange = localSpells[currentSelectedSpell].maxRange;
+        int rangeType = localSpells[currentSelectedSpell].getRangeType(0);
+        int minRange = localSpells[currentSelectedSpell].getMinRange(0);
+        int maxRange = localSpells[currentSelectedSpell].getMaxRange(0);
 
         spellRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), minRange, maxRange, rangeType);
 
@@ -173,27 +173,27 @@ public class GameLogicClient : GameLogic {
     public void targetAction(Cell target) {
         //if (isAiming) {
         //    if (isSpelling) {
-                if (isAnySpellSelected) {
-            if(spellRangeCells.Contains(target)) {
+        if (isAnySpellSelected) {
+            if (spellRangeCells != null && spellRangeCells.Contains(target)) {
                 currentTargetCell = target;
                 // show spell area
                 if (effectRangeCells != null) {
                     grid.SetCellColor(effectRangeCells, Color.white);
                     effectRangeCells = null;
                 }
-                int areaType = localSpells[currentSelectedSpell].areaType;
-                int minArea = localSpells[currentSelectedSpell].minArea;
-                int maxArea = localSpells[currentSelectedSpell].maxArea;
+                int[] areaType = localSpells[currentSelectedSpell].getAreaType(0);
+                int[] minArea = localSpells[currentSelectedSpell].getMinArea(0);
+                int[] maxArea = localSpells[currentSelectedSpell].getMaxArea(0);
 
-                effectRangeCells = grid.getCellsInRange(target, minArea, maxArea, areaType);
+                effectRangeCells = grid.getCellsInRanges(target, minArea, maxArea, areaType);
                 grid.SetCellColor(effectRangeCells, Color.red);
 
             }
 
         }
-         //   } else if (isMoving) {
-         //       currentTargetCell = target;
-                // register movement
+        //   } else if (isMoving) {
+        //       currentTargetCell = target;
+        // register movement
         //    }
         //}
     }
@@ -236,7 +236,7 @@ public class GameLogicClient : GameLogic {
     }
 
     private void buttonCancelHandler() {
-        if(localActions.Count > 0) {
+        if (localActions.Count > 0) {
             localActions.Dequeue();
         }
     }
