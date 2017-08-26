@@ -30,3 +30,6 @@ sysinfo.txt
 *.apk
 *.unitypackage
 *.x86_64
+
+# Visual Studio
+/.vs/

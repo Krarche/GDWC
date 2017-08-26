@@ -58,6 +58,7 @@ public class GameLogicClient : GameLogic {
     public const short BUTTON_TYPE_READy = 22;
 
     public void buttonInput(short type) {
+        Debug.Log(type);
         switch (type) {
             case BUTTON_TYPE_SPELL_0:
                 buttonSpellHandler(type);
@@ -201,7 +202,9 @@ public class GameLogicClient : GameLogic {
     }
 
     private void buttonCancelHandler() {
-        localActions.Dequeue();
+        if(localActions.Count > 0) {
+            localActions.Dequeue();
+        }
     }
 
     private void buttonReadyHandler() {
