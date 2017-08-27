@@ -73,7 +73,6 @@ public class QuickSpellAction : SpellAction {
         return output;
     }
 }
-
 public class SlowSpellAction : SpellAction {
 
     public override short getPriority() {

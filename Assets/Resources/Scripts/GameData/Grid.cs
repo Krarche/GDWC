@@ -65,7 +65,6 @@ public class Grid {
                     cd = mapData.cells[id];
                 GameObject o;
                 if (mapData != null && cd != null) {
-                    Debug.Log("CellData " + cd.id + " found");
                     o = GameObject.Instantiate(cellPrefabs[cd.id], new Vector3(x, 0, y), Quaternion.identity);
                     o.SetActive(true);
                 } else {
@@ -170,7 +169,7 @@ public class Grid {
             case SpellData.RANGE_AREA_ORTHOGONAL:
                 output = getInLine(origin, minRange, maxRange);
                 break;
-            default:
+            default: // REANGE_AREA_POINT/unsuported pattern
                 output = new List<Cell>();
                 output.Add(origin);
                 break;

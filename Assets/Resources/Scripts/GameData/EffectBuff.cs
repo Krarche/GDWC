@@ -19,10 +19,12 @@ public class EffectBuff {
     // entity
     public EffectHandler onGainedHandler; // when the entity gained the buff
     public EffectHandler onLostHandler; // when the entity lost the buff
+
     public EffectHandler onMoveHandler; // when the entity starts a movement
     public EffectHandler onHealHandler; // when the entity received heal
     public EffectHandler onSpellHandler; // each time the entity uses an abality
     public EffectHandler onDamageHandler; // when the entity received damage
+
     public EffectHandler onBuffedHandler; // when the entity received a new buff
 
     // cell

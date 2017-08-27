@@ -61,6 +61,7 @@ public class NetworkMasterClient : MonoBehaviour {
                 user.player = temp;
             }
             temp.playerEntity.initSpell(new string[4] {"S001", "S002", "S003", "S004"});
+            temp.playerEntity.teamId = i;
         }
 
 
@@ -257,6 +258,8 @@ public class NetworkMasterClient : MonoBehaviour {
             p.playerId = playerId;
             p.playerName = displayedName;
             GameLogicClient.game.spawnPlayer(p);
+            p.playerEntity.entityId = entityId;
+            GameLogicClient.game.entityList[entityId] = p.playerEntity;
             p.playerEntity.setColor(r, g, b);
             p.playerEntity.applyColor();
             p.playerEntity.setDisplayedName(displayedName);

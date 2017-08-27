@@ -53,6 +53,7 @@ public class GameLogicClient : GameLogic {
         Debug.Log(type);
         switch (type) {
             case BUTTON_TYPE_ACTION_ROOT:
+                buttonRootHandler();
                 break;
             case BUTTON_TYPE_ACTION_MOVEMENT:
                 buttonMovementHandler();
@@ -152,6 +153,16 @@ public class GameLogicClient : GameLogic {
     List<Cell> effectRangeCells = null;
     private Action currentAction = null;
 
+    private void buttonRootHandler() {
+        if (currentActionSelectionState != ACTION_SELECTION_STATE_ROOT) {
+            if (isSpelling)
+                clearSpellRangeCells();
+            else if (isMoving)
+                clearMovementRangeCells();
+            currentActionSelectionState = ACTION_SELECTION_STATE_ROOT;
+        }
+    }
+
     private void buttonMovementHandler() {
         if (currentActionSelectionState != ACTION_SELECTION_STATE_MOVEMENT) {
             if (isSpelling)
@@ -172,7 +183,6 @@ public class GameLogicClient : GameLogic {
             else if (isSpelling)
                 clearSpellRangeCells();
             currentActionSelectionState = ACTION_SELECTION_STATE_QUICK;
-            currentSelectedSpell = SELECTED_SPELL_NONE;
         }
     }
     private void buttonSlowSpellHandler() {
@@ -182,7 +192,6 @@ public class GameLogicClient : GameLogic {
             else if (isSpelling)
                 clearSpellRangeCells();
             currentActionSelectionState = ACTION_SELECTION_STATE_SLOW;
-            currentSelectedSpell = SELECTED_SPELL_NONE;
         }
     }
 
@@ -192,6 +201,7 @@ public class GameLogicClient : GameLogic {
             grid.SetCellColor(spellRangeCells, Color.white);
             spellRangeCells = null;
         }
+        currentSelectedSpell = SELECTED_SPELL_NONE;
     }
     private void clearEffectRangeCells() {
         if (effectRangeCells != null) {
@@ -254,7 +264,6 @@ public class GameLogicClient : GameLogic {
 
                     effectRangeCells = grid.getCellsInRanges(target, minArea, maxArea, areaType);
                     grid.SetCellColor(effectRangeCells, Color.red);
-                    // register spell
                 }
 
             }
@@ -289,23 +298,33 @@ public class GameLogicClient : GameLogic {
             currentAction = tempAction;
         }
         currentAction.entityId = localEntity.entityId;
+        resolveAction(currentAction);
     }
-    private void registerMovementAction(Cell target) {
+    private void registerMovementAction(List<Cell> target) {
         MovementAction tempAction = new MovementAction();
-        tempAction.path = new int[] { target.cellId };
+        tempAction.path = new int[target.Count];
+        for (int i = 0; i < target.Count; i++)
+            tempAction.path[i] = target[i].cellId;
         currentAction = tempAction;
         currentAction.entityId = localEntity.entityId;
+        resolveAction(currentAction);
     }
 
     private void buttonConfirmHandler() {
         if (isAiming) {
             if (isSpelling) {
                 if (isAnySpellSelected) {
-                    SpellInstance spellInstance = localSpells[currentSelectedSpell];
-                    registerSpellAction(spellInstance.spell.id, currentTargetCell);
+                    if (currentTargetCell != null) {
+                        SpellInstance spellInstance = localSpells[currentSelectedSpell];
+                        registerSpellAction(spellInstance.spell.id, currentTargetCell);
+                        buttonRootHandler();
+                    }
                 }
             } else if (isMoving) {
-                registerMovementAction(currentTargetCell);
+                if (movementPathCells != null) {
+                    registerMovementAction(movementPathCells);
+                    buttonRootHandler();
+                }
             }
         }
     }

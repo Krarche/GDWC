@@ -13,8 +13,19 @@ public class Entity : MonoBehaviour {
     public int entityId;
     public string displayedName = "NONE";
     public Color modelColor = Color.white;
-    public int destinationCellId = NO_DESTINATION_CELL_ID;
-    public int currentCellId = NO_DESTINATION_CELL_ID;
+    public int teamId;
+    public Cell destinationCell;
+    public int destinationCellId {
+        get {
+            return destinationCell != null ? destinationCell.cellId : NO_DESTINATION_CELL_ID;
+        }
+    }
+    public Cell currentCell;
+    public int currentCellId {
+        get {
+            return currentCell != null ? currentCell.cellId : NO_DESTINATION_CELL_ID;
+        }
+    }
     public int currentHealth = 50;
     public int maxHealth = 50;
     public int currentAP = 14;
@@ -39,10 +50,10 @@ public class Entity : MonoBehaviour {
 
     public Queue<Action> actions = new Queue<Action>();
     public SpellInstance[] spells;
+    public List<BuffInstance> buffs;
     public Animator animator;
     public TextMesh entityNameText;
     public Transform meshTransform;
-
 
     // Use this for initialization
     void Start() {
@@ -53,6 +64,7 @@ public class Entity : MonoBehaviour {
         maxAP = 14;
         currentMP = 8;
         maxMP = 8;
+        buffs = new List<BuffInstance>();
     }
 
     // Update is called once per frame
@@ -72,8 +84,8 @@ public class Entity : MonoBehaviour {
                 if (dir.magnitude > 0.1f) {
                     gameObject.transform.position = pos + dir / 2;
                 } else {
-                    currentCellId = destinationCellId;
-                    destinationCellId = NO_DESTINATION_CELL_ID;
+                    currentCell = destinationCell;
+                    destinationCell = null;
                     gameObject.transform.position = dest;
                 }
             }
@@ -91,19 +103,68 @@ public class Entity : MonoBehaviour {
         }
     }
 
+    public bool hasBuff(string buffId) {
+        foreach (BuffInstance bi in buffs)
+            if (bi.buff.id == buffId)
+                return true;
+        return false;
+    }
+
+    // should contain the buff, check first with hasBuff
+    public BuffInstance getBuffInstance(string buffId) {
+        return buffs.Find((x => x.buff.id == buffId));
+    }
+
+    public BuffInstance addBuffInstance(Entity origin, string buffId, int duration) {
+        BuffInstance bi = new BuffInstance();
+        bi.origin = origin;
+        bi.target = this;
+        bi.remainingDuration = duration;
+        bi.buff = DataManager.BUFF_DATA[buffId];
+        buffs.Add(bi);
+        return bi;
+    }
+
+    // should contain the buff, check first with hasBuff
+    public BuffInstance refreshBuffInstance(Entity origin, string buffId, int duration) {
+        BuffInstance bi = buffs.Find((x => x.buff.id == buffId));
+        bi.origin = origin;
+        bi.target = this;
+        bi.remainingDuration = duration;
+        return bi;
+    }
+
+    // should contain the buff, check first with hasBuff
+    public BuffInstance removeBuffInstance(string buffId) {
+        BuffInstance bi = buffs.Find((x => x.buff.id == buffId));
+        buffs.Remove(bi);
+        return bi;
+    }
+
     public void setCurrentCell(Cell c) {
-        transform.position = c.position;
-        currentCellId = c.cellId;
+        if (c != null) {
+            if (currentCell != null)
+                currentCell.currentEntity = null;
+            transform.position = c.position;
+            currentCell = c;
+            c.currentEntity = this;
+        }
     }
 
-    public void orderMoveToCell(int destinationCellId) {
-        this.destinationCellId = destinationCellId;
+    public void orderMoveToCell(Cell destinationCell) {
+        this.destinationCell = destinationCell;
     }
 
-    public int getCurrentCell() {
+    public int getCurrentCellId() {
         if (destinationCellId != NO_DESTINATION_CELL_ID)
             return destinationCellId;
         return currentCellId;
+    }
+
+    public Cell getCurrentCell() {
+        if (destinationCell != null)
+            return destinationCell;
+        return currentCell;
     }
 
     public void addOrder(Action o) {

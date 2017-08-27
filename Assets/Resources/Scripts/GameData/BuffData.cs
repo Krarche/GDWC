@@ -11,10 +11,10 @@ public class BuffData : GameData {
 }
 
 public class BuffInstance {
-    BuffData type;
-    Entity origin;
-    Entity target;
+    public BuffData buff;
+    public Entity origin;
+    public Entity target;
 
-    int remainingDuration;
-    int remainingCharges;
+    public int remainingDuration;
+    public int remainingCharges;
 }

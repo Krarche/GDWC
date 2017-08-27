@@ -143,6 +143,9 @@ public abstract class GameLogic {
     }
 
     public virtual void startTurn() {
+        foreach(Entity e in entityList.Values) {
+            solver.resolveEntityBuffs(e,"onTurnStartHandler");
+        }
         currentTurnState = TURN_STATE_ACT;
         CoroutineMaster.startCoroutine(waitForTurnEnd());
     }
@@ -156,6 +159,9 @@ public abstract class GameLogic {
     }
 
     public virtual void endTurn() {
+        foreach (Entity e in entityList.Values) {
+            solver.resolveEntityBuffs(e, "onTurnEndHandler");
+        }
         currentTurnState = TURN_STATE_SYNC;
         CoroutineMaster.startCoroutine(waitForServerData());
     }
@@ -229,8 +235,7 @@ public abstract class GameLogic {
                 SpellAction spellAction = (SpellAction)action;
                 Cell target = grid.GetCell(spellAction.targetCellId);
                 SpellData spell = DataManager.SPELL_DATA[spellAction.spellId];
-                solver.resolveSpell(spell, e, target);
-                // TODO : QUICK != SLOW
+                solver.resolveSpell(spell, e, target, spellAction is QuickSpellAction);
             } // TODO else give AP
         }
     }

@@ -44,6 +44,8 @@
 	"cellTypes":[
 		{"id":"C001",
 		"name":"Simple grid cell",
+		"blockMovement":"false",
+		"blockLineOfSight":"false",
 		"modelPath":"simpleGridCell"},
 		{"id":"C002",
 		"name":"High ground",
@@ -52,7 +54,8 @@
 		"modelPath":"highGround"},
 		{"id":"C003",
 		"name":"Hole",
-		"blockMovement":"true"}
+		"blockMovement":"true",
+		"blockLineOfSight":"true"}
 	],
 	"entities":[
 		{"id:":"E001",
@@ -130,11 +133,11 @@
 			"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,slowHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell."
 		],
 		"cost":["4","4"],"cooldown":["4","4"],
-		"minRange":["3","3"],"maxRange":["5","5"],"rangeType":["circle","circle"],
+		"minRange":["2","2"],"maxRange":["5","5"],"rangeType":["circle","circle"],
 		"priority":["2","0"],"lineOfSight":["true","true"],
 		"effects":[
 			{"minArea":["0","0"],"maxArea":["2","2"],"areaType":["circle","circle"],
-			"affectAlly":["false","false"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"affectAlly":["true","true"],"affectEnemy":["true","true"],"affectSelf":["true","true"],"affectCell":["false","false"],
 			"quickHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"3"},
 			"slowHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"5"}}
 		]},
@@ -150,7 +153,7 @@
 		"priority":["0","2"],"lineOfSight":["true","false"],
 		"effects":[
 			{"minArea":["0","0"],"maxArea":["0","0"],"areaType":["point","point"],
-			"affectAlly":["false","false"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
+			"affectAlly":["false","false"],"affectEnemy":["false","false"],"affectSelf":["false","false"],"affectCell":["true","true"],
 			"quickHandler":{"class":"EffectHandlerDash"},
 			"slowHandler":{"class":"EffectHandlerWarp"}}
 		]},

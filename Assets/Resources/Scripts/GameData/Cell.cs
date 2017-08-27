@@ -15,6 +15,7 @@ public class Cell {
     public Vector3 position { get { return new Vector3(x, 0, y); } }
     public Grid grid;
     public GameLogic game;
+    public Entity currentEntity;
 
     public GameObject inWorld;
 

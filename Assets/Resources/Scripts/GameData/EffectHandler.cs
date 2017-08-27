@@ -24,9 +24,12 @@ public class EffectHandlerHeal : EffectHandler {
 }
 
 public class EffectHandlerBuff : EffectHandler {
-    // Buff buff
     public string buffId;
     public int duration;
+}
+
+public class EffectHandlerDebuff : EffectHandler {
+    public string buffId;
 }
 
 public class EffectHandlerModAP : EffectHandler {
@@ -50,6 +53,11 @@ public class EffectHandlerUnstun : EffectHandler {
 }
 
 public class EffectHandlerPush : EffectHandler {
+    public int distance;
+}
+
+public class EffectHandlerPull : EffectHandler {
+    public int distance;
 }
 
 public class EffectHandlerDash : EffectHandler {
