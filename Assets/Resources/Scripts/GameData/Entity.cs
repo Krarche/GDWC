@@ -15,9 +15,12 @@ public class Entity : MonoBehaviour {
     public Color modelColor = Color.white;
     public int destinationCellId = NO_DESTINATION_CELL_ID;
     public int currentCellId = NO_DESTINATION_CELL_ID;
-    public int currentHealth, maxHealth;
-    public int currentAP, maxAP;
-    public int currentMP, maxMP;
+    public int currentHealth = 50;
+    public int maxHealth = 50;
+    public int currentAP = 14;
+    public int maxAP = 14;
+    public int currentMP = 8;
+    public int maxMP = 8;
 
     // buffs
     public int rangeModifier;
@@ -30,7 +33,7 @@ public class Entity : MonoBehaviour {
         stunCount++;
     }
     public void unstun() {
-        stunCount = stunCount > 1 ? stunCount - 1 : 0 ;
+        stunCount = stunCount > 1 ? stunCount - 1 : 0;
     }
 
 
@@ -44,6 +47,12 @@ public class Entity : MonoBehaviour {
     // Use this for initialization
     void Start() {
         animator = gameObject.GetComponent<Animator>();
+        currentHealth = 50;
+        maxHealth = 50;
+        currentAP = 14;
+        maxAP = 14;
+        currentMP = 8;
+        maxMP = 8;
     }
 
     // Update is called once per frame
@@ -76,7 +85,7 @@ public class Entity : MonoBehaviour {
 
     public void initSpell(string[] spellIds) {
         spells = new SpellInstance[spellIds.Length];
-        for(int i=0; i<spellIds.Length; i++) {
+        for (int i = 0; i < spellIds.Length; i++) {
             spells[i] = new SpellInstance();
             spells[i].spell = DataManager.SPELL_DATA[spellIds[i]];
         }

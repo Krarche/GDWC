@@ -47,7 +47,7 @@ public class NetworkMasterClient : MonoBehaviour {
         user.currentGameId = game.gameId;
         for (int i = 0; i < 2; i++) {
             ulong playerId = (ulong)i;
-            int cellId = i * 30;
+            int cellId = DataManager.MAP_DATA["M002"].getSpawns(2)[i];
             int entityId = i;
             string displayedName = "Player " + i;
             float r = 255;
@@ -60,7 +60,7 @@ public class NetworkMasterClient : MonoBehaviour {
             if (user.userId == playerId) {
                 user.player = temp;
             }
-            temp.playerEntity.initSpell(new string[2] {"S001", "S002"});
+            temp.playerEntity.initSpell(new string[4] {"S001", "S002", "S003", "S004"});
         }
 
 

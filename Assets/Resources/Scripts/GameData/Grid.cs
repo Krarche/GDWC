@@ -13,7 +13,6 @@ public class Grid {
     public GameObject cellBase;
     public GameObject gridHolder;
     public GameLogic game;
-    public List<Cell> selectedCells;
     public MapData mapData;
 
     public Grid(GameLogic game, MapData mapData) {
@@ -128,15 +127,6 @@ public class Grid {
         }
     }
 
-    public void printGrid() {
-        for (int y = 0; y < sizeY; y++) {
-            for (int x = 0; x < sizeX; x++) {
-                Debug.Log("  " + x + ", " + y + "  ");
-            }
-            Debug.Log("\n");
-        }
-    }
-
     public List<Cell> getInCircle(Cell origin, int minRange, int maxRange) {
 
         List<Cell> output = new List<Cell>();
@@ -169,7 +159,6 @@ public class Grid {
     }
 
     public List<Cell> getCellsInRange(Cell origin, int minRange, int maxRange, int rangeType) {
-        // ClearSelection();
         List<Cell> output;
         switch (rangeType) {
             case SpellData.RANGE_AREA_CIRCLE:
@@ -202,27 +191,8 @@ public class Grid {
         return output;
     }
 
-    public void ClearSelection() {
-        if (selectedCells != null) {
-
-        }
-        selectedCells = null;
-    }
-
     public Cell GetCell(int cellId) {
         return cells[cellId % sizeX, cellId / sizeX];
-    }
-
-    public Cell GetCell(int x, int y) {
-        return cells[x, y];
-    }
-
-    public void SetCellColor(int cellId, Color color) {
-        SetCellColor(GetCell(cellId), color);
-    }
-
-    public void SetCellColor(int x, int y, Color color) {
-        SetCellColor(GetCell(x, y), color);
     }
 
     public void SetCellColor(Cell c, Color color) {
@@ -232,9 +202,9 @@ public class Grid {
             c.removeColor();
     }
 
-    public void SetCellColor(int[] cellId, Color color) {
-        for (int i = 0; i < cellId.Length; i++)
-            SetCellColor(GetCell(cellId[i]), color);
+    public void SetCellColor(int[] cellIds, Color color) {
+        for (int i = 0; i < cellIds.Length; i++)
+            SetCellColor(GetCell(cellIds[i]), color);
     }
 
     public void SetCellColor(List<Cell> cells, Color color) {

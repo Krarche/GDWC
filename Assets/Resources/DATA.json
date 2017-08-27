@@ -38,7 +38,7 @@
 			"C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001","C001"
 		],
 		"spawns":[
-			"21","27"
+			"22","202"
 		]}
 	],
 	"cellTypes":[
@@ -84,6 +84,15 @@
 			"affectAlly":"true","affectEnemy":"true","affectSelf":"true",
 			"onTurnStartHandler":{"class":"EffectHandlerDebuff","buffId":"B002"},
 			"conditions":[{"class":"EffectConditionHealthBelow","target":"TARGET","health":"70","percent":"true"}]}
+		]},
+		{"id":"B003",
+		"name":"Regeneration","iconPath":"SPRITE",
+		"description":"Heals <color=#ff0000>@B003,effects,0,onTurnStartHandler,heal; HP</color> every turn",
+		"effects":[
+			{"minArea":"0","maxArea":"0","areaType":"point",
+			"affectAlly":"false","affectEnemy":"false","affectSelf":"true",
+			"onTurnStartHandler":{"class":"EffectHandlerHeal","heal":"4"},
+			"conditions":[]}
 		]}
 	],
 	"spells":[
@@ -144,6 +153,25 @@
 			"affectAlly":["false","false"],"affectEnemy":["true","true"],"affectSelf":["false","false"],"affectCell":["false","false"],
 			"quickHandler":{"class":"EffectHandlerDash"},
 			"slowHandler":{"class":"EffectHandlerWarp"}}
+		]},
+		{"id":"S004",
+		"name":"Regeneration","iconPath":"SPRITE",
+		"color":"CYAN",
+		"description":[
+			"Instantly heals you <color=#00ffff>@S004,effects,0,quickHandler,heal; HP</color>.",
+			"Instantly heals you <color=#00ffff>@S004,effects,0,slowHandler,heal; HP</color>, then <color=#00ffff>@B003,effects,0,onTurnStartHandler,heal; HP</color> every turn for @S004,effects,1,slowHandler,duration; turns."
+		],
+		"cost":["4","4"],"cooldown":["4","4"],
+		"minRange":["0","0"],"maxRange":["0","0"],"rangeType":["point","point"],
+		"priority":["0","2"],"lineOfSight":["false","false"],
+		"effects":[
+			{"minArea":["0","0"],"maxArea":["0","0"],"areaType":["point","point"],
+			"affectAlly":["false","false"],"affectEnemy":["false","false"],"affectSelf":["true","true"],"affectCell":["false","false"],
+			"quickHandler":{"class":"EffectHandlerHeal","heal":"8"},
+			"slowHandler":{"class":"EffectHandlerHeal","heal":"4"}},
+			{"minArea":["0","0"],"maxArea":["0","0"],"areaType":["point","point"],
+			"affectAlly":["false","false"],"affectEnemy":["false","false"],"affectSelf":["true","true"],"affectCell":["false","false"],
+			"slowHandler":{"class":"EffectHandlerBuff","buffId":"B003","duration":"3"}}
 		]}
 	]
 }

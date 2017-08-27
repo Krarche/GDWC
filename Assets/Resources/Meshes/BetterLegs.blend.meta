@@ -3,7 +3,7 @@ guid: a58546a772b07dd4cb74c8f7f17bed10
 timeCreated: 1502542810
 licenseType: Free
 ModelImporter:
-  serializedVersion: 19
+  serializedVersion: 21
   fileIDToRecycleName:
     100000: Armature
     100002: //RootNode
@@ -60,6 +60,7 @@ ModelImporter:
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
+    extraUserProperties: []
     clipAnimations: []
     isReadable: 1
   meshes:
@@ -67,7 +68,10 @@ ModelImporter:
     globalScale: 1
     meshCompression: 0
     addColliders: 0
+    importVisibility: 0
     importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
@@ -83,8 +87,9 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
-  importAnimation: 1
-  copyAvatar: 0
+    normalCalculationMode: 0
+  importAnimation: 0
+  copyAvatar: 1
   humanDescription:
     serializedVersion: 2
     human: []
@@ -101,7 +106,8 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: e47d1eb7086d0f54183d51451589428f,
+    type: 3}
   animationType: 2
   humanoidOversampling: 1
   additionalBone: 0

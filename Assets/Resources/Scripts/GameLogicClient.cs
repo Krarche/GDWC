@@ -28,14 +28,6 @@ public class GameLogicClient : GameLogic {
         game = this;
     }
 
-    public override void startTurn() {
-        base.startTurn();
-    }
-
-    public override void resolveTurn() {
-        base.resolveTurn();
-    }
-
     public void clearGame() {
         game.grid.clearGrid();
         foreach (Entity e in game.entityList.Values) {
@@ -55,22 +47,33 @@ public class GameLogicClient : GameLogic {
     public const short BUTTON_TYPE_SPELL_3 = 13;
     public const short BUTTON_TYPE_CONFIRM = 20;
     public const short BUTTON_TYPE_CANCEL = 21;
-    public const short BUTTON_TYPE_READy = 22;
+    public const short BUTTON_TYPE_READY = 22;
 
     public void buttonInput(short type) {
         Debug.Log(type);
         switch (type) {
+            case BUTTON_TYPE_ACTION_ROOT:
+                break;
+            case BUTTON_TYPE_ACTION_MOVEMENT:
+                buttonMovementHandler();
+                break;
+            case BUTTON_TYPE_ACTION_QUICK_SPELL:
+                buttonQuickSpellHandler();
+                break;
+            case BUTTON_TYPE_ACTION_SLOW_SPELL:
+                buttonSlowSpellHandler();
+                break;
             case BUTTON_TYPE_SPELL_0:
-                buttonSpellHandler(type);
+                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
                 break;
             case BUTTON_TYPE_SPELL_1:
-                buttonSpellHandler(type);
+                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
                 break;
             case BUTTON_TYPE_SPELL_2:
-                buttonSpellHandler(type);
+                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
                 break;
             case BUTTON_TYPE_SPELL_3:
-                buttonSpellHandler(type);
+                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
                 break;
             case BUTTON_TYPE_CONFIRM:
                 buttonConfirmHandler();
@@ -78,9 +81,11 @@ public class GameLogicClient : GameLogic {
             case BUTTON_TYPE_CANCEL:
                 buttonCancelHandler();
                 break;
+            case BUTTON_TYPE_READY:
+                buttonReadyHandler();
+                break;
         }
     }
-
 
     public static short ACTION_SELECTION_STATE_ROOT = 0;
     public static short ACTION_SELECTION_STATE_QUICK = 1;
@@ -89,10 +94,13 @@ public class GameLogicClient : GameLogic {
     public static short ACTION_SELECTION_STATE_READY = 4;
     public short currentActionSelectionState = 0;
 
+    public bool canQuickSpell;
+    public bool canSlowSpell;
+    public bool canMove;
+
     public bool isAiming {
         get {
-            return currentActionSelectionState != ACTION_SELECTION_STATE_ROOT &&
-                currentActionSelectionState != ACTION_SELECTION_STATE_READY;
+            return isMoving || isSpelling;
         }
     }
     public bool isSpelling {
@@ -116,21 +124,6 @@ public class GameLogicClient : GameLogic {
         }
     }
 
-
-    private void buttonMovementHandler() {
-        currentActionSelectionState = ACTION_SELECTION_STATE_MOVEMENT;
-    }
-
-    private void buttonQuickSpellHandler() {
-        currentActionSelectionState = ACTION_SELECTION_STATE_QUICK;
-        currentSelectedSpell = SELECTED_SPELL_NONE;
-    }
-
-    private void buttonSlowSpellHandler() {
-        currentActionSelectionState = ACTION_SELECTION_STATE_SLOW;
-        currentSelectedSpell = SELECTED_SPELL_NONE;
-    }
-
     public static short SELECTED_SPELL_NONE = -1;
     public static short SELECTED_SPELL_1 = 0;
     public static short SELECTED_SPELL_2 = 1;
@@ -143,62 +136,145 @@ public class GameLogicClient : GameLogic {
             return currentSelectedSpell != SELECTED_SPELL_NONE;
         }
     }
-
-    List<Cell> spellRangeCells = null;
-
-    private void buttonSpellHandler(short spellIndex) {
-        currentSelectedSpell = (short)(spellIndex - BUTTON_TYPE_SPELL_0);
-        // display spell range preview
-        if (spellRangeCells != null) {
-            grid.SetCellColor(spellRangeCells, Color.white);
-            spellRangeCells = null;
-            if (effectRangeCells != null) {
-                grid.SetCellColor(effectRangeCells, Color.white);
-                effectRangeCells = null;
+    public SpellInstance selectedSpell {
+        get {
+            if (currentSelectedSpell != SELECTED_SPELL_NONE) {
+                return localSpells[currentSelectedSpell];
             }
+            return null;
         }
-
-        int rangeType = localSpells[currentSelectedSpell].getRangeType(0);
-        int minRange = localSpells[currentSelectedSpell].getMinRange(0);
-        int maxRange = localSpells[currentSelectedSpell].getMaxRange(0);
-
-        spellRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), minRange, maxRange, rangeType);
-
-        grid.SetCellColor(spellRangeCells, Color.blue);
     }
 
     private Cell currentTargetCell = null;
+    List<Cell> movementRangeCells = null;
+    List<Cell> movementPathCells = null;
+    List<Cell> spellRangeCells = null;
     List<Cell> effectRangeCells = null;
+    private Action currentAction = null;
+
+    private void buttonMovementHandler() {
+        if (currentActionSelectionState != ACTION_SELECTION_STATE_MOVEMENT) {
+            if (isSpelling)
+                clearSpellRangeCells();
+            else if (isMoving)
+                clearMovementRangeCells();
+
+            movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
+            grid.SetCellColor(movementRangeCells, Color.green);
+
+            currentActionSelectionState = ACTION_SELECTION_STATE_MOVEMENT;
+        }
+    }
+    private void buttonQuickSpellHandler() {
+        if (currentActionSelectionState != ACTION_SELECTION_STATE_QUICK) {
+            if (isMoving)
+                clearMovementRangeCells();
+            else if (isSpelling)
+                clearSpellRangeCells();
+            currentActionSelectionState = ACTION_SELECTION_STATE_QUICK;
+            currentSelectedSpell = SELECTED_SPELL_NONE;
+        }
+    }
+    private void buttonSlowSpellHandler() {
+        if (currentActionSelectionState != ACTION_SELECTION_STATE_SLOW) {
+            if (isMoving)
+                clearMovementRangeCells();
+            else if (isSpelling)
+                clearSpellRangeCells();
+            currentActionSelectionState = ACTION_SELECTION_STATE_SLOW;
+            currentSelectedSpell = SELECTED_SPELL_NONE;
+        }
+    }
+
+    private void clearSpellRangeCells() {
+        clearEffectRangeCells();
+        if (spellRangeCells != null) {
+            grid.SetCellColor(spellRangeCells, Color.white);
+            spellRangeCells = null;
+        }
+    }
+    private void clearEffectRangeCells() {
+        if (effectRangeCells != null) {
+            grid.SetCellColor(effectRangeCells, Color.white);
+            effectRangeCells = null;
+        }
+        currentTargetCell = null;
+    }
+    private void clearMovementRangeCells() {
+        if (movementRangeCells != null) {
+            grid.SetCellColor(movementRangeCells, Color.white);
+            movementRangeCells = null;
+        }
+        clearMovementPathCells();
+    }
+    private void clearMovementPathCells() {
+        if (movementPathCells != null) {
+            grid.SetCellColor(movementPathCells, Color.white);
+            movementPathCells = null;
+        }
+        currentTargetCell = null;
+    }
+
+    private void buttonSpellHandler(short spellIndex) {
+        if (isSpelling) {
+            // clear previous spell preview
+            clearSpellRangeCells();
+
+            // switch to selected spell
+            currentSelectedSpell = spellIndex;
+
+            // display spell range preview
+            int priority = isQuickSpelling ? 0 : 1;
+
+            int rangeType = localSpells[currentSelectedSpell].getRangeType(priority);
+            int minRange = localSpells[currentSelectedSpell].getMinRange(priority);
+            int maxRange = localSpells[currentSelectedSpell].getMaxRange(priority);
+
+            spellRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), minRange, maxRange, rangeType);
+            grid.SetCellColor(spellRangeCells, Color.blue);
+        }
+    }
 
     public void targetAction(Cell target) {
         //if (isAiming) {
-        //    if (isSpelling) {
-        if (isAnySpellSelected) {
-            if (spellRangeCells != null && spellRangeCells.Contains(target)) {
-                currentTargetCell = target;
-                // show spell area
-                if (effectRangeCells != null) {
-                    grid.SetCellColor(effectRangeCells, Color.white);
-                    effectRangeCells = null;
-                }
-                int[] areaType = localSpells[currentSelectedSpell].getAreaType(0);
-                int[] minArea = localSpells[currentSelectedSpell].getMinArea(0);
-                int[] maxArea = localSpells[currentSelectedSpell].getMaxArea(0);
+        if (isSpelling) {
+            if (isAnySpellSelected) {
+                if (spellRangeCells != null && spellRangeCells.Contains(target)) {
+                    // clear previous effect preview
+                    clearEffectRangeCells();
 
-                effectRangeCells = grid.getCellsInRanges(target, minArea, maxArea, areaType);
-                grid.SetCellColor(effectRangeCells, Color.red);
+                    // switch to targeted cell
+                    currentTargetCell = target;
+
+                    // display spell effect preview
+                    int priority = isQuickSpelling ? 0 : 1;
+                    int[] areaType = selectedSpell.getAreaType(priority);
+                    int[] minArea = selectedSpell.getMinArea(priority);
+                    int[] maxArea = selectedSpell.getMaxArea(priority);
+
+                    effectRangeCells = grid.getCellsInRanges(target, minArea, maxArea, areaType);
+                    grid.SetCellColor(effectRangeCells, Color.red);
+                    // register spell
+                }
 
             }
+        } else if (isMoving) {
+            if (movementRangeCells != null && movementRangeCells.Contains(target)) {
+                // clear previous path preview
+                clearMovementPathCells();
 
+                // switch to selected path
+                currentTargetCell = target;
+
+                // display movement path preview
+                movementPathCells = new List<Cell>();
+                movementPathCells.Add(grid.GetCell(localEntity.currentCellId));
+                movementPathCells.Add(currentTargetCell);
+                grid.SetCellColor(movementPathCells, Color.yellow);
+                // register movement
+            }
         }
-        //   } else if (isMoving) {
-        //       currentTargetCell = target;
-        // register movement
-        //    }
-        //}
     }
-
-    private Action currentAction = null;
 
     private void registerSpellAction(string spellId, Cell target) {
         if (isQuickSpelling) {
@@ -214,7 +290,6 @@ public class GameLogicClient : GameLogic {
         }
         currentAction.entityId = localEntity.entityId;
     }
-
     private void registerMovementAction(Cell target) {
         MovementAction tempAction = new MovementAction();
         tempAction.path = new int[] { target.cellId };
@@ -234,16 +309,16 @@ public class GameLogicClient : GameLogic {
             }
         }
     }
-
     private void buttonCancelHandler() {
         if (localActions.Count > 0) {
             localActions.Dequeue();
         }
     }
-
     private void buttonReadyHandler() {
 
     }
+
+    // ################################################################
 
     public override string generateTurnActionsJSON() {
         string output = "";
