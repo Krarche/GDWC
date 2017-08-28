@@ -14,16 +14,22 @@ public class Entity : MonoBehaviour {
     public string displayedName = "NONE";
     public Color modelColor = Color.white;
     public int teamId;
-    public Cell destinationCell;
-    public int destinationCellId {
-        get {
-            return destinationCell != null ? destinationCell.cellId : NO_DESTINATION_CELL_ID;
-        }
-    }
     public Cell currentCell;
     public int currentCellId {
         get {
             return currentCell != null ? currentCell.cellId : NO_DESTINATION_CELL_ID;
+        }
+    }
+    public Cell futureCell;
+    public int futureCellId {
+        get {
+            return futureCell != null ? futureCell.cellId : NO_DESTINATION_CELL_ID;
+        }
+    }
+    public Cell destinationCell;
+    public int destinationCellId {
+        get {
+            return destinationCell != null ? destinationCell.cellId : NO_DESTINATION_CELL_ID;
         }
     }
     public int currentHealth = 50;

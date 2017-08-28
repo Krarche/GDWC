@@ -7,6 +7,11 @@ using UnityEngine;
 public class TurnResolution {
 
     GameLogic parent;
+    Grid grid {
+        get { return parent.grid; }
+    }
+
+    private List<MovementUnfolder> pathsToResolve = new List<MovementUnfolder>();
 
     public TurnResolution(GameLogic parent) {
         this.parent = parent;
@@ -16,12 +21,71 @@ public class TurnResolution {
 
     }
 
+
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
     public void resolveMovement(Entity origin, int[] path) {
+        // TODO - remove
         moveEntity(origin);
         int destinationCellId = path[path.Length - 1];
-        origin.orderMoveToCell(parent.grid.GetCell(destinationCellId));
-        // TODO : move along path
+        origin.orderMoveToCell(grid.GetCell(destinationCellId));
+        // TODO - replace with this :
+        // WIP
+        //MovementUnfolder newMovement = new MovementUnfolder();
+        //newMovement.entity = origin;
+        //foreach (int cellId in path)
+        //    newMovement.path.Enqueue(grid.GetCell(cellId));
+        //pathsToResolve.Add(newMovement);
+    }
+
+    public void stepByStepMovementResolution() {
+        while (pathsToResolve.Count > 0) {
+            List<Cell> iterationFutureCells = new List<Cell>();
+            List<MovementUnfolder> pathsToShotDown = new List<MovementUnfolder>();
+            // peek to count future entities on cells
+            foreach (MovementUnfolder movement in pathsToResolve) {
+                Cell futureCell = movement.path.Peek();
+                movement.entity.futureCell = futureCell;
+                futureCell.futureEntity.Add(movement.entity);
+                if (!iterationFutureCells.Contains(futureCell))
+                    iterationFutureCells.Add(futureCell);
+            }
+            // check for unmoving entities
+            foreach (Cell cell in iterationFutureCells) {
+                if(cell.currentEntity != null) {
+                    if (cell.currentEntity.futureCell != cell)
+                        cell.futureEntity.Add(cell.currentEntity);
+                }
+            }
+            // check for invalid paths
+            foreach (MovementUnfolder movement in pathsToResolve) {
+                Cell futureCell = movement.path.Peek();
+                // check if must be shot down
+                if (futureCell.willBeOverFilled)
+                    pathsToShotDown.Add(movement);
+            }
+            // stop tracking invalid paths
+            foreach(MovementUnfolder movement in pathsToShotDown) {
+                pathsToResolve.Remove(movement);
+            }
+            pathsToShotDown.Clear();
+            // unqueue one cell to all valid path, commit current valid positions
+            foreach (MovementUnfolder movement in pathsToResolve) {
+                Cell futureCell = movement.path.Dequeue();
+                movement.entity.destinationCell = futureCell;
+                movement.entity.futureCell = null;
+                // check end of path
+                if(movement.path.Count == 0)
+                    pathsToShotDown.Add(movement);
+            }
+            // stop tracking ended paths
+            foreach (MovementUnfolder movement in pathsToShotDown) {
+                pathsToResolve.Remove(movement);
+            }
+            // prepare for next iteration
+            foreach (Cell cell in iterationFutureCells) {
+                cell.futureEntity.Clear();
+            }
+        }
     }
 
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
@@ -62,7 +126,6 @@ public class TurnResolution {
             }
         }
     }
-
 
     public void resolveEntityBuffs(Entity e, string trigger) {
         Debug.Log("resolveEntityBuffs (" + trigger + ")");
@@ -111,7 +174,7 @@ public class TurnResolution {
         int minArea = effect.minArea[priority ? 0 : 1];
         int maxArea = effect.maxArea[priority ? 0 : 1];
 
-        return parent.grid.getCellsInRange(target, minArea, maxArea, areaType);
+        return grid.getCellsInRange(target, minArea, maxArea, areaType);
     }
     // returns all the cells affected by the buff at the targeted location
     public List<Cell> getBuffEffectAffectedCells(EffectBuff effect, Entity origin, Cell target) {
@@ -119,7 +182,7 @@ public class TurnResolution {
         int minArea = effect.minArea;
         int maxArea = effect.maxArea;
 
-        return parent.grid.getCellsInRange(target, minArea, maxArea, areaType);
+        return grid.getCellsInRange(target, minArea, maxArea, areaType);
     }
 
     // ######################################################
@@ -367,7 +430,16 @@ public class TurnResolution {
 
     public void dashEntity(Entity origin, Cell target) {
         Debug.Log("dashEntity");
+        // TODO - remove
         origin.orderMoveToCell(target);
+        // TODO- replace with
+        // WIP
+        //MovementUnfolder newMovement = new MovementUnfolder();
+        //newMovement.entity = origin;
+        // get all cell between ogirin.currentCell and target
+        // add them to newMovement.path (mind cell order !)
+        // add newMovement to pathsToResolve
+        // end WIP
         resolveEntityBuffs(origin, "onMoveHandler");
     }
     public void warpEntity(Entity origin, Cell target) {

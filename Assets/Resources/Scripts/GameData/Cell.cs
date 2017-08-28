@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public enum Direction : int {
@@ -16,6 +15,13 @@ public class Cell {
     public Grid grid;
     public GameLogic game;
     public Entity currentEntity;
+    public bool willBeEmpty {
+        get { return futureEntity.Count == 0; }
+    }
+    public bool willBeOverFilled {
+        get { return futureEntity.Count > 1;  }
+    }
+    public List<Entity> futureEntity = new List<Entity>();
 
     public GameObject inWorld;
 

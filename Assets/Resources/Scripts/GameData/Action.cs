@@ -134,3 +134,8 @@ public class MovementAction : Action {
         return output;
     }
 }
+
+public class MovementUnfolder {
+    public Queue<Cell> path;
+    public Entity entity;
+}
