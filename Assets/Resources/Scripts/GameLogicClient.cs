@@ -37,63 +37,46 @@ public class GameLogicClient : GameLogic {
         game = null;
     }
 
-    public const short BUTTON_TYPE_ACTION_ROOT = 0;
-    public const short BUTTON_TYPE_ACTION_MOVEMENT = 1;
-    public const short BUTTON_TYPE_ACTION_QUICK_SPELL = 2;
-    public const short BUTTON_TYPE_ACTION_SLOW_SPELL = 3;
-    public const short BUTTON_TYPE_SPELL_0 = 10;
-    public const short BUTTON_TYPE_SPELL_1 = 11;
-    public const short BUTTON_TYPE_SPELL_2 = 12;
-    public const short BUTTON_TYPE_SPELL_3 = 13;
-    public const short BUTTON_TYPE_CONFIRM = 20;
-    public const short BUTTON_TYPE_CANCEL = 21;
-    public const short BUTTON_TYPE_READY = 22;
-
-    public void buttonInput(short type) {
+    public void buttonInput(ButtonType type) {
         Debug.Log(type);
         switch (type) {
-            case BUTTON_TYPE_ACTION_ROOT:
+            case ButtonType.ACTION_ROOT:
                 buttonRootHandler();
                 break;
-            case BUTTON_TYPE_ACTION_MOVEMENT:
+            case ButtonType.ACTION_MOVEMENT:
                 buttonMovementHandler();
                 break;
-            case BUTTON_TYPE_ACTION_QUICK_SPELL:
+            case ButtonType.ACTION_QUICK_SPELL:
                 buttonQuickSpellHandler();
                 break;
-            case BUTTON_TYPE_ACTION_SLOW_SPELL:
+            case ButtonType.ACTION_SLOW_SPELL:
                 buttonSlowSpellHandler();
                 break;
-            case BUTTON_TYPE_SPELL_0:
-                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+            case ButtonType.SPELL_0:
+                buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                 break;
-            case BUTTON_TYPE_SPELL_1:
-                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+            case ButtonType.SPELL_1:
+                buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                 break;
-            case BUTTON_TYPE_SPELL_2:
-                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+            case ButtonType.SPELL_2:
+                buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                 break;
-            case BUTTON_TYPE_SPELL_3:
-                buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+            case ButtonType.SPELL_3:
+                buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                 break;
-            case BUTTON_TYPE_CONFIRM:
+            case ButtonType.CONFIRM:
                 buttonConfirmHandler();
                 break;
-            case BUTTON_TYPE_CANCEL:
+            case ButtonType.CANCEL:
                 buttonCancelHandler();
                 break;
-            case BUTTON_TYPE_READY:
+            case ButtonType.READY:
                 buttonReadyHandler();
                 break;
         }
     }
 
-    public static short ACTION_SELECTION_STATE_ROOT = 0;
-    public static short ACTION_SELECTION_STATE_QUICK = 1;
-    public static short ACTION_SELECTION_STATE_SLOW = 2;
-    public static short ACTION_SELECTION_STATE_MOVEMENT = 3;
-    public static short ACTION_SELECTION_STATE_READY = 4;
-    public short currentActionSelectionState = 0;
+    public ActionSelectionState currentActionSelectionState = 0;
 
     public bool canQuickSpell;
     public bool canSlowSpell;
@@ -111,17 +94,17 @@ public class GameLogicClient : GameLogic {
     }
     public bool isQuickSpelling {
         get {
-            return currentActionSelectionState == ACTION_SELECTION_STATE_QUICK;
+            return currentActionSelectionState == ActionSelectionState.QUICK;
         }
     }
     public bool isSlowSpelling {
         get {
-            return currentActionSelectionState == ACTION_SELECTION_STATE_SLOW;
+            return currentActionSelectionState == ActionSelectionState.SLOW;
         }
     }
     public bool isMoving {
         get {
-            return currentActionSelectionState == ACTION_SELECTION_STATE_MOVEMENT;
+            return currentActionSelectionState == ActionSelectionState.MOVEMENT;
         }
     }
 
@@ -154,17 +137,17 @@ public class GameLogicClient : GameLogic {
     private Action currentAction = null;
 
     private void buttonRootHandler() {
-        if (currentActionSelectionState != ACTION_SELECTION_STATE_ROOT) {
+        if (currentActionSelectionState != ActionSelectionState.ROOT) {
             if (isSpelling)
                 clearSpellRangeCells();
             else if (isMoving)
                 clearMovementRangeCells();
-            currentActionSelectionState = ACTION_SELECTION_STATE_ROOT;
+            currentActionSelectionState = ActionSelectionState.ROOT;
         }
     }
 
     private void buttonMovementHandler() {
-        if (currentActionSelectionState != ACTION_SELECTION_STATE_MOVEMENT) {
+        if (currentActionSelectionState != ActionSelectionState.MOVEMENT) {
             if (isSpelling)
                 clearSpellRangeCells();
             else if (isMoving)
@@ -173,25 +156,25 @@ public class GameLogicClient : GameLogic {
             movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
             grid.SetCellColor(movementRangeCells, Color.green);
 
-            currentActionSelectionState = ACTION_SELECTION_STATE_MOVEMENT;
+            currentActionSelectionState = ActionSelectionState.MOVEMENT;
         }
     }
     private void buttonQuickSpellHandler() {
-        if (currentActionSelectionState != ACTION_SELECTION_STATE_QUICK) {
+        if (currentActionSelectionState != ActionSelectionState.QUICK) {
             if (isMoving)
                 clearMovementRangeCells();
             else if (isSpelling)
                 clearSpellRangeCells();
-            currentActionSelectionState = ACTION_SELECTION_STATE_QUICK;
+            currentActionSelectionState = ActionSelectionState.QUICK;
         }
     }
     private void buttonSlowSpellHandler() {
-        if (currentActionSelectionState != ACTION_SELECTION_STATE_SLOW) {
+        if (currentActionSelectionState != ActionSelectionState.SLOW) {
             if (isMoving)
                 clearMovementRangeCells();
             else if (isSpelling)
                 clearSpellRangeCells();
-            currentActionSelectionState = ACTION_SELECTION_STATE_SLOW;
+            currentActionSelectionState = ActionSelectionState.SLOW;
         }
     }
 
