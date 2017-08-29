@@ -63,7 +63,7 @@ public class NetworkMasterClient : MonoBehaviour {
             temp.playerEntity.initSpell(new string[4] {"S001", "S002", "S003", "S004"});
             temp.playerEntity.teamId = i;
         }
-
+        GUIManager.gui.linkWithLocalEntity(game.localEntity);
 
         GameLogicClient.game.prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());
 

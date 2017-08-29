@@ -26,12 +26,44 @@ public class Entity : MonoBehaviour {
             return currentCell != null ? currentCell.cellId : NO_DESTINATION_CELL_ID;
         }
     }
-    public int currentHealth = 50;
+
+    public event System.EventHandler<ChangeEntityHealthEventArgs> ChangeEntityHealth;
+    public event System.EventHandler<ChangeEntityActionPointsEventArgs> ChangeEntityActionPoints;
+    public event System.EventHandler<ChangeEntityMovePointsEventArgs> ChangeEntityMovePoints;
+    // stats
     public int maxHealth = 50;
-    public int currentAP = 14;
+    private int currentHealth;
+    public int CurrentHealth {
+        get { return currentHealth; }
+        set { 
+            currentHealth = value;
+            //TEMP
+            if (ChangeEntityHealth != null)
+                ChangeEntityHealth(this, new ChangeEntityHealthEventArgs { health = currentHealth }); 
+        } 
+    }
     public int maxAP = 14;
-    public int currentMP = 8;
+    private int currentAP;
+    public int CurrentAP {
+        get { return currentAP; }
+        set {
+            currentAP = value;
+            //TEMP
+            if (ChangeEntityHealth != null)
+                ChangeEntityActionPoints(this, new ChangeEntityActionPointsEventArgs { actionPoints = currentAP });
+        }
+    }
     public int maxMP = 8;
+    private int currentMP;
+    public int CurrentMP {
+        get { return currentMP; }
+        set {
+            currentMP = value;
+            //TEMP
+            if (ChangeEntityHealth != null)
+                ChangeEntityMovePoints(this, new ChangeEntityMovePointsEventArgs { movePoints = currentMP });
+        }
+    }
 
     // buffs
     public int rangeModifier;
@@ -58,11 +90,11 @@ public class Entity : MonoBehaviour {
     // Use this for initialization
     void Start() {
         animator = gameObject.GetComponent<Animator>();
-        currentHealth = 50;
+        CurrentHealth = 50;
         maxHealth = 50;
-        currentAP = 14;
+        CurrentAP = 14;
         maxAP = 14;
-        currentMP = 8;
+        CurrentMP = 8;
         maxMP = 8;
         buffs = new List<BuffInstance>();
     }
@@ -191,27 +223,27 @@ public class Entity : MonoBehaviour {
         gameObject.GetComponentInChildren<SkinnedMeshRenderer>().material.color = modelColor;
     }
     public void heal(int amount) {
-        currentHealth += amount;
-        if (currentHealth > maxHealth)
-            currentHealth = maxHealth;
+        CurrentHealth += amount;
+        if (CurrentHealth > maxHealth)
+            CurrentHealth = maxHealth;
     }
     public bool damage(int amount) { // returns true if the unit dies because of the damage
-        currentHealth -= amount;
-        return currentHealth <= 0;
+        CurrentHealth -= amount;
+        return CurrentHealth <= 0;
     }
     public void modAP(int AP) {
-        currentAP += AP;
-        if (currentAP > maxAP)
-            currentAP = maxAP;
-        if (currentAP < 0)
-            currentAP = 0;
+        CurrentAP += AP;
+        if (CurrentAP > maxAP)
+            CurrentAP = maxAP;
+        if (CurrentAP < 0)
+            CurrentAP = 0;
     }
     public void modMP(int MP) {
-        currentMP += MP;
-        if (currentMP > maxMP)
-            currentMP = maxMP;
-        if (currentMP < 0)
-            currentMP = 0;
+        CurrentMP += MP;
+        if (CurrentMP > maxMP)
+            CurrentMP = maxMP;
+        if (CurrentMP < 0)
+            CurrentMP = 0;
     }
     public void modRange(int range) {
         rangeModifier += range;

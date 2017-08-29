@@ -21,6 +21,8 @@ public class TurnResolution {
         moveEntity(origin);
         int destinationCellId = path[path.Length - 1];
         origin.orderMoveToCell(parent.grid.GetCell(destinationCellId));
+        //TEST RETRAIT DE MP
+        origin.CurrentMP -= path.Length;
         // TODO : move along path
     }
 

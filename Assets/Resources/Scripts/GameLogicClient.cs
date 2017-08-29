@@ -153,7 +153,7 @@ public class GameLogicClient : GameLogic {
             else if (isMoving)
                 clearMovementRangeCells();
 
-            movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
+            movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.CurrentMP), Math.Min(3, localEntity.CurrentMP), SpellData.RANGE_AREA_CIRCLE);
             grid.SetCellColor(movementRangeCells, Color.green);
 
             currentActionSelectionState = ActionSelectionState.MOVEMENT;
