@@ -27,41 +27,63 @@ public class Entity : MonoBehaviour {
         }
     }
 
-    public event System.EventHandler<ChangeEntityHealthEventArgs> ChangeEntityHealth;
-    public event System.EventHandler<ChangeEntityActionPointsEventArgs> ChangeEntityActionPoints;
-    public event System.EventHandler<ChangeEntityMovePointsEventArgs> ChangeEntityMovePoints;
-    // stats
-    public int maxHealth = 50;
-    private int currentHealth;
-    public int CurrentHealth {
-        get { return currentHealth; }
-        set { 
-            currentHealth = value;
-            //TEMP
-            if (ChangeEntityHealth != null)
-                ChangeEntityHealth(this, new ChangeEntityHealthEventArgs { health = currentHealth }); 
-        } 
-    }
-    public int maxAP = 14;
-    private int currentAP;
-    public int CurrentAP {
-        get { return currentAP; }
-        set {
-            currentAP = value;
-            //TEMP
-            if (ChangeEntityHealth != null)
-                ChangeEntityActionPoints(this, new ChangeEntityActionPointsEventArgs { actionPoints = currentAP });
+    public event System.EventHandler<ChangeEntityStatsEventArgs> ChangeEntityStats;
+    // STATS
+    //Health
+    private int _maxHealth;
+    public int maxHealth
+    {
+        get { return _maxHealth; }
+        set
+        {
+            _maxHealth = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeHealth = true });
         }
     }
-    public int maxMP = 8;
-    private int currentMP;
-    public int CurrentMP {
-        get { return currentMP; }
+    private int _currentHealth;
+    public int currentHealth {
+        get { return _currentHealth; }
+        set { 
+            _currentHealth = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeHealth = true }); 
+        } 
+    }
+    //AP
+    private int _maxAP;
+    public int maxAP
+    {
+        get { return _maxAP; }
+        set
+        {
+            _maxAP = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeAP = true });
+        }
+    }
+    private int _currentAP;
+    public int currentAP {
+        get { return _currentAP; }
         set {
-            currentMP = value;
-            //TEMP
-            if (ChangeEntityHealth != null)
-                ChangeEntityMovePoints(this, new ChangeEntityMovePointsEventArgs { movePoints = currentMP });
+            _currentAP = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeAP = true });
+        }
+    }
+    //MP
+    private int _maxMP;
+    public int maxMP
+    {
+        get { return _maxMP; }
+        set
+        {
+            _maxMP = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeMP = true });
+        }
+    }
+    private int _currentMP;
+    public int currentMP {
+        get { return _currentMP; }
+        set {
+            _currentMP = value;
+            if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeMP = true });
         }
     }
 
@@ -90,12 +112,12 @@ public class Entity : MonoBehaviour {
     // Use this for initialization
     void Start() {
         animator = gameObject.GetComponent<Animator>();
-        CurrentHealth = 50;
         maxHealth = 50;
-        CurrentAP = 14;
         maxAP = 14;
-        CurrentMP = 8;
         maxMP = 8;
+        currentHealth = 50;
+        currentAP = 14;
+        currentMP = 8;
         buffs = new List<BuffInstance>();
     }
 
@@ -223,27 +245,27 @@ public class Entity : MonoBehaviour {
         gameObject.GetComponentInChildren<SkinnedMeshRenderer>().material.color = modelColor;
     }
     public void heal(int amount) {
-        CurrentHealth += amount;
-        if (CurrentHealth > maxHealth)
-            CurrentHealth = maxHealth;
+        currentHealth += amount;
+        if (currentHealth > maxHealth)
+            currentHealth = maxHealth;
     }
     public bool damage(int amount) { // returns true if the unit dies because of the damage
-        CurrentHealth -= amount;
-        return CurrentHealth <= 0;
+        currentHealth -= amount;
+        return currentHealth <= 0;
     }
     public void modAP(int AP) {
-        CurrentAP += AP;
-        if (CurrentAP > maxAP)
-            CurrentAP = maxAP;
-        if (CurrentAP < 0)
-            CurrentAP = 0;
+        currentAP += AP;
+        if (currentAP > maxAP)
+            currentAP = maxAP;
+        if (currentAP < 0)
+            currentAP = 0;
     }
     public void modMP(int MP) {
-        CurrentMP += MP;
-        if (CurrentMP > maxMP)
-            CurrentMP = maxMP;
-        if (CurrentMP < 0)
-            CurrentMP = 0;
+        currentMP += MP;
+        if (currentMP > maxMP)
+            currentMP = maxMP;
+        if (currentMP < 0)
+            currentMP = 0;
     }
     public void modRange(int range) {
         rangeModifier += range;

@@ -22,7 +22,7 @@ public class TurnResolution {
         int destinationCellId = path[path.Length - 1];
         origin.orderMoveToCell(parent.grid.GetCell(destinationCellId));
         //TEST RETRAIT DE MP
-        origin.CurrentMP -= path.Length;
+        origin.currentMP -= path.Length;
         // TODO : move along path
     }
 

@@ -9,8 +9,8 @@ public class GUIManager : MonoBehaviour {
 
     //Texts sync with Player values
     public Text healthText;
-    public Text actionPointsText;
-    public Text movePointsText;
+    public Text APText;
+    public Text MPText;
 
     void Start()
     {
@@ -18,34 +18,23 @@ public class GUIManager : MonoBehaviour {
     }
 
     public void linkWithLocalEntity(Entity localEntity) {
-        localEntity.ChangeEntityHealth += player_changeHealth;
-        localEntity.ChangeEntityActionPoints += player_changeActionPoints;
-        localEntity.ChangeEntityMovePoints += player_changeMovePoints;
+        localEntity.ChangeEntityStats += player_changeStats;
     }
 
-    private void player_changeHealth(object sender, ChangeEntityHealthEventArgs e) {
-        healthText.text = e.health.ToString();
+    private void player_changeStats(object sender, ChangeEntityStatsEventArgs e) {
+        Entity localPlayer = (Entity) sender;
+        if (e.changeHealth)   healthText.text = (localPlayer.currentHealth.ToString() + " / " + localPlayer.maxHealth.ToString());
+        if (e.changeAP)       APText.text = (localPlayer.currentAP.ToString() + " / " + localPlayer.maxAP.ToString());
+        if (e.changeMP)       MPText.text = (localPlayer.currentMP.ToString() + " / " + localPlayer.maxMP.ToString());
     }
 
-    private void player_changeActionPoints(object sender, ChangeEntityActionPointsEventArgs e) {
-        actionPointsText.text = e.actionPoints.ToString();
-    }
-
-    private void player_changeMovePoints(object sender, ChangeEntityMovePointsEventArgs e) {
-        movePointsText.text = e.movePoints.ToString();
-    }
 }
 
-public class ChangeEntityHealthEventArgs : System.EventArgs {
-    public int health { get; set; }
+public class ChangeEntityStatsEventArgs : System.EventArgs {
+    public bool changeHealth = false;
+    public bool changeAP = false;
+    public bool changeMP = false;
 }
 
-public class ChangeEntityActionPointsEventArgs : System.EventArgs {
-    public int actionPoints { get; set; }
-}
-
-public class ChangeEntityMovePointsEventArgs : System.EventArgs {
-    public int movePoints { get; set; }
-}
 
 
