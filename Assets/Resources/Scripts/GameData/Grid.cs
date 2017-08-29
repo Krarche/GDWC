@@ -8,6 +8,7 @@ public class Grid {
     public TextAsset source;
     public int sizeX, sizeY;
     public Cell[,] cells;
+    public Cell gridCenter;
     public Dictionary<GameObject, Cell> worldObjects;
     public Dictionary<string, GameObject> cellPrefabs;
     public GameObject cellBase;
@@ -25,6 +26,7 @@ public class Grid {
         createCellPefabs();
         initPosition();
         initDistance();
+        this.gridCenter = GetCell(this.sizeX * this.sizeY / 2);
     }
 
     public void createCellPefabs() {
@@ -157,17 +159,80 @@ public class Grid {
         return output;
     }
 
-    public List<Cell> getCellsInRange(Cell origin, int minRange, int maxRange, int rangeType) {
+    public List<Cell> getParalleleLine(Cell origin, int minRange, int maxRange, Cell lineCasterPosition) {
+        List<Cell> output = new List<Cell>();
+        if (origin == null || lineCasterPosition == null || origin == lineCasterPosition)
+            return output;
+
+        int direction = -1;
+        if (origin.x < lineCasterPosition.x)
+            direction = (int)Direction.WEST;
+        if (origin.x > lineCasterPosition.x)
+            direction = (int)Direction.EAST;
+        if (origin.y < lineCasterPosition.y)
+            direction = (int)Direction.SOUTH;
+        if (origin.y > lineCasterPosition.y)
+            direction = (int)Direction.NORTH;
+        if (direction == -1)
+            return output;
+
+        Cell current = origin;
+        int i = 0;
+        while (i <= maxRange && current != null) {
+            if (i >= minRange)
+                output.Add(current);
+            current = current.adjacent[direction];
+            i++;
+        }
+
+        return output;
+    }
+
+    public List<Cell> getPerpendicularLine(Cell origin, int minRange, int maxRange, Cell lineCasterPosition) {
+        List<Cell> output = new List<Cell>();
+        if (origin == null || lineCasterPosition == null || origin == lineCasterPosition)
+            return output;
+
+        int[] directions = new int[0];
+        if (origin.x == lineCasterPosition.x) {
+            directions = new int[2] { (int)Direction.SOUTH, (int)Direction.NORTH };
+        }
+        if (origin.y == lineCasterPosition.y) {
+            directions = new int[2] { (int)Direction.WEST, (int)Direction.EAST };
+        }
+        if (directions.Length == 0)
+            return output;
+        foreach(int dir in directions) {
+            Cell current = origin;
+            int i = 0;
+            while (i <= maxRange && current != null) {
+                if (i >= minRange)
+                    output.Add(current);
+                current = current.adjacent[dir];
+                i++;
+            }
+        }
+
+        return output;
+    }
+
+    public List<Cell> getCellsInRange(Cell origin, int minRange, int maxRange, int rangeType, Cell lineCasterPosition = null) {
         List<Cell> output;
         switch (rangeType) {
             case SpellData.RANGE_AREA_CIRCLE:
                 output = getInCircle(origin, minRange, maxRange);
                 break;
             //case SpellData.RANGE_AREA_DIAGONAL:
-                //output = get(origin, minRange, maxRange);
-                //break;
+            //output = get(origin, minRange, maxRange);
+            //break;
             case SpellData.RANGE_AREA_ORTHOGONAL:
                 output = getInLine(origin, minRange, maxRange);
+                break;
+            case SpellData.RANGE_AREA_LINE_PARALLEL:
+                output = getParalleleLine(origin, minRange, maxRange, lineCasterPosition);
+                break;
+            case SpellData.RANGE_AREA_LINE_PERPENDICULAR:
+                output = getPerpendicularLine(origin, minRange, maxRange, lineCasterPosition);
                 break;
             default: // REANGE_AREA_POINT/unsuported pattern
                 output = new List<Cell>();
@@ -179,10 +244,10 @@ public class Grid {
 
     public List<Cell> getCellsInRanges(Cell origin, int[] minRange, int[] maxRange, int[] rangeType) {
         List<Cell> output = new List<Cell>();
-        for(int i = 0; i < maxRange.Length; i++) {
+        for (int i = 0; i < maxRange.Length; i++) {
             List<Cell> temp = getCellsInRange(origin, minRange[i], maxRange[i], rangeType[i]);
-            foreach(Cell c in temp) {
-                if(!output.Contains(c)) {
+            foreach (Cell c in temp) {
+                if (!output.Contains(c)) {
                     output.Add(c);
                 }
             }

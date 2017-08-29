@@ -138,4 +138,7 @@ public class MovementAction : Action {
 public class MovementUnfolder {
     public Queue<Cell> path;
     public Entity entity;
+    bool rotateEntity;
+    bool animateEntity;
+    bool translateEntity;
 }

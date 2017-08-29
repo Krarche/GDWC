@@ -21,7 +21,6 @@ public class TurnResolution {
 
     }
 
-
     // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
     public void resolveMovement(Entity origin, int[] path) {
         // TODO - remove
@@ -34,6 +33,9 @@ public class TurnResolution {
         //newMovement.entity = origin;
         //foreach (int cellId in path)
         //    newMovement.path.Enqueue(grid.GetCell(cellId));
+        //newMovement.rotateEntity = true;
+        //newMovement.animateEntity = true;
+        //newMovement.translateEntity = true;
         //pathsToResolve.Add(newMovement);
     }
 
@@ -307,8 +309,6 @@ public class TurnResolution {
         }
     }
 
-
-
     // ######################################################
 
     public void handleEffectDirectDamage(EffectHandlerDirectDamage handler, Entity origin, Entity target) {
@@ -421,10 +421,30 @@ public class TurnResolution {
 
     public void pushEntity(Entity origin, Entity target, int distance) {
         Debug.Log("pushEntity " + distance);
+        // WIP
+        //MovementUnfolder newMovement = new MovementUnfolder();
+        //newMovement.entity = origin;
+        // get all cell between ogirin.currentCell and target
+        // add them to newMovement.path (mind cell order !)
+        // add newMovement to pathsToResolve
+        //newMovement.rotateEntity = false;
+        //newMovement.animateEntity = false;
+        //newMovement.translateEntity = true;
+        // end WIP
         resolveEntityBuffs(origin, "onMoveHandler");
     }
     public void pullEntity(Entity origin, Entity target, int distance) {
         Debug.Log("pullEntity " + distance);
+        // WIP
+        //MovementUnfolder newMovement = new MovementUnfolder();
+        //newMovement.entity = origin;
+        // get all cell between ogirin.currentCell and target
+        // add them to newMovement.path (mind cell order !)
+        // add newMovement to pathsToResolve
+        //newMovement.rotateEntity = false;
+        //newMovement.animateEntity = false;
+        //newMovement.translateEntity = true;
+        // end WIP
         resolveEntityBuffs(origin, "onMoveHandler");
     }
 
@@ -432,19 +452,34 @@ public class TurnResolution {
         Debug.Log("dashEntity");
         // TODO - remove
         origin.orderMoveToCell(target);
-        // TODO- replace with
+        // TODO - replace with
         // WIP
         //MovementUnfolder newMovement = new MovementUnfolder();
         //newMovement.entity = origin;
         // get all cell between ogirin.currentCell and target
         // add them to newMovement.path (mind cell order !)
         // add newMovement to pathsToResolve
+        //newMovement.rotateEntity = true;
+        //newMovement.animateEntity = false;
+        //newMovement.translateEntity = true;
         // end WIP
         resolveEntityBuffs(origin, "onMoveHandler");
     }
     public void warpEntity(Entity origin, Cell target) {
         Debug.Log("warpEntity");
+        // TODO - remove
         origin.setCurrentCell(target);
+        // TODO - replace with
+        // WIP
+        //MovementUnfolder newMovement = new MovementUnfolder();
+        //newMovement.entity = origin;
+        // get all cell between ogirin.currentCell and target
+        // add them to newMovement.path (mind cell order !)
+        // add newMovement to pathsToResolve
+        //newMovement.rotateEntity = true;
+        //newMovement.animateEntity = false;
+        //newMovement.translateEntity = true;
+        // end WIP
         resolveEntityBuffs(origin, "onMoveHandler");
     }
 

@@ -44,6 +44,8 @@ public class SpellData : GameData {
     public const int RANGE_AREA_CIRCLE = 1;
     public const int RANGE_AREA_ORTHOGONAL = 2;
     public const int RANGE_AREA_DIAGONAL = 3;
+    public const int RANGE_AREA_LINE_PARALLEL = 4; // for area only
+    public const int RANGE_AREA_LINE_PERPENDICULAR = 5; // for area only
 
     public static int[] stringToRangeAreaType(string[] str) {
         int[] output = new int[str.Length];
@@ -60,6 +62,10 @@ public class SpellData : GameData {
             return RANGE_AREA_ORTHOGONAL;
         if (str == "diagonal")
             return RANGE_AREA_DIAGONAL;
+        if (str == "parallele")
+            return RANGE_AREA_LINE_PARALLEL;
+        if (str == "perpendicular")
+            return RANGE_AREA_LINE_PERPENDICULAR;
         return RANGE_AREA_POINT;
     }
 }
