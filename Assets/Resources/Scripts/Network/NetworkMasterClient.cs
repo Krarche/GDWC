@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.Networking;
 using System;
 using UnityEngine.SceneManagement;
@@ -18,12 +17,6 @@ namespace Network {
         public NetworkClient client = null;
 
         public static NetworkMasterClient singleton;
-
-        public bool isConnected {
-            get {
-                return client != null;
-            }
-        }
 
         private void Awake() {
             if (singleton == null) {
@@ -44,8 +37,7 @@ namespace Network {
             // InitializeClient();
 
             // TEMP
-            DontDestroyOnLoad(gameObject);
-
+            // TODO : REMOVE AND INJECT CLASSIC IDENTIFICATION ROUTINE
             GameLogicClient game = new GameLogicClient("M002");
             game.gameId = 1;
             game.currentTurn = 0;
@@ -59,8 +51,6 @@ namespace Network {
                 float g = 255 * i;
                 float b = 255 - 255 * i;
 
-
-
                 Player temp = CreatePlayer(playerId, cellId, entityId, displayedName, r, g, b);
                 if (user.userId == playerId) {
                     user.player = temp;
@@ -69,14 +59,13 @@ namespace Network {
                 temp.playerEntity.teamId = i;
             }
 
-
             GameLogicClient.game.prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());
-
+            // END TODO : REMOVE
         }
 
         public void InitializeClient() {
             if (client != null) {
-                Debug.LogError("Already connected");
+                Debug.LogError("Try to connect, but was already connected.");
                 return;
             }
 
@@ -97,13 +86,9 @@ namespace Network {
             // game
             client.RegisterHandler(ServerStartGameMessage.ID, OnClientStartGame);
             client.RegisterHandler(ServerJoinGameResponseMessage.ID, OnClientJoinGame);
-            client.RegisterHandler(ServerLeaveGameResponseMessage.ID, OnClientLeaveGame);
             // turn
             client.RegisterHandler(ServerStartNewTurnMessage.ID, OnClientStartNewTurn);
             client.RegisterHandler(ServerSyncTurnActionsMessage.ID, OnClientSyncTurnActions);
-            // TODO remove/u^date
-            client.RegisterHandler(ServerPlayerJoinedMessage.ID, OnClientCreateNewPlayer);
-            client.RegisterHandler(ServerPlayerLeftGameMessage.ID, OnClientRemovePlayer);
 
             DontDestroyOnLoad(gameObject);
         }
@@ -152,7 +137,7 @@ namespace Network {
                 user.currentGameId = msg.currentGameId;
                 // If client was in game on identification, join it
                 if (msg.currentGameId != 0) {
-                    ClientJoinGameRequest();
+                    // TODO - rejoin logic
                 }
             } else {
                 Debug.Log("Client failed identification");
@@ -187,16 +172,6 @@ namespace Network {
             } else {
                 Debug.LogError("Failed to join solo queue.");
             }
-        }
-
-
-        private void ClientJoinGameRequest() {
-            ClientJoinGameRequestMessage msg = new ClientJoinGameRequestMessage();
-            msg.userId = user.userId;
-            msg.userName = user.userName;
-            msg.gameId = user.currentGameId;
-            client.Send(ClientJoinGameRequestMessage.ID, msg);
-            Debug.Log("Sent join game request");
         }
 
         private void OnClientJoinGame(NetworkMessage netMsg) {
@@ -234,7 +209,7 @@ namespace Network {
             msg.userName = user.userName;
             msg.gameId = user.currentGameId;
             client.Send(ClientReadyToPlayMessage.ID, msg);
-            Debug.Log("Sent ClientReadyToPlay " + user.currentGameId + "/" + GameLogicClient.game.gameId);
+            Debug.Log("Sent ClientReadyToPlay " + user.currentGameId);
         }
 
         void OnClientStartGame(NetworkMessage netMsg) {
@@ -250,11 +225,6 @@ namespace Network {
 
 
         // --------------- Players handlers -----------------
-        private void OnClientCreateNewPlayer(NetworkMessage netMsg) {
-            ServerPlayerJoinedMessage msg = netMsg.ReadMessage<ServerPlayerJoinedMessage>();
-            CreatePlayer(msg.playerId, msg.cellId, msg.entityId, msg.displayedName, msg.r, msg.g, msg.b);
-            Debug.Log(msg.displayedName + " has joined the game.");
-        }
 
         private Player CreatePlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
             if (!GameLogicClient.game.players.ContainsKey(playerId)) {
@@ -272,33 +242,6 @@ namespace Network {
                 return p;
             } else {
                 return GameLogicClient.game.players[playerId];
-            }
-        }
-
-        private void OnClientRemovePlayer(NetworkMessage netMsg) {
-            ServerPlayerLeftGameMessage msg = netMsg.ReadMessage<ServerPlayerLeftGameMessage>();
-            GameLogicClient.game.removePlayer(GameLogicClient.game.players[msg.playerId]);
-            Debug.Log(msg.playerName + " has left the game.");
-        }
-
-
-        // --------------- Leave game handlers -----------------
-        private void ClientLeaveGameRequest() {
-            ClientLeaveGameRequestMessage msg = new ClientLeaveGameRequestMessage();
-            msg.userId = user.userId;
-            msg.userName = user.userName;
-            client.Send(ClientLeaveGameRequestMessage.ID, msg);
-            Debug.Log("Sent leave game request");
-        }
-
-        private void OnClientLeaveGame(NetworkMessage netMsg) {
-            ServerLeaveGameResponseMessage msg = netMsg.ReadMessage<ServerLeaveGameResponseMessage>();
-            if (msg.hasLeft) {
-                Debug.Log("Successfully left game");
-                GameLogicClient.game.clearGame();
-                user.currentGameId = 0;
-            } else {
-                Debug.Log("Couldn't leave game. No currentGame ?");
             }
         }
 
@@ -321,51 +264,46 @@ namespace Network {
         }
 
         private void OnGUI() {
-            //if (client != null && client.isConnected && user.isIdentified) {
-            GUI.Label(new Rect(10, 20, 200, 20), "Identified as : " + user.userName);
-            if (GUI.Button(new Rect(10, 60, 200, 20), "Disconnect")) {
-                ResetClient();
-                if (NetworkManager.singleton != null) {
-                    NetworkManager.singleton.StopClient();
-                }
-                SceneManager.LoadScene("login");
-            }
-            if (user.currentGameId == 0) {
-                if (!user.isQueued) {
-                    if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
-                        ClientJoinSoloQueueRequest();
+            if (client != null && client.isConnected && user.isIdentified) {
+                GUI.Label(new Rect(10, 20, 200, 20), "Identified as : " + user.userName);
+                if (GUI.Button(new Rect(10, 60, 200, 20), "Disconnect")) {
+                    ResetClient();
+                    if (NetworkManager.singleton != null) {
+                        NetworkManager.singleton.StopClient();
                     }
-                } else {
-                    if (GUI.Button(new Rect(10, 100, 200, 20), "Leave solo queue")) {
-                        ClientLeaveSoloQueueRequest();
+                    SceneManager.LoadScene("login");
+                }
+                if (user.currentGameId == 0) {
+                    if (!user.isQueued) {
+                        if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
+                            ClientJoinSoloQueueRequest();
+                        }
+                    } else {
+                        if (GUI.Button(new Rect(10, 100, 200, 20), "Leave solo queue")) {
+                            ClientLeaveSoloQueueRequest();
+                        }
                     }
                 }
-            }// else {
-            if (GUI.Button(new Rect(10, 100, 200, 20), "Leave game")) {
-                ClientLeaveGameRequest();
-            }
-            if (GameLogicClient.game != null) {
-                GUI.Label(new Rect(10, 140, 200, 20), "Turn : " + GameLogicClient.game.currentTurn);
-                switch (GameLogicClient.game.currentTurnState) {
-                    case GameLogicClient.TURN_STATE_PREP:
-                        GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.startTurnSecondRemaining);
-                        GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_PREP");
-                        break;
-                    case GameLogicClient.TURN_STATE_ACT:
-                        GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.endTurnSecondRemaining);
-                        GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_ACT");
-                        break;
-                    case GameLogicClient.TURN_STATE_SYNC:
-                        GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.serverDataTimeoutSccondRemaining);
-                        GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_SYNC");
-                        break;
-                    default:
-                        break;
-
+                if (GameLogicClient.game != null) {
+                    GUI.Label(new Rect(10, 140, 200, 20), "Turn : " + GameLogicClient.game.currentTurn);
+                    switch (GameLogicClient.game.currentTurnState) {
+                        case GameLogicClient.TURN_STATE_PREP:
+                            GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.startTurnSecondRemaining);
+                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_PREP");
+                            break;
+                        case GameLogicClient.TURN_STATE_ACT:
+                            GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.endTurnSecondRemaining);
+                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_ACT");
+                            break;
+                        case GameLogicClient.TURN_STATE_SYNC:
+                            GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.serverDataTimeoutSccondRemaining);
+                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_SYNC");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
-            //}
-            //}
         }
     }
 }

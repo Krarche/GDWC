@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Networking;
-
+﻿
 // client to server
 // ID = 1xxx
 
@@ -14,19 +10,6 @@ namespace Network {
         public static short ID = 1000;
         public string userName;
         public ulong userId;
-    }
-    // TODO remove/update
-    public class ClientJoinGameRequestMessage : ClientMessage {
-        public static short ID = 1001;
-        public ulong userId;
-        public string userName;
-        public ulong gameId;
-    }
-
-    public class ClientLeaveGameRequestMessage : ClientMessage {
-        public static short ID = 1002;
-        public ulong userId;
-        public string userName;
     }
 
     // queue 1100
@@ -121,26 +104,6 @@ namespace Network {
             b = new float[size];
             spellIds = new string[size];
         }
-    }
-
-    public class ServerPlayerJoinedMessage : ServerMessage {
-        public static short ID = 2115;
-        public int cellId;
-        public ulong playerId;
-        public int entityId;
-        public string displayedName;
-        public float r, g, b;
-    }
-
-    public class ServerLeaveGameResponseMessage : ServerMessage {
-        public static short ID = 2116;
-        public bool hasLeft;
-    }
-
-    public class ServerPlayerLeftGameMessage : ServerMessage {
-        public static short ID = 2117;
-        public ulong playerId;
-        public string playerName;
     }
 
     // queue
