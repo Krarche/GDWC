@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Data;
+using Tools;
+using Network;
 
 public class LoadingScene : MonoBehaviour {
 
@@ -14,10 +17,5 @@ public class LoadingScene : MonoBehaviour {
         } else {
             GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ClientHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
         }
-    }
-
-    // Update is called once per frame
-    void Update() {
-
     }
 }

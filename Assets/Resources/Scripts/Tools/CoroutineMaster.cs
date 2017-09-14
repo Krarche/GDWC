@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoroutineMaster : MonoBehaviour {
+namespace Tools {
 
-    public static CoroutineMaster singleton;
+    public class CoroutineMaster : MonoBehaviour {
 
-    void Start() {
-        singleton = this;
+        public static CoroutineMaster singleton;
+
+        void Start() {
+            singleton = this;
+        }
+
+        public static void startCoroutine(IEnumerator e) {
+            singleton.StartCoroutine(e);
+        }
     }
-
-    public static void startCoroutine(IEnumerator e) {
-        singleton.StartCoroutine(e);
-    }
-
 }
