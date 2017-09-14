@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-namespace Tools {
+﻿namespace Tools {
 
     public class StringParsingTool {
 
