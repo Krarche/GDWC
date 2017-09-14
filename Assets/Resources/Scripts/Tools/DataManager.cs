@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Data;
 
-namespace Data {
+namespace Tools {
 
     public class DataManager {
 
@@ -39,6 +40,5 @@ namespace Data {
             MAP_DATA[key] = data;
             GAME_DATA[key] = data;
         }
-
     }
 }
