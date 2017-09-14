@@ -10,9 +10,6 @@ namespace Tools {
          * Call those lines in the LoadingScreen.Start() function for an example
          * 
             DataParser.loadDataJSON();
-            Debug.Log(DataManager.BUFF_DATA["B001"].description);
-            Debug.Log(DataManager.SPELL_DATA["S001"].description);
-            Debug.Log(DataManager.SPELL_DATA["S002"].description);
          * 
          */
 
@@ -21,18 +18,15 @@ namespace Tools {
             if (path.Length == 1)
                 return ""; // should not happen
             Data.GameData data = DataManager.GAME_DATA[path[0]];
-            //Debug.Log("(" + 0 + "/" + path.Length + ") " + path[0] + " : " + data.ToString());
             int i = 1;
             object content = null;
             if (data is SpellData)
                 content = GameData.getFieldContent<SpellData>((SpellData)data, path[i]);
             else if (data is BuffData)
                 content = GameData.getFieldContent<BuffData>((BuffData)data, path[i]);
-            //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
             i++;
             while (i < path.Length) { // going down nested objects
                 if (content is Array) {
-                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                     int index = int.Parse(path[i]);
                     if (content is EffectSpell[]) {
                         content = ((EffectSpell[])content)[index];
@@ -43,9 +37,7 @@ namespace Tools {
                     if (content is EffectCondition[]) {
                         content = ((EffectCondition[])content)[index];
                     }
-                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                 } else {
-                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                     if (content is EffectSpell)
                         content = GameData.getFieldContent<EffectSpell>((EffectSpell)content, path[i]);
                     else if (content is EffectBuff)
@@ -99,8 +91,6 @@ namespace Tools {
                         content = GameData.getFieldContent<EffectConditionHasNotBuff>((EffectConditionHasNotBuff)content, path[i]).ToString();
                         i++;
                     }
-                    //if (i < path.Length)
-                    //Debug.Log("(" + i + "/" + path.Length + ") " + path[i] + " : " + content);
                 }
                 i++;
             }
@@ -178,7 +168,6 @@ namespace Tools {
             CellData[] output = new CellData[array.Length];
             for (int i = 0; i < array.Length; i++) {
                 output[i] = DataManager.CELL_DATA[array.getStringAt(i)];
-                //Debug.Log("(" + i + ") " + output[i].id);
             }
             return output;
         }

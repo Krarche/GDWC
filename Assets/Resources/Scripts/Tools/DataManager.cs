@@ -5,16 +5,6 @@ namespace Tools {
 
     public class DataManager {
 
-        /*
-         * Call those lines in the LoadingScreen.Start() function for an example
-         * 
-            DataParser.buildSpellAndBuffData();
-            Debug.Log(DataParser.BUFF_DATA["B001"].description);
-            Debug.Log(DataParser.SPELL_DATA["S001"].description);
-            Debug.Log(DataParser.SPELL_DATA["S002"].description);
-         * 
-         */
-
         public static Dictionary<string, GameData> GAME_DATA = new Dictionary<string, GameData>();
         public static Dictionary<string, SpellData> SPELL_DATA = new Dictionary<string, SpellData>();
         public static Dictionary<string, BuffData> BUFF_DATA = new Dictionary<string, BuffData>();
