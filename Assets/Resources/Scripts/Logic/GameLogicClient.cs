@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Data;
 using Network;
+using Tools.JSON;
 
 namespace Logic {
 
@@ -289,29 +290,33 @@ namespace Logic {
             }
         }
 
-        private void registerSpellAction(string spellId, Cell target) {
+        private void registerSpellAction(string spellId, Cell path) {
             if (isQuickSpelling) {
-                QuickSpellAction tempAction = new QuickSpellAction();
-                tempAction.spellId = spellId;
-                tempAction.targetCellId = target.cellId;
-                currentAction = tempAction;
+                QuickSpellAction newAction = new QuickSpellAction();
+                newAction.spellId = spellId;
+                newAction.targetCellId = path.cellId;
+                currentAction = newAction;
             } else if (isSlowSpelling) {
-                SlowSpellAction tempAction = new SlowSpellAction();
-                tempAction.spellId = spellId;
-                tempAction.targetCellId = target.cellId;
-                currentAction = tempAction;
+                SlowSpellAction newAction = new SlowSpellAction();
+                newAction.spellId = spellId;
+                newAction.targetCellId = path.cellId;
+                currentAction = newAction;
             }
             currentAction.entityId = localEntity.entityId;
-            resolveAction(currentAction);
+            //resolveAction(currentAction);
+            // add to local actions
+            localActions.Enqueue(currentAction);
         }
         private void registerMovementAction(List<Cell> target) {
-            MovementAction tempAction = new MovementAction();
-            tempAction.path = new int[target.Count];
+            MovementAction newAction = new MovementAction();
+            newAction.path = new int[target.Count];
             for (int i = 0; i < target.Count; i++)
-                tempAction.path[i] = target[i].cellId;
-            currentAction = tempAction;
+                newAction.path[i] = target[i].cellId;
+            currentAction = newAction;
             currentAction.entityId = localEntity.entityId;
-            resolveAction(currentAction);
+            //resolveAction(currentAction);
+            // add to local actions
+            localActions.Enqueue(currentAction);
         }
 
         private void buttonConfirmHandler() {
@@ -338,22 +343,32 @@ namespace Logic {
             }
         }
         private void buttonReadyHandler() {
-
+            // send data to server, be ready
+            synchronizeActions();
         }
 
         // ################################################################
 
+        public override void synchronizeActions() {
+            string JSON = generateTurnActionsJSON();
+            // send using client
+
+            Debug.Log(JSON);
+        }
+
         public override string generateTurnActionsJSON() {
             string output = "";
-            output += "\"actions\":" + "[{";
             int i = 0;
             while (localActions.Count > 0) {
+                output += "\"actions" + i + "\":" + "[";
                 Data.Action action = localActions.Dequeue();
-                output += "\"action" + i + "\":" + action.toJSON();
-                if (localActions.Count > 0)
+                output += action.toJSON();
+                output += "]";
+                if (localActions.Count > 0) {
                     output += ",";
+                    i++;
+                }
             }
-            output += "}]";
             return "{" + output + "}";
         }
     }

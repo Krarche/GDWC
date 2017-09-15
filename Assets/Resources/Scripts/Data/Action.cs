@@ -113,13 +113,13 @@ namespace Data {
             output += ",";
             output += base.toJSON();
             output += ",";
-            output += "\"path\":\"" + "{"; // start path array
+            output += "\"path\":" + "["; // start path array
             for (int i = 0; i < path.Length; i++) {
                 output += "\"" + path[i] + "\"";
                 if (i < path.Length - 1)
                     output += ",";
             }
-            output += "}"; // end path array
+            output += "]"; // end path array
             return "{" + output + "}";
         }
 

@@ -9,6 +9,8 @@ namespace Network {
 
     public class NetworkMasterServer : MonoBehaviour {
 
+        public static NetworkMasterServer singleton;
+
         public bool forceServer = false;
 
         public int MasterServerPort;
@@ -22,6 +24,7 @@ namespace Network {
 
         public void Awake() {
             if (forceServer || isHeadless()) {
+                singleton = this;
                 InitializeServer();
             }
         }
@@ -178,12 +181,22 @@ namespace Network {
             }
             Debug.Log("ServerSendNewGameDataToPlayers " + msg.gameId);
         }
+        // --------------- Turns handlers -----------------
 
         private void OnServerReadyToPlay(NetworkMessage netMsg) {
             ClientReadyToPlayMessage msg = netMsg.ReadMessage<ClientReadyToPlayMessage>();
             GameLogicServer game = games[msg.gameId];
-            DateTime startFirstTurn = DateTime.UtcNow.AddSeconds(5);
-            long startFirstTurnTimestamp = startFirstTurn.ToFileTimeUtc();
+            game.registerPlayerReady(game.getPlayerByUserId(msg.userId));
+        }
+
+        public void ServerStartTurnMessage(GameLogicServer game, long startTurnTimestamp) {
+            if (game.currentTurn == 0)
+                startGame(game, startTurnTimestamp);
+            else
+                startNewTurn(game, startTurnTimestamp);
+        }
+
+        private void startGame(GameLogicServer game, long startFirstTurnTimestamp) {
             ServerStartGameMessage msgOut = new ServerStartGameMessage();
             msgOut.startFirstTurnTimestamp = startFirstTurnTimestamp;
             foreach (Player p in game.players.Values) {
@@ -191,24 +204,31 @@ namespace Network {
             }
         }
 
-        // --------------- Movement handlers -----------------
+        private void startNewTurn(GameLogicServer game, long startTurnTimestamp) {
+            ServerStartNewTurnMessage msgOut = new ServerStartNewTurnMessage();
+            msgOut.startTurnTimestamp = startTurnTimestamp;
+            foreach (Player p in game.players.Values) {
+                p.user.connection.Send(ServerStartNewTurnMessage.ID, msgOut);
+            }
+        }
+
+        // --------------- Actions handlers -----------------
         void OnServerRegisterTurnActions(NetworkMessage netMsg) {
             ClientRegisterTurnActionsMessage msg = netMsg.ReadMessage<ClientRegisterTurnActionsMessage>();
             Debug.Log("Server received OnServerRegisterTurnActions");
             GameLogicServer game = games[msg.gameId];
-            // save actions forsync
+            game.registerPlayerAction(game.getPlayerByUserId(msg.userId), msg.actions);
         }
 
         public void SyncTurnActions(GameLogicServer game) {
             ServerSyncTurnActionsMessage msg = new ServerSyncTurnActionsMessage();
-            // msg.actions ="";
+            msg.actions = game.generateTurnActionsJSON();
             foreach (Player player in game.players.Values) {
                 User u = player.user;
                 u.connection.Send(ServerSyncTurnActionsMessage.ID, msg);
             }
             Debug.Log("Server sent SyncTurnActions");
         }
-
 
         // --------------- Send to in game players handlers -----------------
         private void SendToOtherGamePlayers(ServerMessage msg, short msgId, ulong gameId, User sender) {

@@ -38,14 +38,11 @@ namespace Network {
     // turn 1300
 
     public class ClientRegisterTurnActionsMessage : ClientMessage {
-        public static short ID = 1201;
+        public static short ID = 1301;
         public ulong userId;
         public string userName;
         public ulong gameId;
-        public ulong playerId;
-        public ulong entityId;
         public string actions;
-        // actions
     }
 
 
@@ -127,7 +124,7 @@ namespace Network {
         // résultats
     }
 
-    // turn
+    // turn 2300
 
     public class ServerStartNewTurnMessage : ServerMessage {
         public static short ID = 2301;

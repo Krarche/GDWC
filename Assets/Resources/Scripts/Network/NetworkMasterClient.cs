@@ -247,20 +247,21 @@ namespace Network {
 
 
         // --------------- Actions handlers -----------------
-        private void OnClientSyncTurnActions(NetworkMessage netMsg) {
-            ServerSyncTurnActionsMessage msg = netMsg.ReadMessage<ServerSyncTurnActionsMessage>();
-            GameLogicClient.game.registerAction(msg.actions);
-            Debug.Log("Client received SyncTurnActions");
-        }
 
         public void SyncTurnActions(GameLogicClient game) {
             ClientRegisterTurnActionsMessage msg = new ClientRegisterTurnActionsMessage();
             msg.gameId = game.gameId;
             msg.userId = user.userId;
             msg.userName = user.userName;
-            // msg.actions = "";
+            msg.actions = game.generateTurnActionsJSON();
             client.Send(ClientRegisterTurnActionsMessage.ID, msg);
             Debug.Log("Client sent RegisterTurnActions");
+        }
+
+        private void OnClientSyncTurnActions(NetworkMessage netMsg) {
+            ServerSyncTurnActionsMessage msg = netMsg.ReadMessage<ServerSyncTurnActionsMessage>();
+            GameLogicClient.game.receiveActions(msg.actions);
+            Debug.Log("Client received SyncTurnActions");
         }
 
         private void OnGUI() {
@@ -296,7 +297,7 @@ namespace Network {
                             GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_ACT");
                             break;
                         case GameLogicClient.TURN_STATE_SYNC:
-                            GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.serverDataTimeoutSccondRemaining);
+                            GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.serverDataTimeoutSecondRemaining);
                             GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_SYNC");
                             break;
                         default:

@@ -60,7 +60,7 @@ namespace Network {
                         newGame.spawnPlayer(u1.player);
                         newGame.spawnPlayer(u2.player);
 
-                        newGame.loadingPlayersNumber = 2;
+                        newGame.preparingPlayersNumber = 2;
                         operationOnQueue.ReleaseMutex();
                         return newGame;
                     } else if (u1.timeSpentInQueue > DELAY_BEFORE_MATCH_IA) { // too long, match with IA
