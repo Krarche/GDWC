@@ -12,9 +12,13 @@ public class LoadingScene : MonoBehaviour {
     // Use this for initialization
     void Start() {
         DataParser.loadDataJSON();
-        if (forceServer || NetworkMasterServer.isHeadless()) {
+        if (NetworkMasterServer.isHeadless()) {
             GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ServerHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
-        } else {
+        } else if(forceServer) {
+            GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ServerHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
+            GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ClientHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
+        }
+        else {
             GameObject.Instantiate<GameObject>(Resources.Load<GameObject>("Prefabs/ClientHolder"), new Vector3(), Quaternion.identity).transform.parent = transform;
         }
     }

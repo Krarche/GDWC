@@ -34,11 +34,11 @@ namespace Network {
             user = new User();
             user.userId = userId;
             user.userName = userName;
-            // InitializeClient();
+            InitializeClient();
 
             // TEMP
             // TODO : REMOVE AND INJECT CLASSIC IDENTIFICATION ROUTINE
-            GameLogicClient game = new GameLogicClient("M002");
+            /*GameLogicClient game = new GameLogicClient("M002");
             game.gameId = 1;
             game.currentTurn = 0;
             user.currentGameId = game.gameId;
@@ -59,7 +59,7 @@ namespace Network {
                 temp.playerEntity.teamId = i;
             }
 
-            GameLogicClient.game.prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());
+            GameLogicClient.game.prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());*/
             // END TODO : REMOVE
         }
 
