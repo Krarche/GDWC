@@ -11,6 +11,7 @@ namespace Logic {
     public class GameLogicClient : GameLogic {
 
         public static GameLogicClient game;
+
         public User localUser {
             get { return NetworkMasterClient.singleton.user; }
         }
