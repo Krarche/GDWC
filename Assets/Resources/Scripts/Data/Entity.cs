@@ -60,7 +60,7 @@ namespace Data {
 
         public Queue<Action> actions = new Queue<Action>();
         public SpellInstance[] spells;
-        public List<BuffInstance> buffs;
+        public List<BuffInstance> buffs = new List<BuffInstance>();
         public Animator animator;
         public TextMesh entityNameText;
         public Transform meshTransform;
@@ -74,35 +74,6 @@ namespace Data {
             maxAP = 14;
             currentMP = 8;
             maxMP = 8;
-            buffs = new List<BuffInstance>();
-        }
-
-        // Update is called once per frame
-        void Update() {
-            if (GameLogicClient.game != null) {
-                //if (meshTransform == null) {
-                //    meshTransform = gameObject.transform.GetChild(1).transform;
-                //}
-                if (destinationCellId != NO_DESTINATION_CELL_ID) {
-                    Cell destCell = GameLogicClient.game.grid.GetCell(destinationCellId);
-                    Vector3 pos = gameObject.transform.position;
-                    Vector3 dest = new Vector3(destCell.x, 0, destCell.y);
-                    Vector3 dir = dest - pos;
-                    if (transform != null) {
-                        transform.rotation = Quaternion.LookRotation(dir.normalized, new Vector3(0, 1, 0));
-                    }
-                    if (dir.magnitude > 0.1f) {
-                        gameObject.transform.position = pos + dir / 2;
-                    } else {
-                        currentCell = destinationCell;
-                        destinationCell = null;
-                        gameObject.transform.position = dest;
-                    }
-                }
-                if (entityNameText != null) {
-                    entityNameText.transform.rotation = Camera.main.transform.rotation;
-                }
-            }
         }
 
         public void initSpell(string[] spellIds) {

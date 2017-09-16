@@ -5,6 +5,7 @@ using UnityEngine;
 using Data;
 using Network;
 using Tools.JSON;
+using Tools;
 
 namespace Logic {
 
@@ -350,26 +351,64 @@ namespace Logic {
 
         // ################################################################
 
-        public override void synchronizeActions() {
-            string JSON = generateTurnActionsJSON();
-            // send using client
 
-            Debug.Log(JSON);
+        public override void prepareNewTurn(long startTurnTimestamp) {
+            base.prepareNewTurn(startTurnTimestamp);
+            serverDataTimeoutDate = endTurnDate.AddSeconds(CLIENT_WAIT_SERVER_SYNC_SECONDS);
+        }
+
+        public override void startTurn() {
+            base.startTurn();
+        }
+
+        public override void endTurn() {
+            synchronizeActions();
+            base.endTurn();
+            CoroutineMaster.startCoroutine(waitForServerData());
+        }
+
+        protected IEnumerator waitForServerData() {
+            DateTime now = DateTime.UtcNow;
+            TimeSpan nowToTimeout = serverDataTimeoutDate.Subtract(now);
+            yield return new WaitForSecondsRealtime((float)nowToTimeout.TotalSeconds);
+            if (isSynchronizing) {
+                // something went wrong, no data received from server
+            }
+        }
+
+        public override void resolveTurn() {
+            if (!isResolving) {
+                currentTurnState = TURN_STATE_RES;
+                // resolve action
+                resolveActions(actions0);
+                resolveActions(actions1);
+                resolveActions(actions2);
+                // notify server turn ended on client
+                Network.NetworkMasterClient.singleton.ClientReadyToPlay();
+            }
+        }
+
+        public override void synchronizeActions() {
+            if (!isSynchronizing) {
+                currentTurnState = TURN_STATE_SYNC;
+                Network.NetworkMasterClient.singleton.SyncTurnActions(this);
+            }
         }
 
         public override string generateTurnActionsJSON() {
             string output = "";
-            int i = 0;
-            while (localActions.Count > 0) {
+            for (int i = 0; i < 3; i++) {
                 output += "\"actions" + i + "\":" + "[";
-                Data.Action action = localActions.Dequeue();
-                output += action.toJSON();
+                if(localActions.Count > 0) {
+                    Data.Action action = localActions.Dequeue();
+                    output += action.toJSON();
+                }
                 output += "]";
-                if (localActions.Count > 0) {
+                if (i < 2) {
                     output += ",";
-                    i++;
                 }
             }
+            Debug.Log(output);
             return "{" + output + "}";
         }
     }

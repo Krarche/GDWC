@@ -86,6 +86,7 @@ namespace Logic {
             mapId = "M002";
             grid = new Grid(this, DataManager.MAP_DATA[mapId]);
         }
+
         public GameLogic(string mapId) {
             playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
             solver = new TurnResolution(this);
@@ -93,7 +94,7 @@ namespace Logic {
             grid = new Grid(this, DataManager.MAP_DATA[mapId]);
         }
 
-        public Entity createEntity() {
+        public virtual Entity createEntity() {
             Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
             entity.entityId = lastEntityIdGenerated++;
             entity.game = this;
@@ -103,13 +104,37 @@ namespace Logic {
             return entity;
         }
 
-        public void removeEntity(Entity e) {
-            GameObject.Destroy(e.gameObject);
+        public virtual Entity spawnEntity(int entityId) {
+            Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
+            entity.entityId = entityId;
+            entity.game = this;
+            entity.grid = grid;
+            entity.setCurrentCell(grid.GetCell(0));
+            entityList[entityId] = entity;
+            return entity;
         }
 
-        public void spawnPlayer(Player p) {
+        public void removeEntity(Entity e) {
+            GameObject.Destroy(e.gameObject);
+
+            entityList.Remove(e.entityId);
+        }
+
+        public void createPlayer(Player p) {
             if (!players.ContainsKey(p.playerId)) {
                 p.playerEntity = createEntity();
+                p.playerEntity.setColor(p.playerColor);
+                p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
+                int cellId = grid.mapData.getSpawns(2)[players.Count];
+                Cell cell = grid.GetCell(cellId);
+                p.playerEntity.setCurrentCell(cell);
+                players[p.playerId] = p;
+            }
+        }
+
+        public void spawnPlayer(Player p, int entityId) {
+            if (!players.ContainsKey(p.playerId)) {
+                p.playerEntity = spawnEntity(entityId);
                 p.playerEntity.setColor(p.playerColor);
                 p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
                 int cellId = grid.mapData.getSpawns(2)[players.Count];
@@ -130,6 +155,7 @@ namespace Logic {
         public const short TURN_STATE_ACT = 1;
         public const short TURN_STATE_SYNC = 2;
         public const short TURN_STATE_RES = 3;
+        public const short TURN_STATE_WAITING_END = 4;
         public short currentTurnState = -1;
 
         public bool isPreparing {
@@ -144,13 +170,15 @@ namespace Logic {
         public bool isResolving {
             get { return currentTurnState == TURN_STATE_RES; }
         }
+        public bool isWaitingEnd {
+            get { return currentTurnState == TURN_STATE_WAITING_END; }
+        }
 
         public virtual void prepareNewTurn(long startTurnTimestamp) {
             currentTurn++;
             currentTurnState = TURN_STATE_PREP;
             startTurnDate = DateTime.FromFileTimeUtc(startTurnTimestamp);
             endTurnDate = startTurnDate.AddSeconds(TURN_DURATION_SECONDS);
-            serverDataTimeoutDate = endTurnDate.AddSeconds(CLIENT_WAIT_SERVER_SYNC_SECONDS);
             CoroutineMaster.startCoroutine(waitForTurnStart());
         }
 
@@ -185,46 +213,35 @@ namespace Logic {
             foreach (Entity e in entityList.Values) {
                 solver.resolveEntityBuffs(e, "onTurnEndHandler");
             }
-            currentTurnState = TURN_STATE_SYNC;
-            CoroutineMaster.startCoroutine(waitForServerData());
-        }
-
-        protected IEnumerator waitForServerData() {
-            DateTime now = DateTime.UtcNow;
-            TimeSpan nowToTimeout = serverDataTimeoutDate.Subtract(now);
-            yield return new WaitForSecondsRealtime((float)nowToTimeout.TotalSeconds);
-            if (isSynchronizing)
-                resolveTurn();
         }
 
         // override for client and server
-        public virtual void resolveTurn() {
-            if (!isResolving) {
-                currentTurnState = TURN_STATE_RES;
-                // resolve action
-                // notify server turn ended on client
-                long timestamp = DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc();
-                prepareNewTurn(timestamp);
-            }
+        public abstract void resolveTurn();
+
+        public void waitForEnd() {
+            currentTurnState = TURN_STATE_WAITING_END;
         }
 
         public void receiveActions(string actions) {
             ObjectJSON actionsJSON = new ObjectJSON(actions);
             ArrayJSON actions0JSON = actionsJSON.getArrayJSON("actions0");
             for (int i = 0; i < actions0JSON.Length; i++) {
-                actions0.Add(Data.Action.fromJSON(actions0JSON.getObjectJSONAt(i)));
+                Data.Action action = Data.Action.fromJSON(actions0JSON.getObjectJSONAt(i));
+                actions0.Add(action);
             }
             ArrayJSON actions1JSON = actionsJSON.getArrayJSON("actions1");
             for (int i = 0; i < actions1JSON.Length; i++) {
-                actions1.Add(Data.Action.fromJSON(actions1JSON.getObjectJSONAt(i)));
+                Data.Action action = Data.Action.fromJSON(actions1JSON.getObjectJSONAt(i));
+                actions1.Add(action);
             }
             ArrayJSON actions2JSON = actionsJSON.getArrayJSON("actions2");
             for (int i = 0; i < actions2JSON.Length; i++) {
-                actions2.Add(Data.Action.fromJSON(actions2JSON.getObjectJSONAt(i)));
+                Data.Action action = Data.Action.fromJSON(actions2JSON.getObjectJSONAt(i));
+                actions2.Add(action);
             }
         }
 
-        public virtual void resolveActions(List<Data.Action> actions) {
+        public void resolveActions(List<Data.Action> actions) {
             List<Data.Action> fast = new List<Data.Action>();
             List<Data.Action> move = new List<Data.Action>();
             List<Data.Action> slow = new List<Data.Action>();
@@ -244,10 +261,12 @@ namespace Logic {
                 resolvePriority(fast);
                 resolvePriority(move);
                 resolvePriority(slow);
+
+                actions.Clear();
             }
         }
 
-        public virtual void resolvePriority(List<Data.Action> priority) {
+        public void resolvePriority(List<Data.Action> priority) {
             foreach(Data.Action a in priority) {
                 resolveAction(a);
             }

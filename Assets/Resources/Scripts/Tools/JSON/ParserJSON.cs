@@ -27,6 +27,8 @@ namespace Tools.JSON {
         }
 
         public static string[] getDataList(string json) {
+            if (json == "")
+                return new string[0];
             List<string> dataList = new List<string>();
             int startPos = 0;
             Stack<char> nesters = new Stack<char>();

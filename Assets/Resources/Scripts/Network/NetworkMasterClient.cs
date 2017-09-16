@@ -89,8 +89,6 @@ namespace Network {
             // turn
             client.RegisterHandler(ServerStartNewTurnMessage.ID, OnClientStartNewTurn);
             client.RegisterHandler(ServerSyncTurnActionsMessage.ID, OnClientSyncTurnActions);
-
-            DontDestroyOnLoad(gameObject);
         }
 
         public void ResetClient() {
@@ -195,6 +193,7 @@ namespace Network {
                     if (msg.clientPlayerId == playerId) {
                         user.player = temp;
                     }
+                    temp.playerEntity.initSpell(msg.spellIds);
                 }
                 ClientReadyToPlay();
                 Debug.Log("Received ServerJoinGameResponseMessage " + msg.gameId);
@@ -203,13 +202,13 @@ namespace Network {
             }
         }
 
-        void ClientReadyToPlay() {
+        public void ClientReadyToPlay() {
             ClientReadyToPlayMessage msg = new ClientReadyToPlayMessage();
             msg.userId = user.userId;
             msg.userName = user.userName;
             msg.gameId = user.currentGameId;
             client.Send(ClientReadyToPlayMessage.ID, msg);
-            Debug.Log("Sent ClientReadyToPlay " + user.currentGameId);
+            Debug.Log("Sent ClientReadyToPlay " + msg.userName);
         }
 
         void OnClientStartGame(NetworkMessage netMsg) {
@@ -232,7 +231,7 @@ namespace Network {
                 Player p = new Player();
                 p.playerId = playerId;
                 p.playerName = displayedName;
-                GameLogicClient.game.spawnPlayer(p);
+                GameLogicClient.game.spawnPlayer(p, entityId);
                 p.playerEntity.entityId = entityId;
                 GameLogicClient.game.entityList[entityId] = p.playerEntity;
                 p.playerEntity.setColor(r, g, b);
@@ -261,10 +260,13 @@ namespace Network {
         private void OnClientSyncTurnActions(NetworkMessage netMsg) {
             ServerSyncTurnActionsMessage msg = netMsg.ReadMessage<ServerSyncTurnActionsMessage>();
             GameLogicClient.game.receiveActions(msg.actions);
+            GameLogicClient.game.resolveTurn();
             Debug.Log("Client received SyncTurnActions");
         }
 
         private void OnGUI() {
+            Rect pos = new Rect(10, Screen.currentResolution.height - 220, 200, 20);
+            GUI.Label(pos, "CLIENT");
             if (client != null && client.isConnected && user.isIdentified) {
                 GUI.Label(new Rect(10, 20, 200, 20), "Identified as : " + user.userName);
                 if (GUI.Button(new Rect(10, 60, 200, 20), "Disconnect")) {
@@ -272,9 +274,8 @@ namespace Network {
                     if (NetworkManager.singleton != null) {
                         NetworkManager.singleton.StopClient();
                     }
-                    SceneManager.LoadScene("login");
                 }
-                if (user.currentGameId == 0) {
+                if (GameLogicClient.game == null) {
                     if (!user.isQueued) {
                         if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
                             ClientJoinSoloQueueRequest();
@@ -284,8 +285,7 @@ namespace Network {
                             ClientLeaveSoloQueueRequest();
                         }
                     }
-                }
-                if (GameLogicClient.game != null) {
+                } else {
                     GUI.Label(new Rect(10, 140, 200, 20), "Turn : " + GameLogicClient.game.currentTurn);
                     switch (GameLogicClient.game.currentTurnState) {
                         case GameLogicClient.TURN_STATE_PREP:

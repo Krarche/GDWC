@@ -11,8 +11,6 @@ namespace Network {
 
         public static NetworkMasterServer singleton;
 
-        public bool forceServer = false;
-
         public int MasterServerPort;
 
         public Dictionary<ulong, GameLogicServer> games = new Dictionary<ulong, GameLogicServer>();
@@ -23,10 +21,8 @@ namespace Network {
         public GameQueue soloQueue = new GameQueue();
 
         public void Awake() {
-            if (forceServer || isHeadless()) {
-                singleton = this;
-                InitializeServer();
-            }
+            singleton = this;
+            InitializeServer();
         }
 
         public static bool isHeadless() {
@@ -167,6 +163,7 @@ namespace Network {
                 msg.r[i] = p.playerColor.r;
                 msg.g[i] = p.playerColor.g;
                 msg.b[i] = p.playerColor.b;
+                msg.spellIds = new string[4] { "S001", "S002", "S003", "S004" };
                 i++;
             }
 
@@ -187,29 +184,32 @@ namespace Network {
             ClientReadyToPlayMessage msg = netMsg.ReadMessage<ClientReadyToPlayMessage>();
             GameLogicServer game = games[msg.gameId];
             game.registerPlayerReady(game.getPlayerByUserId(msg.userId));
+            Debug.Log("Server received OnServerReadyToPlay from user " + msg.userName + " in game " + msg.gameId);
         }
 
         public void ServerStartTurnMessage(GameLogicServer game, long startTurnTimestamp) {
             if (game.currentTurn == 0)
-                startGame(game, startTurnTimestamp);
+                StartGame(game, startTurnTimestamp);
             else
-                startNewTurn(game, startTurnTimestamp);
+                StartNewTurn(game, startTurnTimestamp);
         }
 
-        private void startGame(GameLogicServer game, long startFirstTurnTimestamp) {
+        private void StartGame(GameLogicServer game, long startFirstTurnTimestamp) {
             ServerStartGameMessage msgOut = new ServerStartGameMessage();
             msgOut.startFirstTurnTimestamp = startFirstTurnTimestamp;
             foreach (Player p in game.players.Values) {
                 p.user.connection.Send(ServerStartGameMessage.ID, msgOut);
             }
+            Debug.Log("StartGame " + game.gameId);
         }
 
-        private void startNewTurn(GameLogicServer game, long startTurnTimestamp) {
+        private void StartNewTurn(GameLogicServer game, long startTurnTimestamp) {
             ServerStartNewTurnMessage msgOut = new ServerStartNewTurnMessage();
             msgOut.startTurnTimestamp = startTurnTimestamp;
             foreach (Player p in game.players.Values) {
                 p.user.connection.Send(ServerStartNewTurnMessage.ID, msgOut);
             }
+            Debug.Log("StartNewTurn " + game.gameId);
         }
 
         // --------------- Actions handlers -----------------
@@ -245,5 +245,11 @@ namespace Network {
                 }
             }
         }
+
+        private void OnGUI() {
+            Rect pos = new Rect(10, Screen.currentResolution.height - 200, 200, 20);
+            GUI.Label(pos, "SERVER");
+        }
+
     }
 }

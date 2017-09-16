@@ -50,17 +50,17 @@ namespace Network {
                         queue.Remove(u1);
                         queue.Remove(u2);
                         u1.isQueued = false;
-                        u2.isQueued = false;
+                        //u2.isQueued = false;
 
                         // create game
                         GameLogicServer newGame = GameLogicServer.createGame();
                         u1.player = CreatePlayer(u1, newGame);
-                        u2.player = CreatePlayer(u2, newGame);
+                        //u2.player = CreatePlayer(u2, newGame);
 
-                        newGame.spawnPlayer(u1.player);
-                        newGame.spawnPlayer(u2.player);
+                        newGame.createPlayer(u1.player);
+                        //newGame.createPlayer(u2.player);
 
-                        newGame.preparingPlayersNumber = 2;
+                        newGame.preparingPlayersNumber = 1;
                         operationOnQueue.ReleaseMutex();
                         return newGame;
                     } else if (u1.timeSpentInQueue > DELAY_BEFORE_MATCH_IA) { // too long, match with IA
@@ -84,7 +84,7 @@ namespace Network {
 
         private bool canMatch(User u1, User u2) {
             if (u1 == u2)
-                return false;
+                return true;
             int mmr1 = u1.MMR;
             int mmr2 = u2.MMR;
             return Mathf.Abs(mmr1 - mmr2) < MAX_MMR_DISTANCE;
