@@ -752,6 +752,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceServer: 1
+  forceSoloGame: 0
 --- !u!114 &866291095
 MonoBehaviour:
   m_ObjectHideFlags: 0

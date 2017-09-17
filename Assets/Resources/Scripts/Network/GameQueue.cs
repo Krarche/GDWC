@@ -12,7 +12,7 @@ namespace Network {
 
         Mutex operationOnQueue = new Mutex();
         NetworkMasterServer server;
-
+        public bool forceSoloGame = false;
         public static double DELAY_BEFORE_MATCH_IA = 15.0;
 
         public bool queueUser(User u) {
@@ -48,19 +48,18 @@ namespace Network {
                     if (canMatch(u1, u2)) {
                         // dequeue players
                         queue.Remove(u1);
-                        queue.Remove(u2);
+                        if (!forceSoloGame) // if non solo game
+                            queue.Remove(u2);
                         u1.isQueued = false;
-                        //u2.isQueued = false;
+                        if (!forceSoloGame) // if non solo game
+                            u2.isQueued = false;
 
                         // create game
                         GameLogicServer newGame = GameLogicServer.createGame();
                         u1.player = CreatePlayer(u1, newGame);
-                        //u2.player = CreatePlayer(u2, newGame);
-
-                        newGame.createPlayer(u1.player);
-                        //newGame.createPlayer(u2.player);
-
-                        newGame.preparingPlayersNumber = 1;
+                        if (!forceSoloGame) // if non solo game
+                            u2.player = CreatePlayer(u2, newGame);
+                        
                         operationOnQueue.ReleaseMutex();
                         return newGame;
                     } else if (u1.timeSpentInQueue > DELAY_BEFORE_MATCH_IA) { // too long, match with IA
@@ -72,11 +71,14 @@ namespace Network {
             return null;
         }
 
-        private Player CreatePlayer(User u, GameLogic game) {
+        private Player CreatePlayer(User u, GameLogicServer game) {
             Player p = new Player();
+            u.player = p;
+            p.user = u;
             p.playerId = u.userId;
             p.playerName = u.userName;
-            p.user = u;
+            game.createPlayer(p);
+            game.preparingPlayersNumber++;
             return p;
         }
 
@@ -84,7 +86,7 @@ namespace Network {
 
         private bool canMatch(User u1, User u2) {
             if (u1 == u2)
-                return true;
+                return forceSoloGame;
             int mmr1 = u1.MMR;
             int mmr2 = u2.MMR;
             return Mathf.Abs(mmr1 - mmr2) < MAX_MMR_DISTANCE;

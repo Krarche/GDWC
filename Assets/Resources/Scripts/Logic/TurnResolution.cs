@@ -20,10 +20,6 @@ namespace Logic {
             this.parent = parent;
         }
 
-        void resolveAction(Data.Action action) {
-
-        }
-
         // this function is called if the spell can be used (line of sight, cost, cooldown, etc must already be verified)
         public void resolveMovement(Entity origin, int[] path) {
             // TODO - remove

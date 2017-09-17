@@ -176,6 +176,7 @@ namespace Network {
             ServerJoinGameResponseMessage msg = netMsg.ReadMessage<ServerJoinGameResponseMessage>();
 
             if (msg.hasJoined) {
+                Debug.Log("Received ServerJoinGameResponseMessage " + msg.gameId);
                 GameLogicClient game = new GameLogicClient(msg.mapId);
                 game.gameId = msg.gameId;
                 game.currentTurn = msg.currentTurn;
@@ -189,14 +190,13 @@ namespace Network {
                     float g = msg.g[i];
                     float b = msg.b[i];
 
-                    Player temp = CreatePlayer(playerId, cellId, entityId, displayedName, r, g, b);
+                    Player temp = spawnPlayer(playerId, cellId, entityId, displayedName, r, g, b);
                     if (msg.clientPlayerId == playerId) {
                         user.player = temp;
                     }
                     temp.playerEntity.initSpell(msg.spellIds);
                 }
                 ClientReadyToPlay();
-                Debug.Log("Received ServerJoinGameResponseMessage " + msg.gameId);
             } else {
                 Debug.LogError("Failed to join game.");
             }
@@ -208,39 +208,46 @@ namespace Network {
             msg.userName = user.userName;
             msg.gameId = user.currentGameId;
             client.Send(ClientReadyToPlayMessage.ID, msg);
-            Debug.Log("Sent ClientReadyToPlay " + msg.userName);
+            Debug.Log("Sent ClientReadyToPlayMessage.");
         }
 
         void OnClientStartGame(NetworkMessage netMsg) {
             ServerStartGameMessage msg = netMsg.ReadMessage<ServerStartGameMessage>();
+            Debug.Log("Received ServerStartGameMessage");
             GameLogicClient.game.prepareNewTurn(msg.startFirstTurnTimestamp);
             // passer l'écran d'attente des joueurs
         }
 
         void OnClientStartNewTurn(NetworkMessage netMsg) {
             ServerStartNewTurnMessage msg = netMsg.ReadMessage<ServerStartNewTurnMessage>();
+            Debug.Log("Received ServerStartNewTurnMessage");
             GameLogicClient.game.prepareNewTurn(msg.startTurnTimestamp);
         }
 
 
         // --------------- Players handlers -----------------
 
-        private Player CreatePlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
+        private Player spawnPlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
             if (!GameLogicClient.game.players.ContainsKey(playerId)) {
-                Cell cell = GameLogicClient.game.grid.GetCell(cellId);
                 Player p = new Player();
                 p.playerId = playerId;
                 p.playerName = displayedName;
-                GameLogicClient.game.spawnPlayer(p, entityId);
-                p.playerEntity.entityId = entityId;
-                GameLogicClient.game.entityList[entityId] = p.playerEntity;
-                p.playerEntity.setColor(r, g, b);
-                p.playerEntity.applyColor();
-                p.playerEntity.setDisplayedName(displayedName);
-                p.playerEntity.setCurrentCell(cell);
+                p.playerColor = new Color(r, g, b);
+                GameLogicClient.game.spawnPlayer(p, cellId, entityId);
                 return p;
             } else {
                 return GameLogicClient.game.players[playerId];
+            }
+        }
+
+        private Entity spawnEntity(int cellId, int entityId, string displayedName, float r, float g, float b) {
+            if (!GameLogicClient.game.entityList.ContainsKey(entityId)) {
+                Entity e = GameLogicClient.game.spawnEntity(cellId, entityId);
+                e.setDisplayedName(displayedName);
+                e.setColor(r, g, b);
+                return e;
+            } else {
+                return GameLogicClient.game.entityList[entityId];
             }
         }
 
@@ -259,9 +266,9 @@ namespace Network {
 
         private void OnClientSyncTurnActions(NetworkMessage netMsg) {
             ServerSyncTurnActionsMessage msg = netMsg.ReadMessage<ServerSyncTurnActionsMessage>();
+            Debug.Log("Client received SyncTurnActions");
             GameLogicClient.game.receiveActions(msg.actions);
             GameLogicClient.game.resolveTurn();
-            Debug.Log("Client received SyncTurnActions");
         }
 
         private void OnGUI() {
@@ -296,11 +303,12 @@ namespace Network {
                             GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.endTurnSecondRemaining);
                             GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_ACT");
                             break;
-                        case GameLogicClient.TURN_STATE_SYNC:
+                        case GameLogicClient.TURN_STATE_SYNC_WAIT:
                             GUI.Label(new Rect(10, 150, 200, 20), "Time remaining : " + GameLogicClient.game.serverDataTimeoutSecondRemaining);
-                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_SYNC");
+                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + "TURN_STATE_SYNC_WAIT");
                             break;
                         default:
+                            GUI.Label(new Rect(10, 160, 200, 20), "Turn step : " + GameLogicClient.game.currentTurnState);
                             break;
                     }
                 }

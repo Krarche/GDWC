@@ -20,6 +20,10 @@ namespace Network {
 
         public GameQueue soloQueue = new GameQueue();
 
+        public bool forceSoloGame {
+            set { soloQueue.forceSoloGame = value; }
+        }
+
         public void Awake() {
             singleton = this;
             InitializeServer();
@@ -106,7 +110,7 @@ namespace Network {
             msg.currentGameId = u.currentGameId;
 
             client.Send(ServerIdentificationResponseMessage.ID, msg);
-            Debug.Log("Sent ServerIdentificationResponse " + msg.isSuccessful);
+            Debug.Log("Server sent ServerIdentificationResponse " + msg.isSuccessful);
         }
 
 
@@ -176,15 +180,15 @@ namespace Network {
                 User u = player.user;
                 u.connection.Send(ServerJoinGameResponseMessage.ID, msg);
             }
-            Debug.Log("ServerSendNewGameDataToPlayers " + msg.gameId);
+            Debug.Log("Server sent ServerSendNewGameDataToPlayers " + msg.gameId);
         }
         // --------------- Turns handlers -----------------
 
         private void OnServerReadyToPlay(NetworkMessage netMsg) {
             ClientReadyToPlayMessage msg = netMsg.ReadMessage<ClientReadyToPlayMessage>();
+            Debug.Log("Server received OnServerReadyToPlay from user " + msg.userName + " in game " + msg.gameId);
             GameLogicServer game = games[msg.gameId];
             game.registerPlayerReady(game.getPlayerByUserId(msg.userId));
-            Debug.Log("Server received OnServerReadyToPlay from user " + msg.userName + " in game " + msg.gameId);
         }
 
         public void ServerStartTurnMessage(GameLogicServer game, long startTurnTimestamp) {
@@ -200,7 +204,7 @@ namespace Network {
             foreach (Player p in game.players.Values) {
                 p.user.connection.Send(ServerStartGameMessage.ID, msgOut);
             }
-            Debug.Log("StartGame " + game.gameId);
+            Debug.Log("Server sent StartGame " + game.gameId);
         }
 
         private void StartNewTurn(GameLogicServer game, long startTurnTimestamp) {
@@ -209,25 +213,25 @@ namespace Network {
             foreach (Player p in game.players.Values) {
                 p.user.connection.Send(ServerStartNewTurnMessage.ID, msgOut);
             }
-            Debug.Log("StartNewTurn " + game.gameId);
+            Debug.Log("Server sent StartNewTurn " + game.gameId);
         }
 
         // --------------- Actions handlers -----------------
         void OnServerRegisterTurnActions(NetworkMessage netMsg) {
             ClientRegisterTurnActionsMessage msg = netMsg.ReadMessage<ClientRegisterTurnActionsMessage>();
-            Debug.Log("Server received OnServerRegisterTurnActions");
+            Debug.Log("Server received OnServerRegisterTurnAction " + msg.userName);
             GameLogicServer game = games[msg.gameId];
             game.registerPlayerAction(game.getPlayerByUserId(msg.userId), msg.actions);
         }
 
         public void SyncTurnActions(GameLogicServer game) {
             ServerSyncTurnActionsMessage msg = new ServerSyncTurnActionsMessage();
+            Debug.Log("Server sent SyncTurnActions");
             msg.actions = game.generateTurnActionsJSON();
             foreach (Player player in game.players.Values) {
                 User u = player.user;
                 u.connection.Send(ServerSyncTurnActionsMessage.ID, msg);
             }
-            Debug.Log("Server sent SyncTurnActions");
         }
 
         // --------------- Send to in game players handlers -----------------

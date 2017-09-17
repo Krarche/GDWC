@@ -57,7 +57,6 @@ namespace Data {
             stunCount = stunCount > 1 ? stunCount - 1 : 0;
         }
 
-
         public Queue<Action> actions = new Queue<Action>();
         public SpellInstance[] spells;
         public List<BuffInstance> buffs = new List<BuffInstance>();
@@ -65,9 +64,15 @@ namespace Data {
         public TextMesh entityNameText;
         public Transform meshTransform;
 
-        // Use this for initialization
+        private void Awake() {
+            actions = new Queue<Action>();
+            buffs = new List<BuffInstance>();
+        }
+
         void Start() {
             animator = gameObject.GetComponent<Animator>();
+            actions = new Queue<Action>();
+            buffs = new List<BuffInstance>();
             currentHealth = 50;
             maxHealth = 50;
             currentAP = 14;
@@ -133,7 +138,9 @@ namespace Data {
         }
 
         public void orderMoveToCell(Cell destinationCell) {
-            this.destinationCell = destinationCell;
+            //TODO : back to normal
+            //this.destinationCell = destinationCell;
+            setCurrentCell(destinationCell);
         }
 
         public int getCurrentCellId() {

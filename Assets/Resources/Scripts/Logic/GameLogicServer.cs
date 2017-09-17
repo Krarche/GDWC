@@ -10,12 +10,11 @@ namespace Logic {
 
     public class GameLogicServer : GameLogic {
 
-        private static float TURN_PREPARATION_DURATION_SECONDS = 4;
         public static ulong gameCount = 0;
 
         public int preparingPlayersNumber;
         public void registerPlayerReady(Player p) {
-            if (!isPreparing) {
+            if (isDoneResolving || isResolving || isWaitingForGameStart) {
                 if (!p.isReady) {
                     p.isReady = true;
                     preparingPlayersNumber--;
@@ -36,15 +35,25 @@ namespace Logic {
         public bool isTurnReady {
             get { return preparingPlayersNumber == 0; }
         }
+        private void voidResetTurnReady() {
+            foreach (Player p in players.Values) {
+                if (p.isReady) {
+                    p.isReady = false;
+                }
+            }
+            preparingPlayersNumber = players.Values.Count;
+
+        }
+
 
         public int actingPlayerNumber;
         public void registerPlayerAction(Player p, string actions) {
-            if (isActing || isSynchronizing) {
+            if (!isSyncReady && (isActing || isWaitingSync)) {
                 if (!p.isReady) {
+                    receiveActions(actions);
                     p.isReady = true;
                     actingPlayerNumber--;
-                    receiveActions(actions);
-                    if (isSyncReady) {// all player registered, sync !
+                    if (isSyncReady) { // all player registered, sync now !
                         synchronizeActions();
                         resolveTurn();
                     }
@@ -53,11 +62,19 @@ namespace Logic {
                     Debug.LogWarning("Try to registerPlayerAction(), but player actions were already registered!");
                 }
             } else { // too late for sync 
-                Debug.LogWarning("Try to registerPlayerAction(), but turn is already resolving!");
+                Debug.LogWarning("Try to registerPlayerAction(), but sync is already done!");
             }
         }
         public bool isSyncReady {
-            get { return actingPlayerNumber == 0 || endTurnTimeRemaining < 0; }
+            get { return actingPlayerNumber == 0 /*|| endTurnTimeRemaining < 0*/; }
+        }
+        private void voidResetSyncReady() {
+            foreach (Player p in players.Values) {
+                if (p.isReady) {
+                    p.isReady = false;
+                }
+            }
+            actingPlayerNumber = players.Values.Count;
         }
 
 
@@ -70,17 +87,14 @@ namespace Logic {
         private GameLogicServer() : base() {
             foreach (Cell c in grid.cells)
                 c.inWorld.gameObject.SetActive(false);
-        }
-
-
-        public override Entity createEntity() {
-            Entity entity = base.createEntity();
-            entity.gameObject.SetActive(false);
-            return entity;
+            voidResetTurnReady();
+            voidResetSyncReady();
         }
 
         public override void prepareNewTurn(long startTurnTimestamp) {
             base.prepareNewTurn(startTurnTimestamp);
+            voidResetTurnReady();
+            voidResetSyncReady();
             serverDataTimeoutDate = endTurnDate.AddSeconds(SERVER_WAIT_PLAYER_ACTIONS_SECONDS);
         }
 
@@ -92,54 +106,64 @@ namespace Logic {
         }
 
         public override void endTurn() {
-            base.endTurn();
-            // wait for player ready
-            preparingPlayersNumber = players.Count;
-            foreach (Player p in players.Values)
-                p.isReady = false;
-            CoroutineMaster.startCoroutine(waitForClientData());
+            if (isActing) {
+                // wait for player ready
+                currentTurnState = TURN_STATE_SYNC_WAIT;
+                preparingPlayersNumber = players.Count;
+                foreach (Player p in players.Values)
+                    p.isReady = false;
+                CoroutineMaster.startCoroutine(waitForClientsSendData());
+            }
         }
 
-        protected IEnumerator waitForClientData() {
-            DateTime now = DateTime.UtcNow;
-            TimeSpan nowToTimeout = serverDataTimeoutDate.Subtract(now);
-            yield return new WaitForSecondsRealtime((float)nowToTimeout.TotalSeconds);
-            if (isSynchronizing) {
+        protected IEnumerator waitForClientsSendData() {
+            yield return new WaitForSecondsRealtime(SERVER_WAIT_PLAYER_ACTIONS_SECONDS);
+            if (isWaitingSync) { // didn't received all client data, but run anywaywith skips
                 synchronizeActions();
                 resolveTurn();
             }
         }
 
         public override void resolveTurn() {
-            if (!isResolving) {
-                currentTurnState = TURN_STATE_RES;
-                // resolve actions
+            if (isSyncDone) {
+                currentTurnState = TURN_STATE_RESOLVING;
+                // trigger buff onTurnStartHandler
+                foreach (Entity e in entityList.Values) {
+                    solver.resolveEntityBuffs(e, "onTurnStartHandler");
+                }
+                // resolve action
                 resolveActions(actions0);
                 resolveActions(actions1);
                 resolveActions(actions2);
+                // trigger buff onTurnEndHandler
+                foreach (Entity e in entityList.Values) {
+                    solver.resolveEntityBuffs(e, "onTurnEndHandler");
+                }
                 // wait for player ready
                 preparingPlayersNumber = players.Count;
                 foreach (Player p in players.Values)
                     p.isReady = false;
-                waitForEnd();
+                currentTurnState = TURN_STATE_RESOLVING_DONE;
             }
         }
 
         public override void synchronizeActions() {
+            currentTurnState = TURN_STATE_SYNC_SEND;
             Network.NetworkMasterServer.singleton.SyncTurnActions(this);
+            currentTurnState = TURN_STATE_SYNC_DONE;
         }
 
         public override string generateTurnActionsJSON() {
             string output = "";
-            output += "\"actions0\":" + actionListToArray(actions0);
+            output += "\"actions0\":" + actionListToArrayJSON(actions0);
             output += ",";
-            output += "\"actions1\":" + actionListToArray(actions1);
+            output += "\"actions1\":" + actionListToArrayJSON(actions1);
             output += ",";
-            output += "\"actions2\":" + actionListToArray(actions2);
+            output += "\"actions2\":" + actionListToArrayJSON(actions2);
             return "{" + output + "}";
         }
 
-        public string actionListToArray(List<Data.Action> actions) {
+        public string actionListToArrayJSON(List<Data.Action> actions) {
             if (actions.Count == 0)
                 return "[]";
             string output = "";

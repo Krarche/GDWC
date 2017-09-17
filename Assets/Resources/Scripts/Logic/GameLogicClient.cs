@@ -44,6 +44,8 @@ namespace Logic {
             game = null;
         }
 
+        #region Button Types
+
         public const short BUTTON_TYPE_ACTION_ROOT = 0;
         public const short BUTTON_TYPE_ACTION_MOVEMENT = 1;
         public const short BUTTON_TYPE_ACTION_QUICK_SPELL = 2;
@@ -55,6 +57,8 @@ namespace Logic {
         public const short BUTTON_TYPE_CONFIRM = 20;
         public const short BUTTON_TYPE_CANCEL = 21;
         public const short BUTTON_TYPE_READY = 22;
+
+        #endregion
 
         public void buttonInput(short type) {
             Debug.Log(type);
@@ -95,11 +99,16 @@ namespace Logic {
             }
         }
 
+        #region Action selection State
+
         public static short ACTION_SELECTION_STATE_ROOT = 0;
         public static short ACTION_SELECTION_STATE_QUICK = 1;
         public static short ACTION_SELECTION_STATE_SLOW = 2;
         public static short ACTION_SELECTION_STATE_MOVEMENT = 3;
         public static short ACTION_SELECTION_STATE_READY = 4;
+
+        #endregion
+
         public short currentActionSelectionState = 0;
 
         public bool canQuickSpell;
@@ -132,13 +141,17 @@ namespace Logic {
             }
         }
 
+        #region Selected spells index
+
         public static short SELECTED_SPELL_NONE = -1;
         public static short SELECTED_SPELL_1 = 0;
         public static short SELECTED_SPELL_2 = 1;
         public static short SELECTED_SPELL_3 = 2;
         public static short SELECTED_SPELL_4 = 3;
-        public short currentSelectedSpell = -1;
 
+        #endregion
+
+        public short currentSelectedSpell = -1;
         public bool isAnySpellSelected {
             get {
                 return currentSelectedSpell != SELECTED_SPELL_NONE;
@@ -346,7 +359,7 @@ namespace Logic {
         }
         private void buttonReadyHandler() {
             // send data to server, be ready
-            synchronizeActions();
+            // synchronizeActions();
         }
 
         // ################################################################
@@ -362,44 +375,61 @@ namespace Logic {
         }
 
         public override void endTurn() {
-            synchronizeActions();
-            base.endTurn();
-            CoroutineMaster.startCoroutine(waitForServerData());
+            if (isActing) {
+                synchronizeActions();
+                CoroutineMaster.startCoroutine(waitForServerData());
+            }
         }
 
         protected IEnumerator waitForServerData() {
-            DateTime now = DateTime.UtcNow;
-            TimeSpan nowToTimeout = serverDataTimeoutDate.Subtract(now);
-            yield return new WaitForSecondsRealtime((float)nowToTimeout.TotalSeconds);
-            if (isSynchronizing) {
+            yield return new WaitForSecondsRealtime(CLIENT_WAIT_SERVER_SYNC_SECONDS);
+            if (isWaitingSync) {
                 // something went wrong, no data received from server
+                Debug.LogError("waitForServerData() - no data received from server");
             }
         }
 
         public override void resolveTurn() {
-            if (!isResolving) {
-                currentTurnState = TURN_STATE_RES;
+            if (isSyncDone) {
+                currentTurnState = TURN_STATE_RESOLVING;
+                // trigger buff onTurnStartHandler
+                foreach (Entity e in entityList.Values) {
+                    solver.resolveEntityBuffs(e, "onTurnStartHandler");
+                }
                 // resolve action
                 resolveActions(actions0);
                 resolveActions(actions1);
                 resolveActions(actions2);
+                // trigger buff onTurnEndHandler
+                foreach (Entity e in entityList.Values) {
+                    solver.resolveEntityBuffs(e, "onTurnEndHandler");
+                }
                 // notify server turn ended on client
-                Network.NetworkMasterClient.singleton.ClientReadyToPlay();
+                currentTurnState = TURN_STATE_RESOLVING_DONE;
+                NetworkMasterClient.singleton.ClientReadyToPlay();
             }
         }
 
+
+        public override void receiveActions(string actions) {
+            base.receiveActions(actions);
+            currentTurnState = TURN_STATE_SYNC_DONE;
+        }
+
         public override void synchronizeActions() {
-            if (!isSynchronizing) {
-                currentTurnState = TURN_STATE_SYNC;
-                Network.NetworkMasterClient.singleton.SyncTurnActions(this);
-            }
+            //if (!isWaitingSync && !isSendingSync) {
+            currentTurnState = TURN_STATE_SYNC_SEND;
+            NetworkMasterClient.singleton.SyncTurnActions(this);
+            currentTurnState = TURN_STATE_SYNC_WAIT;
+            Debug.Log("synchronizeActions() done");
+            //}
         }
 
         public override string generateTurnActionsJSON() {
             string output = "";
             for (int i = 0; i < 3; i++) {
                 output += "\"actions" + i + "\":" + "[";
-                if(localActions.Count > 0) {
+                if (localActions.Count > 0) {
                     Data.Action action = localActions.Dequeue();
                     output += action.toJSON();
                 }

@@ -11,7 +11,8 @@ namespace Logic {
 
     public abstract class GameLogic {
 
-        public static float TURN_DURATION_SECONDS = 15;
+        public static float TURN_PREPARATION_DURATION_SECONDS = 2;
+        public static float TURN_DURATION_SECONDS = 6;
         public static float SERVER_WAIT_PLAYER_ACTIONS_SECONDS = 2;
         public static float CLIENT_WAIT_SERVER_SYNC_SECONDS = 4;
         public static int MAX_TURN_NUMBER = 20;
@@ -94,84 +95,88 @@ namespace Logic {
             grid = new Grid(this, DataManager.MAP_DATA[mapId]);
         }
 
-        public virtual Entity createEntity() {
+        public void createPlayer(Player p) {
+            if (!players.ContainsKey(p.playerId)) {
+                int cellId = grid.mapData.getSpawns(2)[players.Count];
+                p.playerEntity = createEntity(cellId);
+                players[p.playerId] = p;
+            }
+        }
+
+        public Entity createEntity(int cellId) {
             Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
-            entity.entityId = lastEntityIdGenerated++;
+            entity.setCurrentCell(grid.GetCell(cellId));
+            lastEntityIdGenerated++;
+            entity.entityId = lastEntityIdGenerated;
             entity.game = this;
             entity.grid = grid;
-            entity.setCurrentCell(grid.GetCell(0));
             entityList[lastEntityIdGenerated] = entity;
+            entity.gameObject.SetActive(false);
             return entity;
         }
 
-        public virtual Entity spawnEntity(int entityId) {
+        public void spawnPlayer(Player p, int cellId, int entityId) {
+            if (!players.ContainsKey(p.playerId)) {
+                p.playerEntity = spawnEntity(cellId, entityId);
+                p.playerEntity.setColor(p.playerColor);
+                p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
+                players[p.playerId] = p;
+            }
+        }
+
+        public Entity spawnEntity(int cellId, int entityId) {
             Entity entity = GameObject.Instantiate(playerPrefab, new Vector3(), Quaternion.identity).GetComponent<Entity>();
+            entity.setCurrentCell(grid.GetCell(cellId));
             entity.entityId = entityId;
             entity.game = this;
             entity.grid = grid;
-            entity.setCurrentCell(grid.GetCell(0));
             entityList[entityId] = entity;
             return entity;
         }
 
-        public void removeEntity(Entity e) {
-            GameObject.Destroy(e.gameObject);
-
-            entityList.Remove(e.entityId);
-        }
-
-        public void createPlayer(Player p) {
-            if (!players.ContainsKey(p.playerId)) {
-                p.playerEntity = createEntity();
-                p.playerEntity.setColor(p.playerColor);
-                p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
-                int cellId = grid.mapData.getSpawns(2)[players.Count];
-                Cell cell = grid.GetCell(cellId);
-                p.playerEntity.setCurrentCell(cell);
-                players[p.playerId] = p;
-            }
-        }
-
-        public void spawnPlayer(Player p, int entityId) {
-            if (!players.ContainsKey(p.playerId)) {
-                p.playerEntity = spawnEntity(entityId);
-                p.playerEntity.setColor(p.playerColor);
-                p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
-                int cellId = grid.mapData.getSpawns(2)[players.Count];
-                Cell cell = grid.GetCell(cellId);
-                p.playerEntity.setCurrentCell(cell);
-                players[p.playerId] = p;
-            }
-        }
-
         public void removePlayer(Player p) {
             removeEntity(p.playerEntity);
-            entityList.Remove(p.playerEntity.entityId);
             players.Remove(p.playerId);
+        }
+
+        public void removeEntity(Entity e) {
+            GameObject.Destroy(e.gameObject);
+            entityList.Remove(e.entityId);
         }
 
         public const short TURN_STATE_NONE = -1;
         public const short TURN_STATE_PREP = 0;
         public const short TURN_STATE_ACT = 1;
-        public const short TURN_STATE_SYNC = 2;
-        public const short TURN_STATE_RES = 3;
-        public const short TURN_STATE_WAITING_END = 4;
+        public const short TURN_STATE_SYNC_SEND = 2;
+        public const short TURN_STATE_SYNC_WAIT = 3;
+        public const short TURN_STATE_SYNC_DONE = 4;
+        public const short TURN_STATE_RESOLVING = 5;
+        public const short TURN_STATE_RESOLVING_DONE = 6;
         public short currentTurnState = -1;
 
+        public bool isWaitingForGameStart {
+            get { return currentTurnState == TURN_STATE_NONE; }
+        }
         public bool isPreparing {
             get { return currentTurnState == TURN_STATE_PREP; }
         }
         public bool isActing {
             get { return currentTurnState == TURN_STATE_ACT; }
         }
-        public bool isSynchronizing {
-            get { return currentTurnState == TURN_STATE_SYNC; }
+        public bool isSendingSync {
+            get { return currentTurnState == TURN_STATE_SYNC_SEND; }
+        }
+        public bool isWaitingSync {
+            get { return currentTurnState == TURN_STATE_SYNC_WAIT; }
+        }
+        public bool isSyncDone {
+            get { return currentTurnState == TURN_STATE_SYNC_DONE; }
         }
         public bool isResolving {
-            get { return currentTurnState == TURN_STATE_RES; }
+            get { return currentTurnState == TURN_STATE_RESOLVING; }
         }
-        public bool isWaitingEnd {
-            get { return currentTurnState == TURN_STATE_WAITING_END; }
+        public bool isDoneResolving {
+            get { return currentTurnState == TURN_STATE_RESOLVING_DONE; }
         }
 
         public virtual void prepareNewTurn(long startTurnTimestamp) {
@@ -191,10 +196,6 @@ namespace Logic {
         }
 
         public virtual void startTurn() {
-            // todo : displace in turn resolution - start
-            foreach (Entity e in entityList.Values) {
-                solver.resolveEntityBuffs(e, "onTurnStartHandler");
-            }
             currentTurnState = TURN_STATE_ACT;
             CoroutineMaster.startCoroutine(waitForTurnEnd());
         }
@@ -208,35 +209,29 @@ namespace Logic {
                 endTurn();
         }
 
-        public virtual void endTurn() {
-            // todo : displace in turn resolution - end
-            foreach (Entity e in entityList.Values) {
-                solver.resolveEntityBuffs(e, "onTurnEndHandler");
-            }
-        }
+        public abstract void endTurn();
 
         // override for client and server
         public abstract void resolveTurn();
 
-        public void waitForEnd() {
-            currentTurnState = TURN_STATE_WAITING_END;
-        }
-
-        public void receiveActions(string actions) {
+        public virtual void receiveActions(string actions) {
             ObjectJSON actionsJSON = new ObjectJSON(actions);
             ArrayJSON actions0JSON = actionsJSON.getArrayJSON("actions0");
             for (int i = 0; i < actions0JSON.Length; i++) {
-                Data.Action action = Data.Action.fromJSON(actions0JSON.getObjectJSONAt(i));
+                ObjectJSON actionJSON = actions0JSON.getObjectJSONAt(i);
+                Data.Action action = Data.Action.fromJSON(actionJSON);
                 actions0.Add(action);
             }
             ArrayJSON actions1JSON = actionsJSON.getArrayJSON("actions1");
             for (int i = 0; i < actions1JSON.Length; i++) {
-                Data.Action action = Data.Action.fromJSON(actions1JSON.getObjectJSONAt(i));
+                ObjectJSON actionJSON = actions1JSON.getObjectJSONAt(i);
+                Data.Action action = Data.Action.fromJSON(actionJSON);
                 actions1.Add(action);
             }
             ArrayJSON actions2JSON = actionsJSON.getArrayJSON("actions2");
             for (int i = 0; i < actions2JSON.Length; i++) {
-                Data.Action action = Data.Action.fromJSON(actions2JSON.getObjectJSONAt(i));
+                ObjectJSON actionJSON = actions2JSON.getObjectJSONAt(i);
+                Data.Action action = Data.Action.fromJSON(actionJSON);
                 actions2.Add(action);
             }
         }
@@ -245,35 +240,41 @@ namespace Logic {
             List<Data.Action> fast = new List<Data.Action>();
             List<Data.Action> move = new List<Data.Action>();
             List<Data.Action> slow = new List<Data.Action>();
-
-            foreach (Data.Action action in actions) {
-                switch (action.getPriority()) {
-                    case 0:
-                        fast.Add(action);
-                        break;
-                    case 1:
-                        move.Add(action);
-                        break;
-                    default:
-                        slow.Add(action);
-                        break;
+            try {
+                foreach (Data.Action action in actions) {
+                    switch (action.getPriority()) {
+                        case 0:
+                            fast.Add(action);
+                            break;
+                        case 1:
+                            move.Add(action);
+                            break;
+                        default:
+                            slow.Add(action);
+                            break;
+                    }
+                    resolvePriority(fast);
+                    resolvePriority(move);
+                    resolvePriority(slow);
                 }
-                resolvePriority(fast);
-                resolvePriority(move);
-                resolvePriority(slow);
-
-                actions.Clear();
+            } catch (Exception e) {
+                Debug.LogError(e.GetType().ToString() + " was catch. Turn resolution is interupted.");
             }
+
+            actions.Clear();
         }
 
         public void resolvePriority(List<Data.Action> priority) {
-            foreach(Data.Action a in priority) {
+            foreach (Data.Action a in priority) {
                 resolveAction(a);
             }
         }
 
         public virtual void resolveAction(Data.Action action) {
-            Entity e = entityList[action.entityId];
+            Entity e;
+            if (!entityList.TryGetValue(action.entityId, out e)) {
+                Debug.LogError("resolveAction() - can't find entity with id " + action.entityId);
+            }
             if (action is MovementAction) {
                 if (!action.isActionSkiped()) {
                     MovementAction movementACtion = (MovementAction)action;
