@@ -76,7 +76,14 @@ public class GameLogicClient : GameLogic {
         }
     }
 
-    public ActionSelectionState currentActionSelectionState = 0;
+    private ActionSelectionState _currentActionSelectionState = 0;
+    public ActionSelectionState currentActionSelectionState {
+        get { return _currentActionSelectionState; }
+        set {
+            _currentActionSelectionState = value;
+            GUIManager.gui.changeActionSelectionState(_currentActionSelectionState);
+        }
+    }
 
     public bool canQuickSpell;
     public bool canSlowSpell;
@@ -136,23 +143,18 @@ public class GameLogicClient : GameLogic {
     List<Cell> effectRangeCells = null;
     private Action currentAction = null;
 
+    //Root buttons handlers
+
     private void buttonRootHandler() {
         if (currentActionSelectionState != ActionSelectionState.ROOT) {
-            if (isSpelling)
-                clearSpellRangeCells();
-            else if (isMoving)
-                clearMovementRangeCells();
+            clearRangeCells();
             currentActionSelectionState = ActionSelectionState.ROOT;
         }
     }
 
     private void buttonMovementHandler() {
         if (currentActionSelectionState != ActionSelectionState.MOVEMENT) {
-            if (isSpelling)
-                clearSpellRangeCells();
-            else if (isMoving)
-                clearMovementRangeCells();
-
+            clearRangeCells();
             movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
             grid.SetCellColor(movementRangeCells, Color.green);
 
@@ -160,22 +162,26 @@ public class GameLogicClient : GameLogic {
         }
     }
     private void buttonQuickSpellHandler() {
+        localEntity.currentHealth -= 10; //DEBUG: to test losing health
         if (currentActionSelectionState != ActionSelectionState.QUICK) {
-            if (isMoving)
-                clearMovementRangeCells();
-            else if (isSpelling)
-                clearSpellRangeCells();
+            clearRangeCells();
             currentActionSelectionState = ActionSelectionState.QUICK;
         }
     }
     private void buttonSlowSpellHandler() {
         if (currentActionSelectionState != ActionSelectionState.SLOW) {
-            if (isMoving)
-                clearMovementRangeCells();
-            else if (isSpelling)
-                clearSpellRangeCells();
+            clearRangeCells();
             currentActionSelectionState = ActionSelectionState.SLOW;
         }
+    }
+
+    //Clear functions
+
+    private void clearRangeCells() {
+        if (isMoving)
+            clearMovementRangeCells();
+        else if (isSpelling)
+            clearSpellRangeCells();
     }
 
     private void clearSpellRangeCells() {
@@ -207,6 +213,8 @@ public class GameLogicClient : GameLogic {
         }
         currentTargetCell = null;
     }
+
+    //Spell button handler
 
     private void buttonSpellHandler(short spellIndex) {
         if (isSpelling) {
