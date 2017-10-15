@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4569110458608158}
   - component: {fileID: 114223806040662270}
+  - component: {fileID: 114217780678408328}
   m_Layer: 0
   m_Name: ClientHolder
   m_TagString: Untagged
@@ -40,6 +41,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114217780678408328
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1778427203048940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5946ede8930761241a08c441c0f0daee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isServerClock: 0
+  isClientClock: 1
 --- !u!114 &114223806040662270
 MonoBehaviour:
   m_ObjectHideFlags: 1

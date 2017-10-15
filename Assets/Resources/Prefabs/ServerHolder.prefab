@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4387257065904844}
   - component: {fileID: 114471547197667990}
+  - component: {fileID: 114957853415446818}
   m_Layer: 0
   m_Name: ServerHolder
   m_TagString: Untagged
@@ -51,5 +52,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5dd5da7222a6c346859d75361ec1b43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceServer: 0
   MasterServerPort: 25000
+--- !u!114 &114957853415446818
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1695395727404058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5946ede8930761241a08c441c0f0daee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isServerClock: 1
+  isClientClock: 0

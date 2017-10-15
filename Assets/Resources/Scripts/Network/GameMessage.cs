@@ -12,6 +12,11 @@ namespace Network {
         public ulong userId;
     }
 
+    public class ClientSyncClockMessage : ClientMessage {
+        public static short ID = 1001;
+        public long timestamp;
+    }
+
     // queue 1100
 
     public class ClientJoinSoloQueueRequestMessage : ClientMessage {
@@ -50,6 +55,11 @@ namespace Network {
     // ID = 2xxx
 
     // identification 2000
+
+    public class ServerSyncClockMessage : ClientMessage {
+        public static short ID = 2001;
+        public long timestamp;
+    }
 
     public class ServerStartTurnMessage : ServerMessage {
         public static short ID = 2101;

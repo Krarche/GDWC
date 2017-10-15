@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Networking;
-using System;
 using Data;
 using Logic;
 
@@ -46,6 +45,9 @@ namespace Network {
             NetworkServer.RegisterHandler(MsgType.Disconnect, OnServerDisconnect);
             NetworkServer.RegisterHandler(MsgType.Error, OnServerError);
 
+
+            NetworkServer.RegisterHandler(ClientSyncClockMessage.ID, OnServerSyncClock);
+
             // identification
             NetworkServer.RegisterHandler(ClientIdentificationRequestMessage.ID, OnServerIdentificationRequest);
 
@@ -80,6 +82,17 @@ namespace Network {
 
         private void OnServerError(NetworkMessage netMsg) {
             Debug.Log("ServerError from Master");
+        }
+
+        private void OnServerSyncClock(NetworkMessage netMsg) {
+            Debug.Log("OnServerSyncClockRequest from Master " + (Time.time - netMsg.conn.lastMessageTime));
+            ServerSyncClockResponse(netMsg.conn);
+        }
+
+        void ServerSyncClockResponse(NetworkConnection client) {
+            ServerSyncClockMessage msg = new ServerSyncClockMessage();
+            msg.timestamp = ClockMaster.serverCurrentTimeStamp;
+            client.Send(ServerSyncClockMessage.ID, msg);
         }
 
         // --------------- Identification handlers -----------------

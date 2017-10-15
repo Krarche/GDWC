@@ -38,7 +38,7 @@ namespace Network {
                 userId = (ulong)ID.getLong("userId");
                 userName = ID.getString("userName");
                 Debug.Log("Using custom ID loaded from file.");
-            } catch (Exception e) {
+            } catch (Exception) {
                 Debug.Log("Using default ID.");
             }
             user.userId = userId;
@@ -79,12 +79,14 @@ namespace Network {
             }
 
             client = new NetworkClient();
-            client.Connect(MasterServerIpAddress, MasterServerPort);
-
+            //client.Connect(MasterServerIpAddress, MasterServerPort);
+            client.ConnectWithSimulator(MasterServerIpAddress, MasterServerPort, 200, 0.0f); // temp
             // System messages
             client.RegisterHandler(MsgType.Connect, OnClientConnect);
             client.RegisterHandler(MsgType.Disconnect, OnClientDisconnect);
             client.RegisterHandler(MsgType.Error, OnClientError);
+
+            client.RegisterHandler(ServerSyncClockMessage.ID, OnClientSyncClock);
 
             // identification
             client.RegisterHandler(ServerIdentificationResponseMessage.ID, OnClientIdentified);
@@ -126,6 +128,19 @@ namespace Network {
             Debug.Log("Client error from Master");
         }
 
+        public void ClientSyncClockRequest(long clientCurrentTimestamp) {
+            ClientSyncClockMessage msg = new ClientSyncClockMessage();
+            msg.timestamp = clientCurrentTimestamp;
+            client.Send(ClientSyncClockMessage.ID, msg);
+            Debug.Log("Sent clock synchronization request");
+        }
+
+        void OnClientSyncClock(NetworkMessage netMsg) {
+            Debug.Log("OnClientSyncClock from Master");
+            ServerSyncClockMessage msg = netMsg.ReadMessage<ServerSyncClockMessage>();
+            ClockMaster.clientSingleton.endSyncClient(msg.timestamp);
+        }
+
         // --------------- Identification handlers -----------------
         void ClientIdentificationRequest() {
             ClientIdentificationRequestMessage msg = new ClientIdentificationRequestMessage();
@@ -138,6 +153,7 @@ namespace Network {
         void OnClientIdentified(NetworkMessage netMsg) {
             ServerIdentificationResponseMessage msg = netMsg.ReadMessage<ServerIdentificationResponseMessage>();
             if (msg.isSuccessful) {
+                ClockMaster.clientSingleton.startSyncClient(); // sync clock
                 Debug.Log("Client successfully identified");
                 user = new User(msg.userId, msg.userName);
                 user.isIdentified = true;
