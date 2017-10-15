@@ -190,7 +190,7 @@ namespace Logic {
                 else if (isMoving)
                     clearMovementRangeCells();
 
-                movementRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
+                movementRangeCells = grid.getCellsInRange(localEntity.getPriorityCurrentCell(), Math.Min(1, localEntity.currentMP), Math.Min(3, localEntity.currentMP), SpellData.RANGE_AREA_CIRCLE);
                 grid.SetCellColor(movementRangeCells, Color.green);
 
                 currentActionSelectionState = ACTION_SELECTION_STATE_MOVEMENT;
@@ -260,7 +260,7 @@ namespace Logic {
                 int minRange = localSpells[currentSelectedSpell].getMinRange(priority);
                 int maxRange = localSpells[currentSelectedSpell].getMaxRange(priority);
 
-                spellRangeCells = grid.getCellsInRange(grid.GetCell(localEntity.currentCellId), minRange, maxRange, rangeType);
+                spellRangeCells = grid.getCellsInRange(localEntity.getPriorityCurrentCell(), minRange, maxRange, rangeType);
                 grid.SetCellColor(spellRangeCells, Color.blue);
             }
         }
@@ -305,16 +305,16 @@ namespace Logic {
             }
         }
 
-        private void registerSpellAction(string spellId, Cell path) {
+        private void registerSpellAction(string spellId, Cell target) {
             if (isQuickSpelling) {
                 QuickSpellAction newAction = new QuickSpellAction();
                 newAction.spellId = spellId;
-                newAction.targetCellId = path.cellId;
+                newAction.targetCellId = target.cellId;
                 currentAction = newAction;
             } else if (isSlowSpelling) {
                 SlowSpellAction newAction = new SlowSpellAction();
                 newAction.spellId = spellId;
-                newAction.targetCellId = path.cellId;
+                newAction.targetCellId = target.cellId;
                 currentAction = newAction;
             }
             currentAction.entityId = localEntity.entityId;
@@ -322,16 +322,38 @@ namespace Logic {
             // add to local actions
             localActions.Enqueue(currentAction);
         }
-        private void registerMovementAction(List<Cell> target) {
+        private void registerMovementAction(List<Cell> path) {
             MovementAction newAction = new MovementAction();
-            newAction.path = new int[target.Count];
-            for (int i = 0; i < target.Count; i++)
-                newAction.path[i] = target[i].cellId;
+            newAction.path = new int[path.Count];
+            for (int i = 0; i < path.Count; i++)
+                newAction.path[i] = path[i].cellId;
             currentAction = newAction;
             currentAction.entityId = localEntity.entityId;
             //resolveAction(currentAction);
             // add to local actions
             localActions.Enqueue(currentAction);
+        }
+        private void registerSpellGhost(string spellId, Cell target) {
+            Cell finalPos = localEntity.currentCell;
+            SpellData spell = DataManager.SPELL_DATA[spellId];
+            if (isQuickSpelling) {
+                foreach (EffectSpell effect in spell.effects) {
+                    if (effect.quickHandler is EffectHandlerDash || effect.quickHandler is EffectHandlerWarp)
+                        finalPos = target;
+                }
+            } else if (isSlowSpelling) {
+                foreach (EffectSpell effect in spell.effects) {
+                    if (effect.slowHandler is EffectHandlerDash || effect.quickHandler is EffectHandlerWarp)
+                        finalPos = target;
+                }
+            }
+            // create ghost
+            localEntity.stackGhost(finalPos);
+        }
+        private void registerMovementGhost(List<Cell> path) {
+            Cell finalPos = path[path.Count - 1];
+            // create ghost
+            localEntity.stackGhost(finalPos);
         }
 
         private void buttonConfirmHandler() {
@@ -341,12 +363,14 @@ namespace Logic {
                         if (currentTargetCell != null) {
                             SpellInstance spellInstance = localSpells[currentSelectedSpell];
                             registerSpellAction(spellInstance.spell.id, currentTargetCell);
+                            registerSpellGhost(spellInstance.spell.id, currentTargetCell);
                             buttonRootHandler();
                         }
                     }
                 } else if (isMoving) {
                     if (movementPathCells != null) {
                         registerMovementAction(movementPathCells);
+                        registerMovementGhost(movementPathCells);
                         buttonRootHandler();
                     }
                 }
@@ -355,6 +379,7 @@ namespace Logic {
         private void buttonCancelHandler() {
             if (localActions.Count > 0) {
                 localActions.Dequeue();
+                localEntity.unstackGhost();
             }
         }
         private void buttonReadyHandler() {
@@ -404,6 +429,8 @@ namespace Logic {
                 foreach (Entity e in entityList.Values) {
                     solver.resolveEntityBuffs(e, "onTurnEndHandler");
                 }
+                // clear last execution data
+                localEntity.clearGhost();
                 // notify server turn ended on client
                 currentTurnState = TURN_STATE_RESOLVING_DONE;
                 NetworkMasterClient.singleton.ClientReadyToPlay();

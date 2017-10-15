@@ -64,6 +64,26 @@ namespace Data {
         public TextMesh entityNameText;
         public Transform meshTransform;
 
+        public Stack<Cell> ghosts = new Stack<Cell>();
+        public void stackGhost(Cell g) {
+            ghosts.Push(g);
+        }
+        public Cell unstackGhost() {
+            return ghosts.Pop();
+        }
+        public void clearGhost() {
+            while (ghosts.Count > 0)
+                unstackGhost();
+        }
+        /**
+         * Return the position where the entity will be after all the actions that are stacked. 
+         */
+        public Cell getPriorityCurrentCell() {
+            if (ghosts.Count > 0)
+                return ghosts.Peek();
+            return currentCell;
+        }
+
         private void Awake() {
             actions = new Queue<Action>();
             buffs = new List<BuffInstance>();
@@ -209,6 +229,11 @@ namespace Data {
         }
         public void modResistance(int resistance) {
             resistanceModifier += resistance;
+        }
+
+        private void OnDrawGizmos() {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(getPriorityCurrentCell().position, 0.5f);
         }
     }
 }
