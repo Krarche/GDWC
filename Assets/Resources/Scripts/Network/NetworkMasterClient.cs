@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using Data;
 using Logic;
 using Tools;
+using Tools.JSON;
 
 namespace Network {
 
@@ -32,6 +33,14 @@ namespace Network {
 
         private void Start() {
             user = new User();
+            try {
+                ObjectJSON ID = ParserJSON.getObjectJSONFromAsset("ID");
+                userId = (ulong)ID.getLong("userId");
+                userName = ID.getString("userName");
+                Debug.Log("Using custom ID loaded from file.");
+            } catch (Exception e) {
+                Debug.Log("Using default ID.");
+            }
             user.userId = userId;
             user.userName = userName;
             InitializeClient();
