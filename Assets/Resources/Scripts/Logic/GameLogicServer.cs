@@ -19,7 +19,7 @@ namespace Logic {
                     p.isReady = true;
                     preparingPlayersNumber--;
                     if (isTurnReady) { // all player ready, start turn !
-                        DateTime startTurn = DateTime.UtcNow.AddSeconds(TURN_PREPARATION_DURATION_SECONDS);
+                        DateTime startTurn = localClock.nowCorrected.AddSeconds(TURN_PREPARATION_DURATION_SECONDS);
                         long startTurnTimestamp = startTurn.ToFileTimeUtc();
                         Network.NetworkMasterServer.singleton.ServerStartTurnMessage(this, startTurnTimestamp);
                         prepareNewTurn(startTurnTimestamp);
@@ -85,6 +85,7 @@ namespace Logic {
         }
 
         private GameLogicServer() : base() {
+            localClock = ClockMaster.serverSingleton;
             foreach (Cell c in grid.cells)
                 c.inWorld.gameObject.SetActive(false);
             voidResetTurnReady();

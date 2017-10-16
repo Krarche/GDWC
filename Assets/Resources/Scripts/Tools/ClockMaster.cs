@@ -32,9 +32,17 @@ public class ClockMaster : MonoBehaviour {
         return 0;
     }
     private long currentTimestamp;
-    public DateTime now {
+    private long correction = 0;
+
+    public DateTime nowMaster {
         get {
             return DateTime.FromFileTimeUtc(currentTimestamp);
+        }
+    }
+
+    public DateTime nowCorrected {
+        get {
+            return DateTime.UtcNow.AddMilliseconds(((double)correction) / ((double)milliToNano));
         }
     }
 
@@ -76,11 +84,11 @@ public class ClockMaster : MonoBehaviour {
             endSyncUtcTimestamp = now.ToFileTimeUtc();
             long syncDuration = endSyncUtcTimestamp - startSyncUtcTimestamp;
             long RTT = getRTT();// syncDuration - startSyncEmissionTime; // convert into RTT
-            long correction = (serverCurrentTimestamp + syncDuration / 2) - currentTimestamp;
+            correction = (serverCurrentTimestamp + syncDuration / 2) - currentTimestamp;
             currentTimestamp += correction;
             Debug.Log("Synchronization ends" + ".\n"
                 + "Sync duration was " + syncDuration + ".\n"
-                + "RTT was " + RTT/ milliToNano + ".\n"
+                + "RTT was " + RTT / milliToNano + ".\n"
                 + "getRTT is " + getRTT() + ".\n"
                 + "Correction is " + correction + ".");
         } else {
@@ -92,18 +100,18 @@ public class ClockMaster : MonoBehaviour {
         if (isServerClock) {
             GUI.Label(new Rect(200, 0, 200, 100), "Server time :" + "\n"
                 + currentTimestamp + "\n"
-                + now.ToLongTimeString());
+                + nowMaster.ToLongTimeString());
             if (clientSingleton != null)
-                GUI.Label(new Rect(200, 60, 200, 20), "Client-Server delta :" + clientSingleton.now.Subtract(now).TotalSeconds);
+                GUI.Label(new Rect(200, 60, 200, 20), "Client-Server delta :" + clientSingleton.nowMaster.Subtract(nowMaster).TotalSeconds);
         }
         if (isClientClock) {
             GUI.Label(new Rect(200, 100, 200, 100), "Client time :" + "\n"
                 + currentTimestamp + "\n"
-                + now.ToLongTimeString() + "\n"
+                + nowMaster.ToLongTimeString() + "\n"
                 + "RTT : " + getRTT());
             if (serverSingleton != null)
-                GUI.Label(new Rect(200, 160, 200, 20), "Server-Client delta :" + serverSingleton.now.Subtract(now).TotalSeconds);
-            if(!isSyncing) {
+                GUI.Label(new Rect(200, 160, 200, 20), "Server-Client delta :" + serverSingleton.nowMaster.Subtract(nowMaster).TotalSeconds);
+            if (!isSyncing) {
                 if (GUI.Button(new Rect(300, 100, 100, 20), "Start sync")) {
                     startSyncClient();
                 }
