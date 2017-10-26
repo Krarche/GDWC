@@ -67,7 +67,7 @@
 	],
 	"buffs":[
 		{"id":"B001",
-		"name":"Weakness","iconPath":"SPRITE",
+		"name":"Weakness","iconPath":"Resources/Textures/Icons/weakeningPest",
 		"description":"Each time the affected entity uses a spell, they lost <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color>.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
@@ -76,7 +76,7 @@
 			"conditions":[{"class":"EffectConditionAPAbove","target":"TARGET","AP":"50","percent":"true"}]}
 		]},
 		{"id":"B002",
-		"name":"Neurotoxin","iconPath":"SPRITE",
+		"name":"Neurotoxin","iconPath":"Resources/Textures/Icons/weakeningPest",
 		"description":"Deals <color=#ff0000>@B002,effects,0,onTurnStartHandler,damage;</color> indirect damages every turn while the target is above <b>@B002,effects,0,conditions,0,health; %</b> health.",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
@@ -89,7 +89,7 @@
 			"conditions":[{"class":"EffectConditionHealthBelow","target":"TARGET","health":"70","percent":"true"}]}
 		]},
 		{"id":"B003",
-		"name":"Regeneration","iconPath":"SPRITE",
+		"name":"Regeneration","iconPath":"Resources/Textures/Icons/regeneration",
 		"description":"Heals <color=#ff0000>@B003,effects,0,onTurnStartHandler,heal; HP</color> every turn",
 		"effects":[
 			{"minArea":"0","maxArea":"0","areaType":"point",
@@ -100,7 +100,7 @@
 	],
 	"spells":[
 		{"id":"S001",
-		"name":"Spark","iconPath":"SPRITE",
+		"name":"Spark","iconPath":"Resources/Textures/Icons/spark",
 		"color":"RED",
 		"description":[
 			"Deals <color=#ff0000>@S001,effects,0,quickHandler,damage;</color> direct damages.",
@@ -126,7 +126,7 @@
 			"slowHandler":{"class":"EffectHandlerDirectDamage", "damage":"12"}}
 		]},
 		{"id":"S002",
-		"name":"Weakening pest","iconPath":"SPRITE",
+		"name":"Weakening pest","iconPath":"Resources/Textures/Icons/weakeningPest",
 		"color":"YELLOW",
 		"description":[
 			"Apply <b>@B001,name;</b> to the entities in a circle for @S002,effects,0,quickHandler,duration; turns. Entities affected by <b>@B001,name;</b> loose <color=#ff0000>@B001,effects,0,onSpellHandler,MP; MP</color> each time they use a spell.",
@@ -142,7 +142,7 @@
 			"slowHandler":{"class":"EffectHandlerBuff","buffId":"B001","duration":"5"}}
 		]},
 		{"id":"S003",
-		"name":"Windstep","iconPath":"SPRITE",
+		"name":"Windstep","iconPath":"Resources/Textures/Icons/windStep",
 		"color":"GREEN",
 		"description":[
 			"Dash on the target cell.",
@@ -158,7 +158,7 @@
 			"slowHandler":{"class":"EffectHandlerWarp"}}
 		]},
 		{"id":"S004",
-		"name":"Regeneration","iconPath":"SPRITE",
+		"name":"Regeneration","iconPath":"Resources/Textures/Icons/regeneration",
 		"color":"CYAN",
 		"description":[
 			"Instantly heals you <color=#00ffff>@S004,effects,0,quickHandler,heal; HP</color>.",

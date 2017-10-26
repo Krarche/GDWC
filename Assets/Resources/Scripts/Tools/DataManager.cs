@@ -5,6 +5,10 @@ namespace Tools {
 
     public class DataManager {
 
+        static DataManager() {
+            DataParser.loadDataJSON();
+        }
+
         public static Dictionary<string, GameData> GAME_DATA = new Dictionary<string, GameData>();
         public static Dictionary<string, SpellData> SPELL_DATA = new Dictionary<string, SpellData>();
         public static Dictionary<string, BuffData> BUFF_DATA = new Dictionary<string, BuffData>();

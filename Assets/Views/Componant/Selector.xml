@@ -1,0 +1,22 @@
+<Selector xmlns="MarkLight">
+  <DataGrid Width="100%" AlternateRows="True">
+    <RowHeader>
+      <ColumnHeader Width="25%"/>
+      <ColumnHeader Width="25%"/>
+      <ColumnHeader Width="25%"/>
+      <ColumnHeader Width="25%"/>
+    </RowHeader>
+    <Row>
+      <Column Text="First" />
+      <Column Text="Second" />
+      <Column Text="Third" />
+      <Column Text="Fourth" />
+    </Row>
+    <Row>
+      <Column Text="Alpha" />
+      <Column Text="Beta" />
+      <Column Text="Delta" />
+      <Column Text="Gamma" />
+    </Row>
+  </DataGrid>
+</Selector>

@@ -1,0 +1,19 @@
+<LobbySpellDescription xmlns="MarkLight">
+  <Region Width="100%" Height="100%" Alignment="Bottom">
+    <TabPanel Width="100%" Height="100%" Alignment="Bottom" TabListWidth="10%"
+               TabContentAlignment="Center" TabListAlignment="BottomLeft" TabListContentAlignment="Right" TabListOrientation="Vertical" >
+      <Tab Text="F" Width="100%" Height="100%">
+        <TabHeader Width="100%" Height="20%" FontSize="12" Alignment="Left" AdjustToText="None"/>
+        <Panel Width="90%" Height="100%" Alignment="RIght">
+          <Label Width="100%" Height="100%" Margin="5" FontSize="12" Text="{=spellDescriptionFast}" TextAlignment="Left" HorizontalOverflow="Wrap" Alignment="Left"/>
+        </Panel>
+      </Tab>
+      <Tab Text="S" Width="100%" Height="100%">
+        <TabHeader Width="100%" Height="20%" FontSize="12" Alignment="Left" AdjustToText="None"/>
+        <Panel Width="90%" Height="100%" Alignment="Right">
+          <Label Width="100%" Height="100%" Margin="5" FontSize="12" Text="{=spellDescriptionSlow}" TextAlignment="Left" HorizontalOverflow="Wrap" Alignment="Left"/>
+        </Panel>
+      </Tab>
+    </TabPanel>
+  </Region>
+</LobbySpellDescription>

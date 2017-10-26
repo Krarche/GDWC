@@ -1,0 +1,9 @@
+<LobbySpellPreview xmlns="MarkLight" BackgroundColor="Black">
+  <Region Width="100%" Height="100%" Alignment="Center">
+    <Region Width="100%" Height="30%" Alignment="Top" BackgroundColor="Blue">
+      <Icon Width="20%" Height="100%" iconPath="{=iconPath}" Alignment="Left"/>
+      <Label Width="80%" Height="100%" Text="{spellName}" FontSize="24" Alignment="Right"/>
+    </Region>
+    <LobbySpellDescription Width="100%" Height="70%" spellId="{=spellId}" Alignment="Bottom"/>
+  </Region>
+</LobbySpellPreview>

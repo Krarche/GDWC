@@ -1,0 +1,8 @@
+<LobbyMain xmlns="MarkLight">
+  <UserInterface>
+    <Region Width="100%" Height="100%" BackgroundColor="Grey">
+      <LobbyLoadout Width="100%" Height="50%" Alignment="Center"/>
+    </Region>
+  </UserInterface>
+  <EventSystem />
+</LobbyMain>

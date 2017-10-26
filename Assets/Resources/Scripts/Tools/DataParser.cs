@@ -131,7 +131,7 @@ namespace Tools {
                 for (int i = 0; i < 2; i++) {
                     string macro = StringParsingTool.getNextMacro(s.description[i]);
                     while (macro != "") {
-                        s.description[i] = s.description[0].Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
+                        s.description[i] = s.description[i].Replace(macro, getMacroContent(StringParsingTool.getBetweenMacro(macro)));
                         macro = StringParsingTool.getNextMacro(s.description[i]);
                     }
                 }
