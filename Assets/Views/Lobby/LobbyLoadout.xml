@@ -1,10 +1,8 @@
 <LobbyLoadout xmlns="MarkLight">
-  <Region Width="100%" Height="100%" BackgroundColor="White">
-    <Region Width="100%" Height="100%" Alignment="Top">
-      <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%"  Margin="5" spellId="{=spellId1}" Alignment="TopLeft"/>
-      <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%"  Margin="5" spellId="{=spellId2}" Alignment="TopRight"/>
-      <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%" Margin="5" spellId="{=spellId3}" Alignment="BottomLeft"/>
-      <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%" Margin="5" spellId="{=spellId4}" Alignment="BottomRight"/>
-    </Region>
+  <Region Width="100%" Height="100%" Alignment="Top" BackgroundColor="White">
+    <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%"  Margin="5" spellId="{=spellId1}" Alignment="TopLeft"/>
+    <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%"  Margin="5" spellId="{=spellId2}" Alignment="TopRight"/>
+    <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%" Margin="5" spellId="{=spellId3}" Alignment="BottomLeft"/>
+    <SpellPreview MobileWidth="4" MobileHeight="3" Width="50%" Height="50%" Margin="5" spellId="{=spellId4}" Alignment="BottomRight"/>
   </Region>
 </LobbyLoadout>

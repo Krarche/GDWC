@@ -7,10 +7,10 @@ public class MobileView : UIView {
     protected const int MAX_ELEMENT_WIDTH = 12;
     protected const int MAX_ELEMENT_HEIGHT = 12;
 
-    protected int screenWidth {
+    protected static int screenWidth {
         get { return Screen.width; }
     }
-    protected int screenHeight {
+    protected static int screenHeight {
         get { return Screen.height; }
     }
 
@@ -20,36 +20,24 @@ public class MobileView : UIView {
     public override void InitializeInternal() {
         base.InitializeInternal();
         if (MobileWidth > 0) {
-            WIDTH = new ElementSize();
-            WIDTH.Unit = ElementSizeUnit.Pixels;
-            WIDTH.Value = Mathf.Min(MobileWidth, MAX_ELEMENT_WIDTH) * screenWidth / MAX_ELEMENT_WIDTH;
-            Width.Value = WIDTH;
-        } else {
-            WIDTH = Width.Value;
+            Width.Value = getElementWidth(MobileWidth);
         }
         if (MobileHeight > 0) {
-            HEIGHT = new ElementSize();
-            HEIGHT.Unit = ElementSizeUnit.Pixels;
-            HEIGHT.Value = Mathf.Min(MobileHeight, MAX_ELEMENT_HEIGHT) * screenHeight / MAX_ELEMENT_HEIGHT;
-            Height.Value = HEIGHT;
-        } else {
-            HEIGHT = Height.Value;
+            Height.Value = getElementWidth(MobileHeight);
         }
     }
 
-    public ElementSize ElementWidth {
-        get {
-            return WIDTH;
-        }
-        set { }
+    public static ElementSize getElementWidth(int elementCount) {
+        ElementSize WIDTH = new ElementSize();
+        WIDTH.Unit = ElementSizeUnit.Pixels;
+        WIDTH.Value = Mathf.Min(elementCount, MAX_ELEMENT_WIDTH) * screenWidth / MAX_ELEMENT_WIDTH;
+        return WIDTH;
     }
 
-    public ElementSize ElementHeight {
-        get {
-            return HEIGHT;
-        }
-        set { }
+    public static ElementSize getElementHeight(int elementCount) {
+        ElementSize HEIGHT = new ElementSize();
+        HEIGHT.Unit = ElementSizeUnit.Pixels;
+        HEIGHT.Value = Mathf.Min(elementCount, MAX_ELEMENT_HEIGHT) * screenHeight / MAX_ELEMENT_HEIGHT;
+        return HEIGHT;
     }
-    private ElementSize WIDTH;
-    private ElementSize HEIGHT;
 }

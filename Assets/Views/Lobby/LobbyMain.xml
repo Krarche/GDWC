@@ -1,7 +1,7 @@
 <LobbyMain xmlns="MarkLight">
   <UserInterface>
     <Region Width="100%" Height="100%" BackgroundColor="Grey">
-      <LobbyLoadout Width="100%" Height="50%" Alignment="Center"/>
+      <LobbyLoadout MobileWidth="8" MobileHeight="6" Width="100%" Height="50%" Alignment="Center"/>
     </Region>
   </UserInterface>
   <EventSystem />

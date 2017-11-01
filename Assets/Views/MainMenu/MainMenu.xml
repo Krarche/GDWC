@@ -1,0 +1,42 @@
+<MainMenu xmlns="MarkLight" menuViewWidth="12" menuViewHeight="11"
+  menuBarWidth="12" menuBarHeight="1" regionSize="4">
+  <UserInterface>
+    <Region Id="menuRoot"
+            Width="100%" Height="100%" BackgroundColor="Black">
+      <Region Id="menuView"
+              Width="$GetElementWidth({menuViewWidth})" Height="$GetElementHeight({menuViewHeight})"
+              Alignment="Top" BackgroundColor="Yellow">
+        <Group Alignment="Center" Orientation="Vertical" BackgroundColor="Cyan">
+          <Group Alignment="Center" Orientation="Horizontal">
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+          </Group>
+          <Group Alignment="Center" Orientation="Horizontal">
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+          </Group>
+          <Group Alignment="Center" Orientation="Horizontal">
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+            <Region Width="$GetElementWidth({regionSize})" Height="$GetElementHeight({regionSize})" Margin="5px" BackgroundColor="White"/>
+          </Group>
+        </Group>
+        <Label Alignment="Top" Text="Top" TextAlignment="Top"/>
+        <Label Alignment="Left" Text="Left" TextAlignment="Left"/>
+        <Label Alignment="Right" Text="Right" TextAlignment="Right"/>
+        <Label Alignment="Bottom" Text="Bottom" TextAlignment="Bottom"/>
+      </Region>
+      <Region Id="menuBar"
+              Width="$GetElementWidth({menuBarWidth})" Height="$GetElementHeight({menuBarHeight})"
+              Alignment="Bottom" BackgroundColor="Red">
+        <Label Alignment="Top" Text="Top" TextAlignment="Top"/>
+        <Label Alignment="Left" Text="Left" TextAlignment="Left"/>
+        <Label Alignment="Right" Text="Right" TextAlignment="Right"/>
+        <Label Alignment="Bottom" Text="Bottom" TextAlignment="Bottom"/>
+      </Region>
+    </Region>
+  </UserInterface>
+  <EventSystem />
+</MainMenu>
