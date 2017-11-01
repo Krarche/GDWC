@@ -648,20 +648,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1702837686299972}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4325f1a9bfc471644a50efa9cedfa1d6, type: 3}
+  m_Script: {fileID: 11500000, guid: ce5e5370b7ae726428928984bfaf2ad3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   entityId: 0
   displayedName: NONE
   modelColor: {r: 1, g: 1, b: 1, a: 1}
-  destinationCellId: -1
-  currentCellId: -1
-  currentHealth: 0
-  maxHealth: 0
-  currentAP: 0
-  maxAP: 0
-  currentMP: 0
-  maxMP: 0
+  teamId: 0
   rangeModifier: 0
   damageModifier: 0
   resistanceModifier: 0

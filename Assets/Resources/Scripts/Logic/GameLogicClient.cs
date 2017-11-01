@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Data;
 using Network;
-using Tools.JSON;
 using Tools;
 
 namespace Logic {
@@ -44,56 +43,40 @@ namespace Logic {
             game = null;
         }
 
-        #region Button Types
-
-        public const short BUTTON_TYPE_ACTION_ROOT = 0;
-        public const short BUTTON_TYPE_ACTION_MOVEMENT = 1;
-        public const short BUTTON_TYPE_ACTION_QUICK_SPELL = 2;
-        public const short BUTTON_TYPE_ACTION_SLOW_SPELL = 3;
-        public const short BUTTON_TYPE_SPELL_0 = 10;
-        public const short BUTTON_TYPE_SPELL_1 = 11;
-        public const short BUTTON_TYPE_SPELL_2 = 12;
-        public const short BUTTON_TYPE_SPELL_3 = 13;
-        public const short BUTTON_TYPE_CONFIRM = 20;
-        public const short BUTTON_TYPE_CANCEL = 21;
-        public const short BUTTON_TYPE_READY = 22;
-
-        #endregion
-
-        public void buttonInput(short type) {
+        public void buttonInput(ButtonType type) {
             Debug.Log(type);
             switch (type) {
-                case BUTTON_TYPE_ACTION_ROOT:
+                case ButtonType.ACTION_ROOT:
                     buttonRootHandler();
                     break;
-                case BUTTON_TYPE_ACTION_MOVEMENT:
+                case ButtonType.ACTION_MOVEMENT:
                     buttonMovementHandler();
                     break;
-                case BUTTON_TYPE_ACTION_QUICK_SPELL:
+                case ButtonType.ACTION_QUICK_SPELL:
                     buttonQuickSpellHandler();
                     break;
-                case BUTTON_TYPE_ACTION_SLOW_SPELL:
+                case ButtonType.ACTION_SLOW_SPELL:
                     buttonSlowSpellHandler();
                     break;
-                case BUTTON_TYPE_SPELL_0:
-                    buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+                case ButtonType.SPELL_0:
+                    buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                     break;
-                case BUTTON_TYPE_SPELL_1:
-                    buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+                case ButtonType.SPELL_1:
+                    buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                     break;
-                case BUTTON_TYPE_SPELL_2:
-                    buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+                case ButtonType.SPELL_2:
+                    buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                     break;
-                case BUTTON_TYPE_SPELL_3:
-                    buttonSpellHandler((short)(type - BUTTON_TYPE_SPELL_0));
+                case ButtonType.SPELL_3:
+                    buttonSpellHandler((short)(type - ButtonType.SPELL_0));
                     break;
-                case BUTTON_TYPE_CONFIRM:
+                case ButtonType.CONFIRM:
                     buttonConfirmHandler();
                     break;
-                case BUTTON_TYPE_CANCEL:
+                case ButtonType.CANCEL:
                     buttonCancelHandler();
                     break;
-                case BUTTON_TYPE_READY:
+                case ButtonType.READY:
                     buttonReadyHandler();
                     break;
             }

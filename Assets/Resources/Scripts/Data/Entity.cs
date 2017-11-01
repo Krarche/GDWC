@@ -36,12 +36,60 @@ namespace Data {
                 return destinationCell != null ? destinationCell.cellId : NO_DESTINATION_CELL_ID;
             }
         }
-        public int currentHealth = 50;
-        public int maxHealth = 50;
-        public int currentAP = 14;
-        public int maxAP = 14;
-        public int currentMP = 8;
-        public int maxMP = 8;
+
+        public event System.EventHandler<ChangeEntityStatsEventArgs> ChangeEntityStats;
+        // STATS
+        //Health
+        private int _maxHealth;
+        public int maxHealth {
+            get { return _maxHealth; }
+            set {
+                _maxHealth = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeHealth = true });
+            }
+        }
+        private int _currentHealth;
+        public int currentHealth {
+            get { return _currentHealth; }
+            set {
+                _currentHealth = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeHealth = true });
+            }
+        }
+        //AP
+        private int _maxAP;
+        public int maxAP {
+            get { return _maxAP; }
+            set {
+                _maxAP = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeAP = true });
+            }
+        }
+        private int _currentAP;
+        public int currentAP {
+            get { return _currentAP; }
+            set {
+                _currentAP = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeAP = true });
+            }
+        }
+        //MP
+        private int _maxMP;
+        public int maxMP {
+            get { return _maxMP; }
+            set {
+                _maxMP = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeMP = true });
+            }
+        }
+        private int _currentMP;
+        public int currentMP {
+            get { return _currentMP; }
+            set {
+                _currentMP = value;
+                if (ChangeEntityStats != null) ChangeEntityStats(this, new ChangeEntityStatsEventArgs { changeMP = true });
+            }
+        }
 
         // buffs
         public int rangeModifier;

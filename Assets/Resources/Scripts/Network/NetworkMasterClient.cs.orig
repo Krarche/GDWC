@@ -67,16 +67,20 @@ namespace Network {
                 temp.playerEntity.initSpell(new string[4] { "S001", "S002", "S003", "S004" });
                 temp.playerEntity.teamId = i;
             }
-        GUIManager.gui.linkWithLocalEntity(game.localEntity);
+
             GameLogicClient.game.prepareNewTurn(DateTime.UtcNow.AddSeconds(5).ToFileTimeUtc());*/
             // END TODO : REMOVE
         }
+<<<<<<< HEAD
 
         public void InitializeClient() {
             if (client != null) {
                 Debug.LogError("Try to connect, but was already connected.");
                 return;
             }
+=======
+        GUIManager.gui.linkWithLocalEntity(game.localEntity);
+>>>>>>> gui_real
 
             client = new NetworkClient();
             //client.Connect(MasterServerIpAddress, MasterServerPort);
@@ -218,7 +222,6 @@ namespace Network {
                     Player temp = spawnPlayer(playerId, cellId, entityId, displayedName, r, g, b);
                     if (msg.clientPlayerId == playerId) {
                         user.player = temp;
-                        GUIManager.gui.linkWithLocalEntity(user.player.playerEntity);
                     }
                     temp.playerEntity.initSpell(msg.spellIds);
                 }

@@ -6,7 +6,7 @@ public class ButtonHandler : MonoBehaviour {
 
     public bool useAlpha = false;
     public float alphaThreshold = 0.1f;
-    public short type = 0;
+    public ButtonType type = 0;
 
     // Use this for initialization
     void Awake() {
