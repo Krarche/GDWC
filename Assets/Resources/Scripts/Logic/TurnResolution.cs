@@ -10,7 +10,7 @@ namespace Logic {
     public class TurnResolution {
 
         GameLogic parent;
-        Grid grid {
+        Data.Grid grid {
             get { return parent.grid; }
         }
 

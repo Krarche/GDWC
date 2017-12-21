@@ -76,7 +76,7 @@ namespace Logic {
         public Dictionary<int, Entity> entityList = new Dictionary<int, Entity>();
         public int lastEntityIdGenerated = -1;
 
-        public Grid grid;
+        public Data.Grid grid;
         public TurnResolution solver;
 
         public List<Data.Action> actions0 = new List<Data.Action>();
@@ -87,14 +87,14 @@ namespace Logic {
             playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
             solver = new TurnResolution(this);
             mapId = "M002";
-            grid = new Grid(this, DataManager.MAP_DATA[mapId]);
+            grid = new Data.Grid(this, DataManager.MAP_DATA[mapId]);
         }
 
         public GameLogic(string mapId) {
             playerPrefab = Resources.Load<GameObject>("Prefabs/PlayerPrefab");
             solver = new TurnResolution(this);
             this.mapId = mapId;
-            grid = new Grid(this, DataManager.MAP_DATA[mapId]);
+            grid = new Data.Grid(this, DataManager.MAP_DATA[mapId]);
         }
 
         public void createPlayer(Player p) {
