@@ -31,6 +31,7 @@ namespace Logic {
         }
 
         public GameLogicClient(string mapId) : base(mapId) {
+            localClock = ClockMaster.clientSingleton;
             game = this;
         }
 

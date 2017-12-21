@@ -20,24 +20,26 @@ namespace Logic {
 
         public ulong gameId;
         public int currentTurn;
+        public ClockMaster localClock;
+
 
         public double startTurnTimeRemaining {
             get {
-                DateTime now = DateTime.UtcNow;
+                DateTime now = localClock.nowCorrected;
                 TimeSpan nowToStart = startTurnDate.Subtract(now);
                 return nowToStart.TotalSeconds;
             }
         }
         public double endTurnTimeRemaining {
             get {
-                DateTime now = DateTime.UtcNow;
+                DateTime now = localClock.nowCorrected;
                 TimeSpan nowToEnd = endTurnDate.Subtract(now);
                 return nowToEnd.TotalSeconds;
             }
         }
         public double serverDataTimeoutTimeRemaining {
             get {
-                DateTime now = DateTime.UtcNow;
+                DateTime now = localClock.nowCorrected;
                 TimeSpan serverDataTimeout = serverDataTimeoutDate.Subtract(now);
                 return serverDataTimeout.TotalSeconds;
             }
@@ -188,7 +190,7 @@ namespace Logic {
         }
 
         protected IEnumerator waitForTurnStart() {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = localClock.nowCorrected;
             TimeSpan nowToStart = startTurnDate.Subtract(now);
 
             yield return new WaitForSecondsRealtime((float)nowToStart.TotalSeconds);
@@ -201,7 +203,7 @@ namespace Logic {
         }
 
         protected IEnumerator waitForTurnEnd() {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = localClock.nowCorrected;
             TimeSpan nowToEnd = endTurnDate.Subtract(now);
 
             yield return new WaitForSecondsRealtime((float)nowToEnd.TotalSeconds);
