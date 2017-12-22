@@ -13,7 +13,7 @@ namespace Logic {
         public static GameLogicClient game;
 
         public User localUser {
-            get { return NetworkMasterClient.singleton.user; }
+            get { return NetworkMasterClient.user; }
         }
         public Player localPlayer {
             get { return localUser.player; }

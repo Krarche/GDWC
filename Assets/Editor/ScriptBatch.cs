@@ -29,6 +29,7 @@ public class ScriptBatch {
             zip.AddDirectory("./Build/Server");
             zip.Save("./Build/Server/gdwc.zip");
         }
+        Debug.Log("Build done");
     }
 
     [MenuItem("Server/Push %&p")]
@@ -40,6 +41,8 @@ public class ScriptBatch {
 
         if (File.Exists("./Build/Server/gdwc.zip")) {
             SshHandler.sendFile("./Build/Server/gdwc.zip");
+        } else {
+            Debug.LogError("File \"./Build/Server/gdwc.zip\" not found! Build first.");
         }
     }
 

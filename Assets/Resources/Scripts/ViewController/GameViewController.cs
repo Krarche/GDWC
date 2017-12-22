@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Logic;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,51 +33,75 @@ public class GameViewController : MonoBehaviour {
     }
 
     public void SwitchToRoot() {
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.ACTION_ROOT);
+        }
         currentPanel.SetActive(false);
         currentPanel = rootPanel;
         currentPanel.SetActive(true);
     }
 
     public void SwitchToQuickAction() {
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.ACTION_QUICK_SPELL);
+        }
         currentPanel.SetActive(false);
         currentPanel = quickActionPanel;
         currentPanel.SetActive(true);
     }
 
     public void SwitchToMovementAction() {
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.ACTION_MOVEMENT);
+        }
         currentPanel.SetActive(false);
         currentPanel = movementActionPanel;
         currentPanel.SetActive(true);
     }
 
     public void SwitchToSlowAction() {
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.ACTION_SLOW_SPELL);
+        }
         currentPanel.SetActive(false);
         currentPanel = slowActionPanel;
         currentPanel.SetActive(true);
     }
 
     public void SelectSpell1() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.SPELL_0);
+        }
     }
 
     public void SelectSpell2() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.SPELL_1);
+        }
     }
 
     public void SelectSpell3() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.SPELL_2);
+        }
     }
 
     public void SelectSpell4() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.SPELL_3);
+        }
     }
 
     public void Cancel() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.CANCEL);
+        }
     }
 
     public void Confirm() {
-
+        if (GameLogicClient.game != null) {
+            GameLogicClient.game.buttonInput(ButtonType.CONFIRM);
+        }
     }
 
 }

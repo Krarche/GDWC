@@ -82,6 +82,7 @@ public class SshHandler {
                     Debug.Log("Finished upload");
                     SendCommand(stream, "unzip gdwc.zip");
                     SendCommand(stream, "chmod +x gdwc.x86_64");
+                    Debug.Log("Unzip done. Server ready");
                 }).Start();
             }
         }

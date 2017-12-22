@@ -6,12 +6,13 @@ using Data;
 using Logic;
 using Tools;
 using Tools.JSON;
+using System.Collections.Generic;
 
 namespace Network {
 
     public class NetworkMasterClient : MonoBehaviour {
 
-        public User user;
+        public static User user;
 
         public string MasterServerIpAddress;
         public int MasterServerPort;
@@ -190,6 +191,8 @@ namespace Network {
 
         private void OnClientJoinSoloQueue(NetworkMessage netMsg) {
             ServerJoinSoloQueueResponseMessage msg = netMsg.ReadMessage<ServerJoinSoloQueueResponseMessage>();
+            // spaghetti !
+            LobbyViewController.singleton.OnJoinQueueResponse(msg.joinedQueue);
             if (msg.joinedQueue) {
                 Debug.Log("Successfully joined solo queue.");
             } else {
@@ -202,27 +205,9 @@ namespace Network {
 
             if (msg.hasJoined) {
                 Debug.Log("Received ServerJoinGameResponseMessage " + msg.gameId);
-                GameLogicClient game = new GameLogicClient(msg.mapId);
-                game.gameId = msg.gameId;
-                game.currentTurn = msg.currentTurn;
-                user.currentGameId = game.gameId;
-                for (int i = 0; i < msg.cellIds.Length; i++) {
-                    ulong playerId = msg.playerIds[i];
-                    int cellId = msg.cellIds[i];
-                    int entityId = msg.entityIds[i];
-                    string displayedName = msg.displayedNames[i];
-                    float r = msg.r[i];
-                    float g = msg.g[i];
-                    float b = msg.b[i];
-
-                    Player temp = spawnPlayer(playerId, cellId, entityId, displayedName, r, g, b);
-                    if (msg.clientPlayerId == playerId) {
-                        user.player = temp;
-                        GUIManager.gui.linkWithLocalEntity(user.player.playerEntity);
-                    }
-                    temp.playerEntity.initSpell(msg.spellIds);
-                }
-                ClientReadyToPlay();
+                Dictionary<string, object> args = new Dictionary<string, object>();
+                args.Add("msg", msg);
+                SceneMaster.singleton.SwitchToGame1v1(args);
             } else {
                 Debug.LogError("Failed to join game.");
             }
@@ -251,33 +236,6 @@ namespace Network {
         }
 
 
-        // --------------- Players handlers -----------------
-
-        private Player spawnPlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
-            if (!GameLogicClient.game.players.ContainsKey(playerId)) {
-                Player p = new Player();
-                p.playerId = playerId;
-                p.playerName = displayedName;
-                p.playerColor = new Color(r, g, b);
-                GameLogicClient.game.spawnPlayer(p, cellId, entityId);
-                return p;
-            } else {
-                return GameLogicClient.game.players[playerId];
-            }
-        }
-
-        private Entity spawnEntity(int cellId, int entityId, string displayedName, float r, float g, float b) {
-            if (!GameLogicClient.game.entityList.ContainsKey(entityId)) {
-                Entity e = GameLogicClient.game.spawnEntity(cellId, entityId);
-                e.setDisplayedName(displayedName);
-                e.setColor(r, g, b);
-                return e;
-            } else {
-                return GameLogicClient.game.entityList[entityId];
-            }
-        }
-
-
         // --------------- Actions handlers -----------------
 
         public void SyncTurnActions(GameLogicClient game) {
@@ -297,6 +255,14 @@ namespace Network {
             GameLogicClient.game.resolveTurn();
         }
 
+        public static void JoinQueue1v1() {
+            singleton.ClientJoinSoloQueueRequest();
+        }
+
+        public static void LeaveQueue() {
+            singleton.ClientLeaveSoloQueueRequest();
+        }
+
         private void OnGUI() {
             Rect pos = new Rect(10, Screen.currentResolution.height - 220, 200, 20);
             GUI.Label(pos, "CLIENT");
@@ -309,7 +275,7 @@ namespace Network {
                     }
                 }
                 if (GameLogicClient.game == null) {
-                    if (!user.isQueued) {
+                    /*if (!user.isQueued) {
                         if (GUI.Button(new Rect(10, 100, 200, 20), "Join solo queue")) {
                             ClientJoinSoloQueueRequest();
                         }
@@ -317,7 +283,7 @@ namespace Network {
                         if (GUI.Button(new Rect(10, 100, 200, 20), "Leave solo queue")) {
                             ClientLeaveSoloQueueRequest();
                         }
-                    }
+                    }*/
                 } else {
                     GUI.Label(new Rect(10, 140, 200, 20), "Turn : " + GameLogicClient.game.currentTurn);
                     switch (GameLogicClient.game.currentTurnState) {
