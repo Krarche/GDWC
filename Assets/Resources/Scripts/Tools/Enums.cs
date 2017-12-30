@@ -20,3 +20,24 @@ public enum ActionSelectionState {
     READY = 4
 }
 
+public enum GameMode {
+    Mode1v1,
+    Mode3v3
+}
+
+public enum Team {
+    None,
+    Team1,
+    Team2
+}
+
+public enum NationColor {
+    None,
+    Red,
+    Green,
+    Blue,
+    Cyan,
+    Magenta,
+    Yellow
+}
+

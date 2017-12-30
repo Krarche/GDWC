@@ -381,7 +381,7 @@ namespace Tools {
                 } else if (className == "EffectHandlerModAP") {
                     output = new EffectHandlerModAP();
                     ((EffectHandlerModAP)output).AP = effectHandler.getInt("AP");
-                    ((EffectHandlerModMP)output).direction = effectHandler.getInt("direction");
+                    ((EffectHandlerModAP)output).direction = effectHandler.getInt("direction");
                 } else if (className == "EffectHandlerModRange") {
                     output = new EffectHandlerModRange();
                     ((EffectHandlerModRange)output).range = effectHandler.getInt("range");

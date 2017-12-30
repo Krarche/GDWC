@@ -11,13 +11,9 @@ namespace Logic {
     public class GameLogicClient : GameLogic {
 
         public static GameLogicClient game;
+        public Game1v1 game1v1;
 
-        public User localUser {
-            get { return NetworkMasterClient.user; }
-        }
-        public Player localPlayer {
-            get { return localUser.player; }
-        }
+        public Player localPlayer;
         public Entity localEntity {
             get { return localPlayer.playerEntity; }
         }
@@ -33,15 +29,6 @@ namespace Logic {
         public GameLogicClient(string mapId) : base(mapId) {
             localClock = ClockMaster.clientSingleton;
             game = this;
-        }
-
-        public void clearGame() {
-            game.grid.clearGrid();
-            foreach (Entity e in game.entityList.Values) {
-                game.removeEntity(e);
-            }
-            entityList.Clear();
-            game = null;
         }
 
         public void buttonInput(ButtonType type) {
@@ -93,6 +80,18 @@ namespace Logic {
 
         #endregion
 
+        #region Selected spells index
+
+        public static short SELECTED_SPELL_NONE = -1;
+        public static short SELECTED_SPELL_1 = 0;
+        public static short SELECTED_SPELL_2 = 1;
+        public static short SELECTED_SPELL_3 = 2;
+        public static short SELECTED_SPELL_4 = 3;
+
+        #endregion
+
+        #region CONTROl_VIEW
+
         public short currentActionSelectionState = 0;
 
         public bool canQuickSpell;
@@ -124,16 +123,6 @@ namespace Logic {
                 return currentActionSelectionState == ACTION_SELECTION_STATE_MOVEMENT;
             }
         }
-
-        #region Selected spells index
-
-        public static short SELECTED_SPELL_NONE = -1;
-        public static short SELECTED_SPELL_1 = 0;
-        public static short SELECTED_SPELL_2 = 1;
-        public static short SELECTED_SPELL_3 = 2;
-        public static short SELECTED_SPELL_4 = 3;
-
-        #endregion
 
         public short currentSelectedSpell = -1;
         public bool isAnySpellSelected {
@@ -249,6 +238,40 @@ namespace Logic {
             }
         }
 
+
+        private void buttonConfirmHandler() {
+            if (isAiming) {
+                if (isSpelling) {
+                    if (isAnySpellSelected) {
+                        if (currentTargetCell != null) {
+                            SpellInstance spellInstance = localSpells[currentSelectedSpell];
+                            registerSpellAction(spellInstance.spell.id, currentTargetCell);
+                            registerSpellGhost(spellInstance.spell.id, currentTargetCell);
+                            buttonRootHandler();
+                        }
+                    }
+                } else if (isMoving) {
+                    if (movementPathCells != null) {
+                        registerMovementAction(movementPathCells);
+                        registerMovementGhost(movementPathCells);
+                        buttonRootHandler();
+                    }
+                }
+            }
+        }
+        private void buttonCancelHandler() {
+            if (localActions.Count > 0) {
+                localActions.Dequeue();
+                localEntity.unstackGhost();
+            }
+        }
+        private void buttonReadyHandler() {
+            // send data to server, be ready
+            // synchronizeActions();
+        }
+
+        #endregion
+
         public void targetAction(Cell target) {
             //if (isAiming) {
             if (isSpelling) {
@@ -340,43 +363,13 @@ namespace Logic {
             localEntity.stackGhost(finalPos);
         }
 
-        private void buttonConfirmHandler() {
-            if (isAiming) {
-                if (isSpelling) {
-                    if (isAnySpellSelected) {
-                        if (currentTargetCell != null) {
-                            SpellInstance spellInstance = localSpells[currentSelectedSpell];
-                            registerSpellAction(spellInstance.spell.id, currentTargetCell);
-                            registerSpellGhost(spellInstance.spell.id, currentTargetCell);
-                            buttonRootHandler();
-                        }
-                    }
-                } else if (isMoving) {
-                    if (movementPathCells != null) {
-                        registerMovementAction(movementPathCells);
-                        registerMovementGhost(movementPathCells);
-                        buttonRootHandler();
-                    }
-                }
-            }
-        }
-        private void buttonCancelHandler() {
-            if (localActions.Count > 0) {
-                localActions.Dequeue();
-                localEntity.unstackGhost();
-            }
-        }
-        private void buttonReadyHandler() {
-            // send data to server, be ready
-            // synchronizeActions();
-        }
-
         // ################################################################
 
 
         public override void prepareNewTurn(long startTurnTimestamp) {
             base.prepareNewTurn(startTurnTimestamp);
             serverDataTimeoutDate = endTurnDate.AddSeconds(CLIENT_WAIT_SERVER_SYNC_SECONDS);
+            game1v1.gameViewController.SetTurnCount(currentTurn);
         }
 
         public override void startTurn() {
@@ -400,25 +393,115 @@ namespace Logic {
 
         public override void resolveTurn() {
             if (isSyncDone) {
-                currentTurnState = TURN_STATE_RESOLVING;
-                // trigger buff onTurnStartHandler
-                foreach (Entity e in entityList.Values) {
-                    solver.resolveEntityBuffs(e, "onTurnStartHandler");
-                }
-                // resolve action
-                resolveActions(actions0);
-                resolveActions(actions1);
-                resolveActions(actions2);
-                // trigger buff onTurnEndHandler
-                foreach (Entity e in entityList.Values) {
-                    solver.resolveEntityBuffs(e, "onTurnEndHandler");
-                }
-                // clear last execution data
-                localEntity.clearGhost();
-                // notify server turn ended on client
-                currentTurnState = TURN_STATE_RESOLVING_DONE;
+                CoroutineMaster.startCoroutine(doResolveTurn());
+            }
+        }
+
+
+        private IEnumerator doResolveTurn() {
+            currentTurnState = TURN_STATE_RESOLVING;
+            // trigger buff onTurnStartHandler
+            foreach (Entity e in entityList.Values) {
+                solver.resolveEntityBuffs(e, "onTurnStartHandler");
+            }
+            yield return new WaitForSeconds(0.5f); // wait for buff animations
+                                                   // resolve action
+            resolveActions(actions0);
+            yield return new WaitWhile(ResolvingActions);
+            resolveActions(actions1);
+            yield return new WaitWhile(ResolvingActions);
+            resolveActions(actions2);
+            yield return new WaitWhile(ResolvingActions);
+            // trigger buff onTurnEndHandler
+            foreach (Entity e in entityList.Values) {
+                solver.resolveEntityBuffs(e, "onTurnEndHandler");
+            }
+            // clear last execution data
+            localEntity.clearGhost();
+            // notify server turn ended on client
+            currentTurnState = TURN_STATE_RESOLVING_DONE;
+
+            if (checkForGameEnd()) {
+                game1v1.QuitGame();
+            } else {
                 NetworkMasterClient.singleton.ClientReadyToPlay();
             }
+        }
+
+        protected bool resolvingActions = false;
+        public bool ResolvingActions() {
+            return resolvingActions;
+        }
+
+        public IEnumerator resolveActions(List<Data.Action> actions) {
+            resolvingActions = true;
+            List<Data.Action> fast = new List<Data.Action>();
+            List<Data.Action> move = new List<Data.Action>();
+            List<Data.Action> slow = new List<Data.Action>();
+            foreach (Data.Action action in actions) {
+                try {
+                    switch (action.getPriority()) {
+                        case 0:
+                            fast.Add(action);
+                            break;
+                        case 1:
+                            move.Add(action);
+                            break;
+                        default:
+                            slow.Add(action);
+                            break;
+                    }
+                } catch (Exception e) {
+                    Debug.LogError(e.GetType().ToString() + " was catch. Turn resolution is interupted.");
+                }
+                resolvePriority(fast);
+                yield return new WaitWhile(ResolvingPriority);
+                resolvePriority(move);
+                yield return new WaitWhile(ResolvingPriority);
+                resolvePriority(slow);
+                yield return new WaitWhile(ResolvingPriority);
+            }
+            actions.Clear();
+            resolvingActions = false;
+        }
+
+        protected bool resolvingPriority = false;
+        public virtual bool ResolvingPriority() {
+            return resolvingPriority;
+        }
+
+        public IEnumerator resolvePriority(List<Data.Action> priority) {
+            resolvingPriority = true;
+            float maxDuration = 0;
+            foreach (Data.Action a in priority) {
+                resolveAction(a);
+                maxDuration = Mathf.Max(maxDuration, resolveAction(a));
+            }
+            yield return new WaitForSeconds(maxDuration + 0.5f);
+            resolvingPriority = false;
+        }
+
+        public float resolveAction(Data.Action action) {
+            Entity e;
+            if (!entityList.TryGetValue(action.entityId, out e)) {
+                Debug.LogError("resolveAction() - can't find entity with id " + action.entityId);
+            }
+            if (action is MovementAction) {
+                if (!action.isActionSkiped()) {
+                    MovementAction movementAction = (MovementAction)action;
+                    solver.resolveMovement(e, movementAction.path);
+                    return movementAction.path.Length * 0.2f;
+                } // TODO else give MP
+            } else if (action is SpellAction) {
+                if (!action.isActionSkiped()) {
+                    SpellAction spellAction = (SpellAction)action;
+                    Cell target = grid.GetCell(spellAction.targetCellId);
+                    SpellData spell = DataManager.SPELL_DATA[spellAction.spellId];
+                    solver.resolveSpell(spell, e, target, spellAction is QuickSpellAction);
+                    return 0.5f;
+                } // TODO else give AP
+            }
+            return 0;
         }
 
 

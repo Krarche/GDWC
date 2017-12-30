@@ -23,6 +23,7 @@ namespace Network {
         public static short ID = 1100;
         public ulong userId;
         public string userName;
+        public string loadout;
     }
 
     public class ClientLeaveSoloQueueRequestMessage : ClientMessage {

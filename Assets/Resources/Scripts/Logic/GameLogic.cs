@@ -22,6 +22,49 @@ namespace Logic {
         public int currentTurn;
         public ClockMaster localClock;
 
+        public List<Entity> killedEntities = new List<Entity>();
+
+        public List<Entity> team1Entities = new List<Entity>();
+        public bool team1Defeated {
+            get {
+                foreach (Entity e in team1Entities)
+                    if (e.currentHealth > 0)
+                        return false;
+                return true;
+            }
+        }
+        public List<Entity> team2Entities = new List<Entity>();
+        public bool team2Defeated {
+            get {
+                foreach (Entity e in team2Entities)
+                    if (e.currentHealth > 0)
+                        return false;
+                return true;
+            }
+        }
+
+        public bool gameOver {
+            get { return team1Defeated || team2Defeated; }
+        }
+
+        public Team winningTeam {
+            get {
+                if (team1Defeated)
+                    return Team.Team2;
+                if (team2Defeated)
+                    return Team.Team1;
+                return Team.None;
+            }
+        }
+        public Team losingTeam {
+            get {
+                if (team1Defeated)
+                    return Team.Team1;
+                if (team2Defeated)
+                    return Team.Team2;
+                return Team.None;
+            }
+        }
 
         public double startTurnTimeRemaining {
             get {
@@ -122,6 +165,8 @@ namespace Logic {
                 p.playerEntity = spawnEntity(cellId, entityId);
                 p.playerEntity.setColor(p.playerColor);
                 p.playerEntity.setDisplayedName(p.playerName); // Temporary userName = playerName
+                p.playerEntity.teamId = p.teamId;
+                p.playerEntity.team = p.team;
                 players[p.playerId] = p;
             }
         }
@@ -216,6 +261,20 @@ namespace Logic {
         // override for client and server
         public abstract void resolveTurn();
 
+
+        // will return true if the game is over
+        public bool checkForGameEnd() {
+            foreach (Entity e in team1Entities) {
+                if (e.currentHealth < 1 && !killedEntities.Contains(e))
+                    killedEntities.Add(e);
+            }
+            foreach (Entity e in team2Entities) {
+                if (e.currentHealth < 1 && !killedEntities.Contains(e))
+                    killedEntities.Add(e);
+            }
+            return gameOver;
+        }
+
         public virtual void receiveActions(string actions) {
             ObjectJSON actionsJSON = new ObjectJSON(actions);
             ArrayJSON actions0JSON = actionsJSON.getArrayJSON("actions0");
@@ -235,60 +294,6 @@ namespace Logic {
                 ObjectJSON actionJSON = actions2JSON.getObjectJSONAt(i);
                 Data.Action action = Data.Action.fromJSON(actionJSON);
                 actions2.Add(action);
-            }
-        }
-
-        public void resolveActions(List<Data.Action> actions) {
-            List<Data.Action> fast = new List<Data.Action>();
-            List<Data.Action> move = new List<Data.Action>();
-            List<Data.Action> slow = new List<Data.Action>();
-            try {
-                foreach (Data.Action action in actions) {
-                    switch (action.getPriority()) {
-                        case 0:
-                            fast.Add(action);
-                            break;
-                        case 1:
-                            move.Add(action);
-                            break;
-                        default:
-                            slow.Add(action);
-                            break;
-                    }
-                    resolvePriority(fast);
-                    resolvePriority(move);
-                    resolvePriority(slow);
-                }
-            } catch (Exception e) {
-                Debug.LogError(e.GetType().ToString() + " was catch. Turn resolution is interupted.");
-            }
-
-            actions.Clear();
-        }
-
-        public void resolvePriority(List<Data.Action> priority) {
-            foreach (Data.Action a in priority) {
-                resolveAction(a);
-            }
-        }
-
-        public virtual void resolveAction(Data.Action action) {
-            Entity e;
-            if (!entityList.TryGetValue(action.entityId, out e)) {
-                Debug.LogError("resolveAction() - can't find entity with id " + action.entityId);
-            }
-            if (action is MovementAction) {
-                if (!action.isActionSkiped()) {
-                    MovementAction movementACtion = (MovementAction)action;
-                    solver.resolveMovement(e, movementACtion.path);
-                } // TODO else give MP
-            } else if (action is SpellAction) {
-                if (!action.isActionSkiped()) {
-                    SpellAction spellAction = (SpellAction)action;
-                    Cell target = grid.GetCell(spellAction.targetCellId);
-                    SpellData spell = DataManager.SPELL_DATA[spellAction.spellId];
-                    solver.resolveSpell(spell, e, target, spellAction is QuickSpellAction);
-                } // TODO else give AP
             }
         }
 

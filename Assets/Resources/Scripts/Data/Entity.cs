@@ -18,6 +18,7 @@ namespace Data {
         public string displayedName = "NONE";
         public Color modelColor = Color.white;
         public int teamId;
+        public Team team = Team.None;
         public Cell currentCell;
         public int currentCellId {
             get {

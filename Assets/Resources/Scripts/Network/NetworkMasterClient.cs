@@ -109,10 +109,6 @@ namespace Network {
             }
             client.Disconnect();
             client = null;
-
-            if (GameLogicClient.game != null) {
-                GameLogicClient.game.clearGame();
-            }
         }
 
         // --------------- System handlers -----------------

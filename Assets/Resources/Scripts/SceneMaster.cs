@@ -8,7 +8,15 @@ public class SceneMaster : MonoBehaviour {
     public static SceneMaster singleton;
 
     public static float asyncProgress = 0;
-    public static Dictionary<string, object> args;
+    public static Dictionary<string, object> args {
+        get {
+            if (ARGS == null)
+                ARGS = new Dictionary<string, object>();
+            return ARGS;
+        }
+        set { ARGS = value; }
+    }
+    private static Dictionary<string, object> ARGS;
 
 
     void Awake() {
@@ -58,3 +66,10 @@ public class SceneMaster : MonoBehaviour {
 
 
 }
+
+// in case of cascades...
+public class SceneMasterQueueElement {
+    public string sceneName;
+    public Dictionary<string, object> args;
+}
+

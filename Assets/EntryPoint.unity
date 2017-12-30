@@ -489,8 +489,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isServer: 1
-  forceSoloGame: 0
-  isClient: 0
+  forceSoloGame: 1
+  isClient: 1
 --- !u!114 &1560071749
 MonoBehaviour:
   m_ObjectHideFlags: 0

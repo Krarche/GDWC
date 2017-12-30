@@ -15,14 +15,20 @@ namespace Data {
         public Color playerColor = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         public Entity playerEntity = null;
 
+        public int teamId;
+        public Team team;
+
         public bool isReady = false; // to begin game and end turn
 
+        public bool quickActionUsed = false;
+        public bool movementActionUsed = false;
+        public bool slowActionUsed = false;
+        public bool ultimateActionUsed = false;
 
         public Player() {
             playerId = playerCount;
             playerCount++;
         }
-
         public Player(ulong playerId, Entity e) {
             this.playerId = playerId;
             this.playerEntity = e;
@@ -31,9 +37,16 @@ namespace Data {
         public void addOrder(Action o) {
             playerEntity.addOrder(o);
         }
-
         public int getCurrentCellId() {
             return playerEntity.currentCellId;
         }
+
+        public void restartTurn() {
+            quickActionUsed = false;
+            movementActionUsed = false;
+            slowActionUsed = false;
+            ultimateActionUsed = false;
+        }
+
     }
 }

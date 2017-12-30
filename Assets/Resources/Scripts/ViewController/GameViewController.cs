@@ -20,6 +20,13 @@ public class GameViewController : MonoBehaviour {
     public Image slowSpell3;
     public Image slowSpell4;
 
+    public Button quickActionButton;
+    public Button movementActionButton;
+    public Button slowActionButton;
+
+    public Text timer;
+    public Text turnCount;
+
     private GameObject currentPanel;
 
     // Use this for initialization
@@ -31,6 +38,8 @@ public class GameViewController : MonoBehaviour {
     void Update() {
 
     }
+
+    #region EVENT_SYSTEM
 
     public void SwitchToRoot() {
         if (GameLogicClient.game != null) {
@@ -103,5 +112,55 @@ public class GameViewController : MonoBehaviour {
             GameLogicClient.game.buttonInput(ButtonType.CONFIRM);
         }
     }
+
+    #endregion
+
+    #region EXTERN_CONTROL
+
+    public void SetTurnCount(int turnNumber) {
+        turnCount.text = "Turn " + turnNumber;
+    }
+
+    public void SetTimerValue(int seconds, bool hide = false) {
+        if (hide) {
+            timer.gameObject.SetActive(false);
+        } else {
+            timer.gameObject.SetActive(true);
+            timer.text = seconds + "s";
+        }
+    }
+
+    public void SetQuickActionButtonEnabled(bool value) {
+        quickActionButton.interactable = value;
+    }
+
+    public void SetMovementActionButtonEnabled(bool value) {
+        movementActionButton.interactable = value;
+    }
+
+    public void SetSlowActionButtonEnabled(bool value) {
+        slowActionButton.interactable = value;
+    }
+
+    public void resetView() { // call at the start of the turn
+        SetQuickActionButtonEnabled(true);
+        SetMovementActionButtonEnabled(true);
+        SetSlowActionButtonEnabled(true);
+        SwitchToRoot();
+    }
+
+    public void SetHP(int current, int max, int[] ghostModificators) {
+
+    }
+
+    public void SetAP(int current, int max, int[] ghostModificators) {
+
+    }
+
+    public void SetMP(int current, int max, int[] ghostModificators) {
+
+    }
+
+    #endregion
 
 }

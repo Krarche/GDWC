@@ -67,4 +67,7 @@ namespace Data {
 
     public class EffectHandlerWarp : EffectHandler {
     }
+
+    public class EffectHandlerSwap : EffectHandler {
+    }
 }

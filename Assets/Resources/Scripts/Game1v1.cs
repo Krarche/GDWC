@@ -9,6 +9,12 @@ public class Game1v1 : MonoBehaviour {
 
     public static Game1v1 singleton;
 
+    public GameViewController gameViewController;
+    public GameLogicClient gameLogic;
+
+    public Player localPlayer;
+
+
     private void Start() {
         LoadGame(SceneMaster.args);
     }
@@ -17,10 +23,11 @@ public class Game1v1 : MonoBehaviour {
         ServerJoinGameResponseMessage msg = (ServerJoinGameResponseMessage)args["msg"];
 
         if (msg.hasJoined) {
-            GameLogicClient game = new GameLogicClient(msg.mapId);
-            game.gameId = msg.gameId;
-            game.currentTurn = msg.currentTurn;
-            NetworkMasterClient.user.currentGameId = game.gameId;
+            gameLogic = new GameLogicClient(msg.mapId);
+            gameLogic.game1v1 = this;
+            gameLogic.gameId = msg.gameId;
+            gameLogic.currentTurn = msg.currentTurn;
+            NetworkMasterClient.user.currentGameId = gameLogic.gameId;
             for (int i = 0; i < msg.cellIds.Length; i++) {
                 ulong playerId = msg.playerIds[i];
                 int cellId = msg.cellIds[i];
@@ -30,12 +37,14 @@ public class Game1v1 : MonoBehaviour {
                 float g = msg.g[i];
                 float b = msg.b[i];
 
-                Player temp = spawnPlayer(playerId, cellId, entityId, displayedName, r, g, b);
+                Player newPlayer = spawnPlayer(playerId, cellId, entityId, displayedName, r, g, b);
                 if (msg.clientPlayerId == playerId) {
-                    NetworkMasterClient.user.player = temp;
+                    NetworkMasterClient.user.player = newPlayer;
+                    gameLogic.localPlayer = newPlayer;
+                    localPlayer = newPlayer;
                     //GUIManager.gui.linkWithLocalEntity(NetworkMasterClient.user.player.playerEntity);
                 }
-                temp.playerEntity.initSpell(msg.spellIds);
+                newPlayer.playerEntity.initSpell(msg.spellIds);
             }
             NetworkMasterClient.singleton.ClientReadyToPlay();
         } else {
@@ -43,30 +52,45 @@ public class Game1v1 : MonoBehaviour {
         }
     }
 
+    public void QuitGame() {
+        Dictionary<string, object> args = new Dictionary<string, object>();
+        args["scoreScreen"] = true;
+        args["gameMode"] = GameMode.Mode1v1;
+        args["winningTeam"] = gameLogic.winningTeam;
+        args["losingTeam"] = gameLogic.losingTeam;
+        args["team1Entities"] = gameLogic.team1Entities;
+        args["team2Entities"] = gameLogic.team2Entities;
+        args["killedEntities"] = gameLogic.killedEntities;
+        args["totalTurnCount"] = gameLogic.currentTurn;
+        SceneMaster.singleton.SwitchToLobby(args);
+    }
+
 
     // --------------- Players handlers -----------------
 
     private Player spawnPlayer(ulong playerId, int cellId, int entityId, string displayedName, float r, float g, float b) {
-        if (!GameLogicClient.game.players.ContainsKey(playerId)) {
+        if (!gameLogic.players.ContainsKey(playerId)) {
             Player p = new Player();
             p.playerId = playerId;
             p.playerName = displayedName;
             p.playerColor = new Color(r, g, b);
-            GameLogicClient.game.spawnPlayer(p, cellId, entityId);
+            p.teamId = entityId;
+            p.team = p.teamId == 0 ? Team.Team1 : Team.Team2;
+            gameLogic.spawnPlayer(p, cellId, entityId);
             return p;
         } else {
-            return GameLogicClient.game.players[playerId];
+            return gameLogic.players[playerId];
         }
     }
 
     private Entity spawnEntity(int cellId, int entityId, string displayedName, float r, float g, float b) {
-        if (!GameLogicClient.game.entityList.ContainsKey(entityId)) {
-            Entity e = GameLogicClient.game.spawnEntity(cellId, entityId);
+        if (!gameLogic.entityList.ContainsKey(entityId)) {
+            Entity e = gameLogic.spawnEntity(cellId, entityId);
             e.setDisplayedName(displayedName);
             e.setColor(r, g, b);
             return e;
         } else {
-            return GameLogicClient.game.entityList[entityId];
+            return gameLogic.entityList[entityId];
         }
     }
 
